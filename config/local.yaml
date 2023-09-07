@@ -1,0 +1,15 @@
+env: "local"
+instance: "store1"
+http_server:
+  address: "localhost:8091"
+  read_timeout: 5s
+  write_timeout: 10s
+  idle_timeout: 60s
+  shutdown_timeout: 15s
+storage:
+  database_login: "store1"
+  database_password: "python"
+  database_address: "localhost"
+  database_max_open_connections: 10
+  database_name: "store1"
+  query_timeout: 5s
