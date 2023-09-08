@@ -176,6 +176,8 @@ func (r *Repository) ConvertToCommonErr(err error) error {
 		return nil
 	}
 	switch {
+	case strings.HasPrefix(err.Error(), "Error 1062"):
+		return repository.ErrDuplicate
 	case errors.Is(err, sql.ErrNoRows):
 		return repository.ErrNoRecord
 	case errors.Is(err, context.DeadlineExceeded):
@@ -192,7 +194,7 @@ func (r *Repository) ConvertToCommonErr(err error) error {
 // CreateStock сохраняет в БД запись о товаре
 func (r *Repository) CreateStock(ctx context.Context, data *dto.NamedProductDTO) error {
 	var err error
-	stmt := `INSERT INTO on_sale (article, name, price, amount) VALUES (?,?,?,?)`
+	stmt := `INSERT INTO stock (article, name, price, amount) VALUES (?,?,?,?)`
 
 	_, err = r.executor(ctx).ExecContext(ctx, stmt, data.Article, data.Name, data.Price, data.Amount)
 

@@ -13,8 +13,9 @@ func repositoryError(text string) error {
 }
 
 var (
-	ErrNoRecord = repositoryError("no record")
-	ErrTimeout  = repositoryError("operation timeout")
+	ErrNoRecord  = repositoryError("no record")
+	ErrTimeout   = repositoryError("operation timeout")
+	ErrDuplicate = repositoryError("duplicate entry")
 )
 
 type Interface interface {

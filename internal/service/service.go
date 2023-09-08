@@ -88,11 +88,16 @@ func (s *Service) GetStock(ctx context.Context, data dto.ArticleDTO) (dto.NamedP
 
 // AddProductToStock добавляет новый товар в ассортимент магазина
 func (s *Service) AddProductToStock(ctx context.Context, data dto.NamedProductDTO) error {
-	// TODO implement me
 	if err := data.Validate(); err != nil {
 		return err
 	}
-	standartLog.Fatal("need to implement: service.AddProductToStock")
+
+	if err := s.Repository.CreateStock(ctx, &data); err != nil {
+		return err
+	}
+
+	logger.LogWithCtxData(ctx, s.Logger.With(logger.OPLabel, "service.AddProductToStock")).Info(
+		fmt.Sprintf("add to stock record with article %s, price %.2f", data.Article, data.Price))
 	return nil
 }
 

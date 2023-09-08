@@ -201,7 +201,8 @@ func (h *Handler) AddToStock(w http.ResponseWriter, r *http.Request) {
 
 	err = h.service.AddProductToStock(injectRequestIDToCtx(ctx, r), transferObject)
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err == nil {
-		log.Info(fmt.Sprintf("add product to stock where article %v, amount %d, price %.2f, name %s",
+		w.WriteHeader(http.StatusCreated)
+		log.Info(fmt.Sprintf("add product to stock with article %v, amount %d, price %.2f, name %s",
 			art, amount, price, name))
 	}
 }
