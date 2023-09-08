@@ -103,11 +103,16 @@ func (s *Service) AddProductToStock(ctx context.Context, data dto.NamedProductDT
 
 // ChangeAmountInStock изменяет доступное для продажи количество товара
 func (s *Service) ChangeAmountInStock(ctx context.Context, data dto.ArticleWithAmountDTO) error {
-	// TODO implement me
 	if err := data.Validate(); err != nil {
 		return err
 	}
-	standartLog.Fatal("need to implement: service.ChangeAmountInStock")
+
+	if err := s.Repository.UpdateStockAmount(ctx, &data); err != nil {
+		return err
+	}
+
+	logger.LogWithCtxData(ctx, s.Logger.With(logger.OPLabel, "service.ChangeAmountInStock")).Info(
+		fmt.Sprintf("amount udpaded to %d in stock record with article %s", data.Amount, data.Article))
 	return nil
 }
 
