@@ -138,45 +138,43 @@ func (s *Service) GetAmountInStock(ctx context.Context, data dto.ArticleDTO) (ui
 func (s *Service) MakeReservation(ctx context.Context, data dto.ReservationDTO) error {
 	var err error
 	var available uint
-	log := s.Logger.With(slog.String("op", "service.MakeReservation"))
+	newAmountInStock := make(map[article.Article]uint)
 
 	if err = data.Validate(); err != nil {
 		return err
 	}
 
-	newAmountInStock := make(map[article.Article]uint)
-
-	return s.Repository.WithinTransaction(ctx,
-		func(txCtx context.Context) error {
-			for _, p := range data.Products {
-				if available, err = s.Repository.ReadStockAmount(txCtx,
-					&dto.ArticleDTO{Article: p.Article}); err != nil {
-					return err
-				}
-				if available < p.Amount {
-					return ErrNoEnoughItemsToReserve
-				}
-				newAmountInStock[p.Article] = available - p.Amount
-			}
-			for _, p := range data.Products {
-				err = s.Repository.UpdateStockAmount(
-					txCtx,
-					&dto.ArticleWithAmountDTO{
-						Article: p.Article,
-						Amount:  newAmountInStock[p.Article],
-					},
-				)
-				if err != nil {
-					return err
-				}
-			}
-			if err = s.Repository.CreateReservation(txCtx, &data); err != nil {
+	return s.Repository.WithinTransaction(ctx, func(txCtx context.Context) error {
+		for _, p := range data.Products {
+			if available, err = s.Repository.ReadStockAmount(txCtx,
+				&dto.ArticleDTO{Article: p.Article}); err != nil {
 				return err
 			}
+			if available < p.Amount {
+				return ErrNoEnoughItemsToReserve
+			}
+			newAmountInStock[p.Article] = available - p.Amount
+		}
+		for _, p := range data.Products {
+			err = s.Repository.UpdateStockAmount(
+				txCtx,
+				&dto.ArticleWithAmountDTO{
+					Article: p.Article,
+					Amount:  newAmountInStock[p.Article],
+				},
+			)
+			if err != nil {
+				return err
+			}
+		}
+		if err = s.Repository.CreateReservation(txCtx, &data); err != nil {
+			return err
+		}
 
-			log.Info(fmt.Sprintf("succesfully saved order %d", data.OrderNumber))
-			return nil
-		})
+		logger.LogWithCtxData(txCtx, s.Logger.With(logger.OPLabel, "service.MakeReservation")).Info(
+			fmt.Sprintf("succesfully saved order %d", data.OrderNumber))
+		return nil
+	})
 }
 
 // CancelReservation снимает бронь с товара/ов

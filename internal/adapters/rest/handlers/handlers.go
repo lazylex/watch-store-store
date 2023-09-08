@@ -284,8 +284,8 @@ func (h *Handler) GetSoldAmountInSpan(w http.ResponseWriter, r *http.Request) {
 
 // MakeReservation резервирует группу товаров под переданным номером заказа. В *http.Request передается номер заказа и
 // массив резервируемых продуктов вида products[]=ca-f91w,2100,20&products[]=ca-aw-591,15000,36, где сперва идет
-// артикул, затем цена и количество резервируемого товара. В случае удачного резервирования возвращается http.StatusOK и
-// производится запись в лог
+// артикул, затем цена и количество резервируемого товара. В случае удачного резервирования возвращается
+// http.StatusCreated и производится запись в лог
 func (h *Handler) MakeReservation(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var status uint
@@ -302,7 +302,9 @@ func (h *Handler) MakeReservation(w http.ResponseWriter, r *http.Request) {
 	if order, err = request.GetOrderFromURLQuery(w, r, log); err != nil {
 		return
 	}
-	status, err = request.GetStatusFromURLQuery(w, r, log)
+	if status, err = request.GetStatusFromURLQuery(w, r, log); err != nil {
+		return
+	}
 
 	transferObject := dto.ReservationDTO{Products: products, OrderNumber: order, Date: time.Now(), State: status}
 	err = transferObject.Validate()
@@ -312,6 +314,7 @@ func (h *Handler) MakeReservation(w http.ResponseWriter, r *http.Request) {
 
 	err = h.service.MakeReservation(injectRequestIDToCtx(ctx, r), transferObject)
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err == nil {
+		w.WriteHeader(http.StatusCreated)
 		log.Info(fmt.Sprintf("succesfully saved order %d", order))
 	}
 }
