@@ -11,6 +11,7 @@ import (
 	"github.com/lazylex/watch-store/store/internal/ports/repository"
 	standartLog "log"
 	"log/slog"
+	"time"
 )
 
 type Service struct {
@@ -25,6 +26,7 @@ func serviceError(text string) error {
 
 var (
 	ErrNoEnoughItemsToReserve = serviceError("no enough items to reserve")
+	ErrNoEnoughItemsInStock   = serviceError("no enough items in stock")
 )
 
 type Option func(*Service)
@@ -187,16 +189,54 @@ func (s *Service) CancelReservation(ctx context.Context, data dto.OrderNumberDTO
 	return nil
 }
 
-// MakeSale уменьшает количества доступного лдя продажи товара и производит запись в статистику продаж
+// MakeSale уменьшает количества доступного для продажи товара и производит запись в статистику продаж
 func (s *Service) MakeSale(ctx context.Context, data []dto.ProductDTO) error {
-	// TODO implement me
 	for _, p := range data {
 		if err := p.Validate(); err != nil {
 			return err
 		}
 	}
-	standartLog.Fatal("need to implement: service.MakeSale")
-	return nil
+
+	var err error
+	var available uint
+	newAmountInStock := make(map[article.Article]uint)
+
+	return s.Repository.WithinTransaction(ctx, func(txCtx context.Context) error {
+		for _, p := range data {
+			if available, err = s.Repository.ReadStockAmount(txCtx, &dto.ArticleDTO{Article: p.Article}); err != nil {
+				return err
+			}
+			if available < p.Amount {
+				return ErrNoEnoughItemsInStock
+			}
+			newAmountInStock[p.Article] = available - p.Amount
+		}
+
+		for _, p := range data {
+			err = s.Repository.UpdateStockAmount(txCtx,
+				&dto.ArticleWithAmountDTO{
+					Article: p.Article,
+					Amount:  newAmountInStock[p.Article],
+				},
+			)
+			if err != nil {
+				return err
+			}
+		}
+
+		for _, p := range data {
+			if err = s.Repository.CreateSoldRecord(txCtx, &dto.SoldDTO{
+				Article: p.Article, Price: p.Price, Amount: p.Amount, Date: time.Now(),
+			}); err != nil {
+				return err
+			}
+		}
+
+		logger.LogWithCtxData(txCtx, s.Logger.With(logger.OPLabel, "service.MakeSale")).Info(
+			"sale completed successfully")
+
+		return nil
+	})
 }
 
 // FinishOrder помечает заказ, как выполненный. Данные о содержащихся в заказе товарах переносятся в статистику продаж

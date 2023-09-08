@@ -363,7 +363,7 @@ func (h *Handler) MakeLocalSale(w http.ResponseWriter, r *http.Request) {
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err == nil {
 		var logString string
 		for _, p := range products {
-			logString += fmt.Sprintf("sold article: %s, amount: %d, price %f. ", p.Article, p.Amount, p.Price)
+			logString += fmt.Sprintf("sold article: %s, amount: %d, price %.2f. ", p.Article, p.Amount, p.Price)
 		}
 		log.Info(logString)
 	}
