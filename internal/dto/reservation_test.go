@@ -72,4 +72,28 @@ func TestReservationDTO_Validate(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("duplicate product", func(t *testing.T) {
+		r := &ReservationDTO{OrderNumber: 466, State: reservation.NewForInternetCustomer,
+			Products: []ProductDTO{
+				{
+					Article: "ca-09.1000",
+					Price:   4660,
+					Amount:  5,
+				},
+				{
+					Article: "ca-12",
+					Price:   46960,
+					Amount:  1,
+				},
+				{
+					Article: "ca-09.1000",
+					Price:   4660,
+					Amount:  9,
+				},
+			}}
+		if !errors.Is(r.Validate(), validators.ErrDuplicateProductsInReservation) {
+			t.Fail()
+		}
+	})
 }

@@ -2,6 +2,7 @@ package dto
 
 import (
 	rs "github.com/lazylex/watch-store/store/internal/domain/aggregates/reservation"
+	"github.com/lazylex/watch-store/store/internal/domain/value_objects/article"
 	"github.com/lazylex/watch-store/store/internal/dto/validators"
 	"time"
 )
@@ -31,9 +32,15 @@ func (r *ReservationDTO) Validate() error {
 		return validators.ErrOrderForInternetCustomer
 	}
 
+	articles := make(map[article.Article]bool)
 	for _, product := range r.Products {
 		if err := product.Validate(); err != nil {
 			return err
+		}
+		if _, ok := articles[product.Article]; !ok {
+			articles[product.Article] = true
+		} else {
+			return validators.ErrDuplicateProductsInReservation
 		}
 	}
 

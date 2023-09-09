@@ -14,16 +14,17 @@ func dtoErr(text string) error {
 }
 
 var (
-	ErrIncorrectArticle         = dtoErr("incorrect article")
-	ErrIncorrectState           = dtoErr("incorrect state")
-	ErrIncorrectOrder           = dtoErr("incorrect order")
-	ErrNegativePrice            = dtoErr("negative product price")
-	ErrZeroPrice                = dtoErr("zero product price")
-	ErrEmptyName                = dtoErr("empty product testName")
-	ErrIncorrectDatesOrder      = dtoErr("incorrect dates order")
-	ErrDatesIsEqual             = dtoErr("dates is equal")
-	ErrCashRegisterOrder        = dtoErr("order number for cash register can't be higher than 10")
-	ErrOrderForInternetCustomer = dtoErr("number for internet based orders must be higher than 10")
+	ErrIncorrectArticle               = dtoErr("incorrect article")
+	ErrIncorrectState                 = dtoErr("incorrect state")
+	ErrIncorrectOrder                 = dtoErr("incorrect order")
+	ErrNegativePrice                  = dtoErr("negative product price")
+	ErrZeroPrice                      = dtoErr("zero product price")
+	ErrEmptyName                      = dtoErr("empty product testName")
+	ErrIncorrectDatesOrder            = dtoErr("incorrect dates order")
+	ErrDatesIsEqual                   = dtoErr("dates is equal")
+	ErrCashRegisterOrder              = dtoErr("order number for cash register can't be higher than 10")
+	ErrOrderForInternetCustomer       = dtoErr("number for internet based orders must be higher than 10")
+	ErrDuplicateProductsInReservation = dtoErr("duplicate products in reservation")
 )
 
 // Article валидатор для артукула
