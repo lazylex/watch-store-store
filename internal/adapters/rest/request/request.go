@@ -8,6 +8,7 @@ import (
 	"github.com/lazylex/watch-store/store/internal/domain/value_objects/article"
 	"github.com/lazylex/watch-store/store/internal/dto"
 	"github.com/lazylex/watch-store/store/internal/helpers/constantes/prefixes"
+	"github.com/lazylex/watch-store/store/internal/helpers/constantes/various"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -31,8 +32,6 @@ const (
 func requestErr(text string) error {
 	return errors.New(prefixes.RequestErrorsPrefix + text)
 }
-
-const DateLayout = "2006-01-02"
 
 var ErrIncorrectArticle = requestErr("invalid article sent")
 var ErrIncorrectOrder = requestErr("invalid order number passed")
@@ -125,7 +124,7 @@ func GetOrderFromURLQuery(w http.ResponseWriter, r *http.Request, logger *slog.L
 // GetFromUsingChi возвращает начальную дату периода, если она есть в запросе. При отсутствии даты в заголовок ответа
 // записывается http.StatusBadRequest, и возвращается ошибка ErrIncorrectDate, которая так же записывается в лог
 func GetFromUsingChi(w http.ResponseWriter, r *http.Request, logger *slog.Logger) (time.Time, error) {
-	result, err := time.Parse(DateLayout, chi.URLParam(r, From))
+	result, err := time.Parse(various.DateLayout, chi.URLParam(r, From))
 	if err != nil {
 		response.WriteHeaderAndLogAboutBadRequest(w, logger, ErrIncorrectDate)
 	}
@@ -136,7 +135,7 @@ func GetFromUsingChi(w http.ResponseWriter, r *http.Request, logger *slog.Logger
 // GetToUsingChi возвращает конечную дату периода, если она есть в запросе. При отсутствии даты в заголовок ответа
 // записывается http.StatusBadRequest, и возвращается ошибка ErrIncorrectDate, которая так же записывается в лог
 func GetToUsingChi(w http.ResponseWriter, r *http.Request, logger *slog.Logger) (time.Time, error) {
-	result, err := time.Parse(DateLayout, chi.URLParam(r, To))
+	result, err := time.Parse(various.DateLayout, chi.URLParam(r, To))
 	if err != nil {
 		response.WriteHeaderAndLogAboutBadRequest(w, logger, ErrIncorrectDate)
 	}

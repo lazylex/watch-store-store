@@ -31,7 +31,7 @@ func New(cfg *config.Config, service *service.Service, logger *slog.Logger) *chi
 	router.Post(apiV1+"stock/add/{article}/{amount}/{price}/{name}", handlers.AddToStock)
 
 	router.Get(apiV1+"sold/amount/{article}", handlers.GetSoldAmount)
-	router.Get(apiV1+"sold/amount/{article}/{from}/{to}", handlers.GetSoldAmountInSpan)
+	router.Get(apiV1+"sold/amount/{article}/{from}/{to}", handlers.GetSoldAmountInTimePeriod)
 
 	router.Post(apiV1+"sale/make", handlers.MakeLocalSale)
 

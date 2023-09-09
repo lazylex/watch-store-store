@@ -236,22 +236,22 @@ func (h *Handler) GetSoldAmount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info(fmt.Sprintf("requested total amount in stock with article %s", art))
+	log.Info(fmt.Sprintf("requested total amount of sold with article %s", art))
 
 	render.JSON(w, r, map[string]uint{request.Amount: amount})
 }
 
-// GetSoldAmountInSpan возвращает общее количество проданного товара за период времени. В пути запроса передается
+// GetSoldAmountInTimePeriod возвращает общее количество проданного товара за период времени. В пути запроса передается
 // артикул. Пример возвращаемого значения:
 // {
 // "amount": 13
 // }
-func (h *Handler) GetSoldAmountInSpan(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetSoldAmountInTimePeriod(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var amount uint
 	var from, to time.Time
 	var art article.Article
-	log := logger.AddPlaceAndRequestId(h.logger, "rest.handlers.GetSoldAmountInSpan", r)
+	log := logger.AddPlaceAndRequestId(h.logger, "rest.handlers.GetSoldAmountInTimePeriod", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
@@ -277,7 +277,7 @@ func (h *Handler) GetSoldAmountInSpan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info(fmt.Sprintf("requested total amount in stock with article %s in span", art))
+	log.Info(fmt.Sprintf("requested total amount of sold with article %s in time period", art))
 
 	render.JSON(w, r, map[string]uint{request.Amount: amount})
 }

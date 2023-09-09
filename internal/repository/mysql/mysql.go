@@ -379,6 +379,23 @@ func (r *Repository) ReadSoldRecords(ctx context.Context, data *dto.ArticleDTO) 
 	return result, r.ConvertToCommonErr(err)
 }
 
+// ReadSoldAmount возвращает количество проданного товара с переданным в *dto.ArticleDTO артикулом (за весь период)
+func (r *Repository) ReadSoldAmount(ctx context.Context, data *dto.ArticleDTO) (uint, error) {
+	var result sql.NullInt64
+
+	stmt := `SELECT SUM(amount) FROM sold WHERE article = ?`
+
+	row := r.executor(ctx).QueryRowContext(ctx, stmt, data.Article)
+	if err := row.Scan(&result); err != nil {
+		return 0, r.ConvertToCommonErr(err)
+	}
+	if result.Valid {
+		return uint(result.Int64), nil
+	}
+
+	return 0, nil
+}
+
 // ReadSoldRecordsInPeriod возвращает все записи о продажах товара с переданным в dto.ArticleWithPeriodDTO артикулом
 // в период между датами From и To включительно
 func (r *Repository) ReadSoldRecordsInPeriod(ctx context.Context, data *dto.ArticleWithPeriodDTO) ([]dto.SoldDTO, error) {
@@ -397,4 +414,21 @@ func (r *Repository) ReadSoldRecordsInPeriod(ctx context.Context, data *dto.Arti
 	}
 
 	return result, r.ConvertToCommonErr(err)
+}
+
+// ReadSoldAmountInPeriod возвращает количество проданного товара за определенный период
+func (r *Repository) ReadSoldAmountInPeriod(ctx context.Context, data *dto.ArticleWithPeriodDTO) (uint, error) {
+	var result sql.NullInt64
+
+	stmt := `SELECT SUM(amount) FROM sold WHERE article = ? AND date_of_sale >= ? AND date_of_sale <= ?`
+
+	row := r.executor(ctx).QueryRowContext(ctx, stmt, data.Article, data.From, data.To)
+	if err := row.Scan(&result); err != nil {
+		return 0, r.ConvertToCommonErr(err)
+	}
+	if result.Valid {
+		return uint(result.Int64), nil
+	}
+
+	return 0, nil
 }

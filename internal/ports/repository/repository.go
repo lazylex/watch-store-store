@@ -39,5 +39,7 @@ type Interface interface {
 
 	CreateSoldRecord(context.Context, *dto.SoldDTO) error
 	ReadSoldRecords(context.Context, *dto.ArticleDTO) ([]dto.SoldDTO, error)
+	ReadSoldAmount(context.Context, *dto.ArticleDTO) (uint, error)
 	ReadSoldRecordsInPeriod(context.Context, *dto.ArticleWithPeriodDTO) ([]dto.SoldDTO, error)
+	ReadSoldAmountInPeriod(context.Context, *dto.ArticleWithPeriodDTO) (uint, error)
 }

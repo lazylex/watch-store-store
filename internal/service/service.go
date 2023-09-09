@@ -7,6 +7,7 @@ import (
 	"github.com/lazylex/watch-store/store/internal/domain/value_objects/article"
 	"github.com/lazylex/watch-store/store/internal/dto"
 	"github.com/lazylex/watch-store/store/internal/helpers/constantes/prefixes"
+	"github.com/lazylex/watch-store/store/internal/helpers/constantes/various"
 	"github.com/lazylex/watch-store/store/internal/logger"
 	"github.com/lazylex/watch-store/store/internal/ports/repository"
 	standartLog "log"
@@ -243,20 +244,39 @@ func (s *Service) FinishOrder(ctx context.Context, data dto.OrderNumberDTO) erro
 
 // TotalSold возвращает количество проданного товара с переданным артикулом за весь период
 func (s *Service) TotalSold(ctx context.Context, data dto.ArticleDTO) (uint, error) {
-	// TODO implement me
-	if err := data.Validate(); err != nil {
+	var amount uint
+	var err error
+
+	if err = data.Validate(); err != nil {
 		return 0, err
 	}
-	standartLog.Fatal("need to implement: service.TotalSold")
-	return 0, nil
+
+	if amount, err = s.Repository.ReadSoldAmount(ctx, &data); err != nil {
+		return 0, err
+	}
+
+	logger.LogWithCtxData(ctx, s.Logger.With(logger.OPLabel, "service.TotalSold")).Info(
+		fmt.Sprintf("readed amount of sold %d (article %s)", amount, data.Article))
+
+	return amount, nil
 }
 
 // TotalSoldInPeriod возвращает количество проданного товара с переданным артикулом за указанный период
 func (s *Service) TotalSoldInPeriod(ctx context.Context, data dto.ArticleWithPeriodDTO) (uint, error) {
-	// TODO implement me
-	if err := data.Validate(); err != nil {
+	var amount uint
+	var err error
+
+	if err = data.Validate(); err != nil {
 		return 0, err
 	}
-	standartLog.Fatal("need to implement: service.TotalSoldInPeriod")
-	return 0, nil
+
+	if amount, err = s.Repository.ReadSoldAmountInPeriod(ctx, &data); err != nil {
+		return 0, err
+	}
+
+	logger.LogWithCtxData(ctx, s.Logger.With(logger.OPLabel, "service.TotalSoldInPeriod")).Info(
+		fmt.Sprintf("readed amount of sold - %d (from %s to %s) (article %s)",
+			amount, data.From.Format(various.DateLayout), data.To.Format(various.DateLayout), data.Article))
+
+	return amount, nil
 }
