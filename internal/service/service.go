@@ -197,7 +197,6 @@ func (s *Service) MakeSale(ctx context.Context, data []dto.ProductDTO) error {
 
 	var err error
 	var available uint
-	newAmountInStock := make(map[article.Article]uint)
 
 	return s.Repository.WithinTransaction(ctx, func(txCtx context.Context) error {
 		for _, p := range data {
@@ -207,17 +206,12 @@ func (s *Service) MakeSale(ctx context.Context, data []dto.ProductDTO) error {
 			if available < p.Amount {
 				return ErrNoEnoughItemsInStock
 			}
-			newAmountInStock[p.Article] = available - p.Amount
-		}
 
-		for _, p := range data {
-			err = s.Repository.UpdateStockAmount(txCtx,
-				&dto.ArticleWithAmountDTO{
-					Article: p.Article,
-					Amount:  newAmountInStock[p.Article],
-				},
-			)
-			if err != nil {
+			if err = s.Repository.UpdateStockAmount(txCtx, &dto.ArticleWithAmountDTO{
+				Article: p.Article,
+				Amount:  available - p.Amount,
+			},
+			); err != nil {
 				return err
 			}
 		}
