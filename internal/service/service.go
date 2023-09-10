@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/lazylex/watch-store/store/internal/domain/aggregates/reservation"
 	"github.com/lazylex/watch-store/store/internal/domain/value_objects/article"
 	"github.com/lazylex/watch-store/store/internal/dto"
 	"github.com/lazylex/watch-store/store/internal/helpers/constantes/prefixes"
@@ -180,12 +181,35 @@ func (s *Service) MakeReservation(ctx context.Context, data dto.ReservationDTO) 
 
 // CancelReservation снимает бронь с товара/ов
 func (s *Service) CancelReservation(ctx context.Context, data dto.OrderNumberDTO) error {
-	// TODO implement me
 	if err := data.Validate(); err != nil {
 		return err
 	}
-	standartLog.Fatal("need to implement: service.CancelReservation")
-	return nil
+
+	return s.Repository.WithinTransaction(ctx, func(txCtx context.Context) error {
+		res, err := s.Repository.ReadReservation(txCtx, &data)
+		if err != nil {
+			return err
+		}
+
+		for _, p := range res.Products {
+			var inStock uint
+			if inStock, err = s.Repository.ReadStockAmount(txCtx, &dto.ArticleDTO{Article: p.Article}); err != nil {
+				return err
+			}
+			if err = s.Repository.UpdateStockAmount(txCtx,
+				&dto.ArticleWithAmountDTO{Article: p.Article, Amount: p.Amount + inStock}); err != nil {
+				return err
+			}
+
+		}
+
+		return s.Repository.UpdateReservation(txCtx, &dto.ReservationDTO{
+			Products:    res.Products,
+			OrderNumber: data.OrderNumber,
+			Date:        time.Now(),
+			State:       reservation.Cancel,
+		})
+	})
 }
 
 // MakeSale уменьшает количества доступного для продажи товара и производит запись в статистику продаж

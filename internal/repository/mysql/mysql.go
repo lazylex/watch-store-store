@@ -277,15 +277,15 @@ func (r *Repository) UpdateStockPrice(ctx context.Context, data *dto.ArticleWith
 func (r *Repository) CreateReservation(ctx context.Context, data *dto.ReservationDTO) error {
 	stmt := `INSERT
 			 INTO on_processing 
-			 (article, price, amount, date_of_reservation, order_number, status) 
-			 values (?,?,?,?,?,?)`
+			 (article, price, amount, date_of_reservation, updated_at, order_number, status) 
+			 values (?,?,?,?,?,?,?)`
 
-	dateOfReservation := time.Now()
+	currentDate := time.Now()
 
 	f := func(txCtx context.Context) error {
 		for _, p := range data.Products {
 			_, err := r.executor(txCtx).ExecContext(ctx, stmt,
-				p.Article, p.Price, p.Amount, dateOfReservation, data.OrderNumber, data.State)
+				p.Article, p.Price, p.Amount, currentDate, currentDate, data.OrderNumber, data.State)
 			if err != nil {
 				return r.ConvertToCommonErr(err)
 			}
@@ -299,8 +299,8 @@ func (r *Repository) CreateReservation(ctx context.Context, data *dto.Reservatio
 // ReadReservation возвращает в виде dto.ReservationDTO  данные о бронировании товаров с номером заказа, переданным в
 // dto.OrderNumberDTO
 func (r *Repository) ReadReservation(ctx context.Context, data *dto.OrderNumberDTO) (dto.ReservationDTO, error) {
-	stmt := `SELECT 
-    		 FROM on_processing (article, price, amount, date_of_reservation, order_number, status)
+	stmt := `SELECT article, price, amount, date_of_reservation, order_number, status
+    		 FROM on_processing 
     		 WHERE order_number = ?`
 
 	rows, err := r.executor(ctx).QueryContext(ctx, stmt, data.OrderNumber)
@@ -326,15 +326,16 @@ func (r *Repository) ReadReservation(ctx context.Context, data *dto.OrderNumberD
 }
 
 // UpdateReservation обновляет в БД записи о бронировании, в соответствии с переданными в dto.ReservationDTO данными
-// (кроме идентификатора записи в таблицы и время бронирования)
+// (кроме идентификатора записи в таблицы и времени бронирования)
 func (r *Repository) UpdateReservation(ctx context.Context, data *dto.ReservationDTO) error {
 	var err error
 	stmt := `UPDATE on_processing 
-			 SET article, price, amount, order_number, state = (?,?,?,?,?) 
-			 WHERE article = ?`
+			 SET article = ?, price = ?, amount = ?, status= ? , updated_at= ? 
+			 WHERE order_number = ? AND article = ? AND price = ? AND amount = ?`
 
 	for _, p := range data.Products {
-		_, err = r.executor(ctx).ExecContext(ctx, stmt, p.Article, p.Price, p.Amount, data.OrderNumber, data.State)
+		_, err = r.executor(ctx).ExecContext(ctx, stmt,
+			p.Article, p.Price, p.Amount, data.State, data.Date, data.OrderNumber, p.Article, p.Price, p.Amount)
 		if err != nil {
 			return r.ConvertToCommonErr(err)
 		}
