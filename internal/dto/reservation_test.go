@@ -29,37 +29,37 @@ func TestReservationDTO_Validate(t *testing.T) {
 		{
 			testName:    "correct order for cash register",
 			state:       reservation.NewForCashRegister,
-			order:       reservation.OrderNumber(10),
+			order:       reservation.OrderNumber(reservation.MaxCashRegisterNumber),
 			expectedErr: nil,
 		},
 		{
 			testName:    "incorrect order for cash register",
 			state:       reservation.NewForCashRegister,
-			order:       reservation.OrderNumber(11),
+			order:       reservation.OrderNumber(reservation.MaxCashRegisterNumber + 1),
 			expectedErr: validators.ErrCashRegisterOrder,
 		},
 		{
 			testName:    "correct order for local customer",
 			state:       reservation.NewForLocalCustomer,
-			order:       reservation.OrderNumber(11),
+			order:       reservation.OrderNumber(reservation.MaxCashRegisterNumber + 1),
 			expectedErr: nil,
 		},
 		{
 			testName:    "incorrect order for local customer",
 			state:       reservation.NewForLocalCustomer,
-			order:       reservation.OrderNumber(10),
+			order:       reservation.OrderNumber(reservation.MaxCashRegisterNumber),
 			expectedErr: validators.ErrOrderForInternetCustomer,
 		},
 		{
 			testName:    "correct order for internet customer",
 			state:       reservation.NewForInternetCustomer,
-			order:       reservation.OrderNumber(11),
+			order:       reservation.OrderNumber(reservation.MaxCashRegisterNumber + 1),
 			expectedErr: nil,
 		},
 		{
 			testName:    "incorrect order for internet customer",
 			state:       reservation.NewForInternetCustomer,
-			order:       reservation.OrderNumber(10),
+			order:       reservation.OrderNumber(reservation.MaxCashRegisterNumber),
 			expectedErr: validators.ErrOrderForInternetCustomer,
 		},
 	}

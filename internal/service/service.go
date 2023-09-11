@@ -208,6 +208,10 @@ func (s *Service) CancelReservation(ctx context.Context, data dto.OrderNumberDTO
 
 		}
 
+		if data.OrderNumber <= reservation.MaxCashRegisterNumber {
+			return s.Repository.DeleteReservation(txCtx, &dto.OrderNumberDTO{OrderNumber: data.OrderNumber})
+		}
+
 		return s.Repository.UpdateReservation(txCtx, &dto.ReservationDTO{
 			Products:    res.Products,
 			OrderNumber: data.OrderNumber,
@@ -287,6 +291,10 @@ func (s *Service) FinishOrder(ctx context.Context, data dto.OrderNumberDTO) erro
 			}); err != nil {
 				return err
 			}
+		}
+
+		if data.OrderNumber <= reservation.MaxCashRegisterNumber {
+			return s.Repository.DeleteReservation(txCtx, &dto.OrderNumberDTO{OrderNumber: data.OrderNumber})
 		}
 
 		return s.Repository.UpdateReservation(txCtx, &dto.ReservationDTO{

@@ -29,11 +29,11 @@ func (r *ReservationDTO) Validate() error {
 		return validators.ErrIncorrectState
 	}
 
-	if r.State == rs.NewForCashRegister && r.OrderNumber > 10 {
+	if r.State == rs.NewForCashRegister && r.OrderNumber > rs.MaxCashRegisterNumber {
 		return validators.ErrCashRegisterOrder
 	}
 
-	if r.State != rs.NewForCashRegister && r.OrderNumber <= 10 {
+	if r.State != rs.NewForCashRegister && r.OrderNumber <= rs.MaxCashRegisterNumber {
 		return validators.ErrOrderForInternetCustomer
 	}
 

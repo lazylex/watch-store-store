@@ -7,6 +7,8 @@ import (
 
 type OrderNumber int
 
+const MaxCashRegisterNumber = 10
+
 const (
 	NewForCashRegister  = iota
 	NewForLocalCustomer = iota
