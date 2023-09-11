@@ -29,6 +29,7 @@ func serviceError(text string) error {
 var (
 	ErrNoEnoughItemsToReserve = serviceError("no enough items to reserve")
 	ErrNoEnoughItemsInStock   = serviceError("no enough items in stock")
+	ErrAlreadyProcessed       = serviceError("already processed")
 )
 
 type Option func(*Service)
@@ -191,6 +192,10 @@ func (s *Service) CancelReservation(ctx context.Context, data dto.OrderNumberDTO
 			return err
 		}
 
+		if !res.IsNew() {
+			return ErrAlreadyProcessed
+		}
+
 		for _, p := range res.Products {
 			var inStock uint
 			if inStock, err = s.Repository.ReadStockAmount(txCtx, &dto.ArticleDTO{Article: p.Article}); err != nil {
@@ -258,12 +263,39 @@ func (s *Service) MakeSale(ctx context.Context, data []dto.ProductDTO) error {
 
 // FinishOrder помечает заказ, как выполненный. Данные о содержащихся в заказе товарах переносятся в статистику продаж
 func (s *Service) FinishOrder(ctx context.Context, data dto.OrderNumberDTO) error {
-	// TODO implement me
 	if err := data.Validate(); err != nil {
 		return err
 	}
-	standartLog.Fatal("need to implement: service.FinishOrder")
-	return nil
+
+	return s.Repository.WithinTransaction(ctx, func(txCtx context.Context) error {
+
+		res, err := s.Repository.ReadReservation(txCtx, &data)
+		if err != nil {
+			return err
+		}
+
+		if !res.IsNew() {
+			return ErrAlreadyProcessed
+		}
+
+		for _, p := range res.Products {
+			if err = s.Repository.CreateSoldRecord(txCtx, &dto.SoldDTO{
+				Article: p.Article,
+				Price:   p.Price,
+				Amount:  p.Amount,
+				Date:    time.Now(),
+			}); err != nil {
+				return err
+			}
+		}
+
+		return s.Repository.UpdateReservation(txCtx, &dto.ReservationDTO{
+			Products:    res.Products,
+			OrderNumber: data.OrderNumber,
+			Date:        time.Now(),
+			State:       reservation.Finished,
+		})
+	})
 }
 
 // TotalSold возвращает количество проданного товара с переданным артикулом за весь период

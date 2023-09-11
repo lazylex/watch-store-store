@@ -37,6 +37,7 @@ func New(cfg *config.Config, service *service.Service, logger *slog.Logger) *chi
 
 	router.Post(apiV1+"reservation/make", handlers.MakeReservation)
 	router.Put(apiV1+"reservation/cancel/{order_number}", handlers.CancelReservation)
+	router.Put(apiV1+"reservation/finish/{order_number}", handlers.FinishOrder)
 
 	return router
 }
