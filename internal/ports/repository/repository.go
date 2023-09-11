@@ -18,6 +18,7 @@ var (
 	ErrDuplicate = repositoryError("duplicate entry")
 )
 
+//go:generate mockgen -source=repository.go -destination=mocks/repository.go
 type Interface interface {
 	ConvertToCommonErr(error) error
 	Close() error
