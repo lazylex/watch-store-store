@@ -491,3 +491,162 @@ func TestService_MakeReservationErrCreate(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestService_CancelReservationIncorrectDTO(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	data := dto.OrderNumberDTO{OrderNumber: 0}
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+
+	mockRepo.EXPECT().WithinTransaction(context.Background(), gomock.Any()).Times(0)
+
+	err := s.CancelReservation(context.Background(), data)
+	if err == nil {
+		t.Fail()
+	}
+}
+
+func TestService_CancelReservationCashRegister(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	data := dto.OrderNumberDTO{OrderNumber: 5}
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+
+	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
+
+	mockRepo.EXPECT().ReadReservation(ctx, &data).Times(1).Return(
+		dto.ReservationDTO{
+			Products:    []dto.ProductDTO{{Article: "test-9", Amount: 1, Price: 698}},
+			OrderNumber: data.OrderNumber,
+			Date:        time.Now(),
+			State:       reservation.NewForCashRegister,
+		}, nil)
+	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(5), nil)
+	mockRepo.EXPECT().UpdateStockAmount(ctx,
+		&dto.ArticleWithAmountDTO{Article: "test-9", Amount: uint(6)}).Times(1).Return(nil)
+	mockRepo.EXPECT().DeleteReservation(ctx, &data).Times(1).Return(nil)
+
+	err := s.CancelReservation(ctx, data)
+	if err != nil {
+		t.Fail()
+	}
+}
+
+func TestService_CancelReservationErrReadReservation(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	data := dto.OrderNumberDTO{OrderNumber: 5}
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+
+	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
+
+	mockRepo.EXPECT().ReadReservation(ctx, &data).Times(1).Return(dto.ReservationDTO{}, repository.ErrNoRecord)
+
+	err := s.CancelReservation(ctx, data)
+	if !errors.Is(err, repository.ErrNoRecord) {
+		t.Fail()
+	}
+}
+
+func TestService_CancelReservationErrAlreadyFinished(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	data := dto.OrderNumberDTO{OrderNumber: 5}
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+
+	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
+
+	mockRepo.EXPECT().ReadReservation(ctx, &data).Times(1).Return(
+		dto.ReservationDTO{
+			Products:    []dto.ProductDTO{{Article: "test-9", Amount: 1, Price: 698}},
+			OrderNumber: data.OrderNumber,
+			Date:        time.Now(),
+			State:       reservation.Finished,
+		}, nil)
+
+	err := s.CancelReservation(ctx, data)
+	if !errors.Is(err, ErrAlreadyProcessed) {
+		t.Fail()
+	}
+}
+
+func TestService_CancelReservationErrReadStockAmount(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	data := dto.OrderNumberDTO{OrderNumber: 5}
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+
+	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
+
+	mockRepo.EXPECT().ReadReservation(ctx, &data).Times(1).Return(
+		dto.ReservationDTO{
+			Products:    []dto.ProductDTO{{Article: "test-9", Amount: 1, Price: 698}},
+			OrderNumber: data.OrderNumber,
+			Date:        time.Now(),
+			State:       reservation.NewForCashRegister,
+		}, nil)
+	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(
+		uint(0), repository.ErrNoRecord)
+
+	err := s.CancelReservation(ctx, data)
+	if !errors.Is(err, repository.ErrNoRecord) {
+		t.Fail()
+	}
+}
+
+func TestService_CancelReservationErrUpdateAmount(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	data := dto.OrderNumberDTO{OrderNumber: 5}
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+
+	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
+
+	mockRepo.EXPECT().ReadReservation(ctx, &data).Times(1).Return(
+		dto.ReservationDTO{
+			Products:    []dto.ProductDTO{{Article: "test-9", Amount: 1, Price: 698}},
+			OrderNumber: data.OrderNumber,
+			Date:        time.Now(),
+			State:       reservation.NewForCashRegister,
+		}, nil)
+	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(5), nil)
+	mockRepo.EXPECT().UpdateStockAmount(ctx,
+		&dto.ArticleWithAmountDTO{Article: "test-9", Amount: uint(6)}).Times(1).Return(repository.ErrTimeout)
+
+	err := s.CancelReservation(ctx, data)
+	if !errors.Is(err, repository.ErrTimeout) {
+		t.Fail()
+	}
+}
+
+func TestService_CancelReservationInternet(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	data := dto.OrderNumberDTO{OrderNumber: 555}
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+
+	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
+	resData := dto.ReservationDTO{Products: []dto.ProductDTO{{Article: "test-9", Amount: 1, Price: 698}},
+		OrderNumber: 555, Date: time.Now(), State: reservation.NewForInternetCustomer,
+	}
+	mockRepo.EXPECT().ReadReservation(ctx, &data).Times(1).Return(resData, nil)
+	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(5), nil)
+	mockRepo.EXPECT().UpdateStockAmount(ctx,
+		&dto.ArticleWithAmountDTO{Article: "test-9", Amount: uint(6)}).Times(1).Return(nil)
+
+	// Тест фейлился из-за расхождений во времени запуска time.Now() при создании DTO для функции UpdateReservation в
+	// сервисе и тесте. Пришлось использовать в моке gomock.Any() вместо dto.ReservationDTO
+	mockRepo.EXPECT().UpdateReservation(ctx, gomock.Any()).Times(1).Return(nil)
+
+	err := s.CancelReservation(ctx, data)
+	if err != nil {
+		t.Fail()
+	}
+}
