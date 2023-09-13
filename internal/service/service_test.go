@@ -650,3 +650,102 @@ func TestService_CancelReservationInternet(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestService_MakeSaleErrDTO(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	data := []dto.ProductDTO{{Article: "test-9.9999", Price: 410, Amount: 10}}
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+	err := s.MakeSale(context.Background(), data)
+	if err == nil {
+		t.Fail()
+	}
+}
+
+func TestService_MakeSaleSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	data := []dto.ProductDTO{{Article: "test-9", Price: 410, Amount: 10}}
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
+
+	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(12), nil)
+	mockRepo.EXPECT().UpdateStockAmount(ctx, &dto.ArticleWithAmountDTO{Article: "test-9", Amount: 2}).Times(1).Return(nil)
+	mockRepo.EXPECT().CreateSoldRecord(ctx, gomock.Any()).Times(1).Return(nil)
+
+	err := s.MakeSale(ctx, data)
+	if err != nil {
+		t.Fail()
+	}
+}
+
+func TestService_MakeSaleErrCreateSoldRecord(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	data := []dto.ProductDTO{{Article: "test-9", Price: 410, Amount: 10}}
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
+
+	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(12), nil)
+	mockRepo.EXPECT().UpdateStockAmount(ctx, &dto.ArticleWithAmountDTO{Article: "test-9", Amount: 2}).Times(1).Return(nil)
+	mockRepo.EXPECT().CreateSoldRecord(ctx, gomock.Any()).Times(1).Return(repository.ErrTimeout)
+
+	err := s.MakeSale(ctx, data)
+	if !errors.Is(err, repository.ErrTimeout) {
+		t.Fail()
+	}
+}
+
+func TestService_MakeSaleErrUpdateStock(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	data := []dto.ProductDTO{{Article: "test-9", Price: 410, Amount: 10}}
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
+
+	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(12), nil)
+	mockRepo.EXPECT().UpdateStockAmount(ctx, &dto.ArticleWithAmountDTO{Article: "test-9", Amount: 2}).Times(
+		1).Return(repository.ErrTimeout)
+
+	err := s.MakeSale(ctx, data)
+	if !errors.Is(err, repository.ErrTimeout) {
+		t.Fail()
+	}
+}
+
+func TestService_MakeSaleErrNoEnoughItemsInStock(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	data := []dto.ProductDTO{{Article: "test-9", Price: 410, Amount: 10}}
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
+
+	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(2), nil)
+
+	err := s.MakeSale(ctx, data)
+	if !errors.Is(err, ErrNoEnoughItemsInStock) {
+		t.Fail()
+	}
+}
+
+func TestService_MakeSaleErrReadStock(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	data := []dto.ProductDTO{{Article: "test-9", Price: 410, Amount: 10}}
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
+
+	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(2),
+		repository.ErrTimeout)
+
+	err := s.MakeSale(ctx, data)
+	if !errors.Is(err, repository.ErrTimeout) {
+		t.Fail()
+	}
+}
