@@ -294,7 +294,7 @@ func (s *Service) FinishOrder(ctx context.Context, data dto.OrderNumberDTO) erro
 		}
 
 		if data.OrderNumber <= reservation.MaxCashRegisterNumber {
-			return s.Repository.DeleteReservation(txCtx, &dto.OrderNumberDTO{OrderNumber: data.OrderNumber})
+			return s.Repository.DeleteReservation(txCtx, &data)
 		}
 
 		return s.Repository.UpdateReservation(txCtx, &dto.ReservationDTO{

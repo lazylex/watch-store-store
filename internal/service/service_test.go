@@ -749,3 +749,130 @@ func TestService_MakeSaleErrReadStock(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestService_FinishOrderIncorrectDTO(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+
+	err := s.FinishOrder(context.Background(), dto.OrderNumberDTO{OrderNumber: 0})
+	if err == nil {
+		t.Fail()
+	}
+}
+
+func TestService_FinishOrderLocal(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
+	data := dto.OrderNumberDTO{OrderNumber: reservation.MaxCashRegisterNumber}
+	resData := dto.ReservationDTO{
+		Products:    []dto.ProductDTO{{Article: "test-9", Price: 100, Amount: 1}},
+		OrderNumber: reservation.MaxCashRegisterNumber,
+		Date:        time.Time{},
+		State:       reservation.NewForCashRegister,
+	}
+
+	mockRepo.EXPECT().ReadReservation(ctx, &data).Times(1).Return(resData, nil)
+	mockRepo.EXPECT().CreateSoldRecord(ctx, gomock.Any()).Times(1).Return(nil)
+	mockRepo.EXPECT().DeleteReservation(ctx, &data).Times(1).Return(nil)
+
+	err := s.FinishOrder(ctx, data)
+	if err != nil {
+		t.Fail()
+	}
+}
+
+func TestService_FinishOrderInternet(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
+	data := dto.OrderNumberDTO{OrderNumber: reservation.MaxCashRegisterNumber + 1}
+	resData := dto.ReservationDTO{
+		Products:    []dto.ProductDTO{{Article: "test-9", Price: 100, Amount: 1}},
+		OrderNumber: reservation.MaxCashRegisterNumber + 1,
+		Date:        time.Time{},
+		State:       reservation.NewForInternetCustomer,
+	}
+
+	mockRepo.EXPECT().ReadReservation(ctx, &data).Times(1).Return(resData, nil)
+	mockRepo.EXPECT().CreateSoldRecord(ctx, gomock.Any()).Times(1).Return(nil)
+	mockRepo.EXPECT().UpdateReservation(ctx, gomock.Any()).Times(1).Return(nil)
+
+	err := s.FinishOrder(ctx, data)
+	if err != nil {
+		t.Fail()
+	}
+}
+
+func TestService_FinishOrderErrCreateSoldRecord(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
+	data := dto.OrderNumberDTO{OrderNumber: reservation.MaxCashRegisterNumber + 1}
+	resData := dto.ReservationDTO{
+		Products:    []dto.ProductDTO{{Article: "test-9", Price: 100, Amount: 1}},
+		OrderNumber: reservation.MaxCashRegisterNumber + 1,
+		Date:        time.Time{},
+		State:       reservation.NewForInternetCustomer,
+	}
+
+	mockRepo.EXPECT().ReadReservation(ctx, &data).Times(1).Return(resData, nil)
+	mockRepo.EXPECT().CreateSoldRecord(ctx, gomock.Any()).Times(1).Return(repository.ErrTimeout)
+
+	err := s.FinishOrder(ctx, data)
+	if !errors.Is(err, repository.ErrTimeout) {
+		t.Fail()
+	}
+}
+
+func TestService_FinishOrderErrAlreadyProcessed(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
+	data := dto.OrderNumberDTO{OrderNumber: reservation.MaxCashRegisterNumber + 1}
+	resData := dto.ReservationDTO{
+		Products:    []dto.ProductDTO{{Article: "test-9", Price: 100, Amount: 1}},
+		OrderNumber: reservation.MaxCashRegisterNumber + 1,
+		Date:        time.Time{},
+		State:       reservation.Finished,
+	}
+
+	mockRepo.EXPECT().ReadReservation(ctx, &data).Times(1).Return(resData, nil)
+
+	err := s.FinishOrder(ctx, data)
+	if !errors.Is(err, ErrAlreadyProcessed) {
+		t.Fail()
+	}
+}
+
+func TestService_FinishOrderErrReadReservation(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	s := Service{Repository: mockRepo, Logger: nullLogger}
+	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
+	data := dto.OrderNumberDTO{OrderNumber: reservation.MaxCashRegisterNumber + 1}
+	resData := dto.ReservationDTO{
+		Products:    []dto.ProductDTO{{Article: "test-9", Price: 100, Amount: 1}},
+		OrderNumber: reservation.MaxCashRegisterNumber + 1,
+		Date:        time.Time{},
+		State:       reservation.NewForInternetCustomer,
+	}
+
+	mockRepo.EXPECT().ReadReservation(ctx, &data).Times(1).Return(resData, repository.ErrTimeout)
+
+	err := s.FinishOrder(ctx, data)
+	if !errors.Is(err, repository.ErrTimeout) {
+		t.Fail()
+	}
+}
