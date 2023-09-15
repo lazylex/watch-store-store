@@ -96,4 +96,19 @@ func TestReservationDTO_Validate(t *testing.T) {
 			t.Fail()
 		}
 	})
+
+	t.Run("error product", func(t *testing.T) {
+		r := &ReservationDTO{OrderNumber: 466, State: reservation.NewForInternetCustomer,
+			Products: []ProductDTO{
+				{
+					Article: "ca-09.1900",
+					Price:   4660,
+					Amount:  5,
+				},
+			}}
+		if !errors.Is(r.Validate(), validators.ErrIncorrectArticle) {
+			t.Fail()
+		}
+	})
+
 }
