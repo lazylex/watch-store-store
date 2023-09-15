@@ -3,8 +3,8 @@ normal=\033[0m
 
 help:
 	@echo "Варианты выполнения команды make:"
-	@echo "\t${bold}make test${normal} - запуск тестов"
-	@echo "\t${bold}make cover${normal} - вывод покрытия тестами кода в браузер"
+	@echo "\t${bold}make test${normal}\t\t - запуск тестов"
+	@echo "\t${bold}make cover${normal}\t\t - вывод покрытия кода тестами в браузер"
 
 test:
 	@go test ./internal/service
