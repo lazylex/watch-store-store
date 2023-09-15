@@ -1,7 +1,0 @@
---  Создание пользователя username на address
-CREATE USER 'username'@'address';
--- Выдача разрешений пользователю username в базе dbname, расположенной по адресу address
-GRANT SELECT, INSERT, UPDATE ON username.* TO 'dbname'@'address';
--- Выдача разрешений пользователю username на  локальной машине в таблице on_processing в базе dbname
-GRANT SELECT, INSERT, UPDATE, DELETE ON username.on_processing TO 'dbname'@'address';
-ALTER USER 'store1'@'localhost' IDENTIFIED BY 'python';
