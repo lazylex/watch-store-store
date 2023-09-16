@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/lazylex/watch-store/store/internal/domain/aggregates/reservation"
 	"github.com/lazylex/watch-store/store/internal/domain/value_objects/article"
@@ -11,6 +10,7 @@ import (
 	"github.com/lazylex/watch-store/store/internal/helpers/constantes/various"
 	"github.com/lazylex/watch-store/store/internal/logger"
 	"github.com/lazylex/watch-store/store/internal/ports/repository"
+	"github.com/lazylex/watch-store/store/internal/ports/service"
 	standartLog "log"
 	"log/slog"
 	"time"
@@ -20,17 +20,6 @@ type Service struct {
 	Repository repository.Interface
 	Logger     *slog.Logger
 }
-
-// serviceError добавляет к тексту ошибки префикс, указывающий на её принадлежность к сервису
-func serviceError(text string) error {
-	return errors.New(prefixes.ServicePrefix + text)
-}
-
-var (
-	ErrNoEnoughItemsToReserve = serviceError("no enough items to reserve")
-	ErrNoEnoughItemsInStock   = serviceError("no enough items in stock")
-	ErrAlreadyProcessed       = serviceError("already processed")
-)
 
 type Option func(*Service)
 
@@ -47,18 +36,18 @@ func WithLogger(logger *slog.Logger) Option {
 func New(options ...Option) *Service {
 	requiredOptions, initializedOptions := 2, 0
 
-	service := &Service{}
+	s := &Service{}
 	for _, opt := range options {
-		opt(service)
+		opt(s)
 		initializedOptions++
 	}
 
 	if initializedOptions != requiredOptions {
-		standartLog.Fatal(serviceError(
-			fmt.Sprintf("need to initialize %d options, not %d", requiredOptions, initializedOptions)).Error())
+		standartLog.Fatal(prefixes.ServicePrefix +
+			fmt.Sprintf("need to initialize %d options, not %d", requiredOptions, initializedOptions))
 	}
 
-	return service
+	return s
 }
 
 // ChangePriceInStock изменяет цену товара, находящегося в продаже
@@ -154,7 +143,7 @@ func (s *Service) MakeReservation(ctx context.Context, data dto.ReservationDTO) 
 				return err
 			}
 			if available < p.Amount {
-				return ErrNoEnoughItemsToReserve
+				return service.ErrNoEnoughItemsToReserve
 			}
 			newAmountInStock[p.Article] = available - p.Amount
 		}
@@ -193,7 +182,7 @@ func (s *Service) CancelReservation(ctx context.Context, data dto.OrderNumberDTO
 		}
 
 		if !res.IsNew() {
-			return ErrAlreadyProcessed
+			return service.ErrAlreadyProcessed
 		}
 
 		for _, p := range res.Products {
@@ -238,7 +227,7 @@ func (s *Service) MakeSale(ctx context.Context, data []dto.ProductDTO) error {
 				return err
 			}
 			if available < p.Amount {
-				return ErrNoEnoughItemsInStock
+				return service.ErrNoEnoughItemsInStock
 			}
 
 			if err = s.Repository.UpdateStockAmount(txCtx, &dto.ArticleWithAmountDTO{
@@ -279,7 +268,7 @@ func (s *Service) FinishOrder(ctx context.Context, data dto.OrderNumberDTO) erro
 		}
 
 		if !res.IsNew() {
-			return ErrAlreadyProcessed
+			return service.ErrAlreadyProcessed
 		}
 
 		for _, p := range res.Products {

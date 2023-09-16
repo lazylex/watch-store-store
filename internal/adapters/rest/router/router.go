@@ -5,14 +5,14 @@ import (
 	"github.com/go-chi/chi/middleware"
 	restHandles "github.com/lazylex/watch-store/store/internal/adapters/rest/handlers"
 	"github.com/lazylex/watch-store/store/internal/config"
-	"github.com/lazylex/watch-store/store/internal/service"
+	"github.com/lazylex/watch-store/store/internal/ports/service"
 	"log/slog"
 )
 
 const apiV1 = "/api/api_v1/"
 
 // New возвращает роутер *chi.Mux для REST запросов
-func New(cfg *config.Config, service *service.Service, logger *slog.Logger) *chi.Mux {
+func New(cfg *config.Config, service service.Interface, logger *slog.Logger) *chi.Mux {
 	router := chi.NewRouter()
 	// ручки хардкорно создаются в роутере, а не передаются, как зависимость, потому что всё равно их логика считывания
 	// параметров запросов местами зависима от chi, а значит с другим роутером они не совместимы без модификации

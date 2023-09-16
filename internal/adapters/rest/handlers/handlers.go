@@ -11,7 +11,7 @@ import (
 	"github.com/lazylex/watch-store/store/internal/domain/value_objects/article"
 	"github.com/lazylex/watch-store/store/internal/dto"
 	"github.com/lazylex/watch-store/store/internal/logger"
-	"github.com/lazylex/watch-store/store/internal/service"
+	"github.com/lazylex/watch-store/store/internal/ports/service"
 	"log/slog"
 	"net/http"
 	"time"
@@ -19,12 +19,12 @@ import (
 
 type Handler struct {
 	logger       *slog.Logger
-	service      *service.Service
+	service      service.Interface
 	queryTimeout time.Duration
 }
 
 // New конструктор хендлеров. Возвращает созданный обработчик *Handler
-func New(service *service.Service, logger *slog.Logger, queryTimeout time.Duration) *Handler {
+func New(service service.Interface, logger *slog.Logger, queryTimeout time.Duration) *Handler {
 	return &Handler{logger: logger, service: service, queryTimeout: queryTimeout}
 }
 

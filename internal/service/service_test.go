@@ -8,6 +8,7 @@ import (
 	"github.com/lazylex/watch-store/store/internal/dto"
 	"github.com/lazylex/watch-store/store/internal/ports/repository"
 	mockrepository "github.com/lazylex/watch-store/store/internal/ports/repository/mocks"
+	"github.com/lazylex/watch-store/store/internal/ports/service"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -440,7 +441,7 @@ func TestService_MakeReservationNoEnough(t *testing.T) {
 	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(1), nil)
 
 	err := s.MakeReservation(ctx, data)
-	if !errors.Is(err, ErrNoEnoughItemsToReserve) {
+	if !errors.Is(err, service.ErrNoEnoughItemsToReserve) {
 		t.Fail()
 	}
 }
@@ -569,7 +570,7 @@ func TestService_CancelReservationErrAlreadyFinished(t *testing.T) {
 		}, nil)
 
 	err := s.CancelReservation(ctx, data)
-	if !errors.Is(err, ErrAlreadyProcessed) {
+	if !errors.Is(err, service.ErrAlreadyProcessed) {
 		t.Fail()
 	}
 }
@@ -728,7 +729,7 @@ func TestService_MakeSaleErrNoEnoughItemsInStock(t *testing.T) {
 	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(2), nil)
 
 	err := s.MakeSale(ctx, data)
-	if !errors.Is(err, ErrNoEnoughItemsInStock) {
+	if !errors.Is(err, service.ErrNoEnoughItemsInStock) {
 		t.Fail()
 	}
 }
@@ -850,7 +851,7 @@ func TestService_FinishOrderErrAlreadyProcessed(t *testing.T) {
 	mockRepo.EXPECT().ReadReservation(ctx, &data).Times(1).Return(resData, nil)
 
 	err := s.FinishOrder(ctx, data)
-	if !errors.Is(err, ErrAlreadyProcessed) {
+	if !errors.Is(err, service.ErrAlreadyProcessed) {
 		t.Fail()
 	}
 }
