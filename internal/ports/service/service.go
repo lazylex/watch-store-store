@@ -18,6 +18,7 @@ var (
 	ErrAlreadyProcessed       = serviceError("already processed")
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/service.go
 type Interface interface {
 	// ChangePriceInStock изменяет цену товара, находящегося в продаже
 	ChangePriceInStock(ctx context.Context, data dto.ArticleWithPriceDTO) error
