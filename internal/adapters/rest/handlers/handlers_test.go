@@ -5,17 +5,16 @@ import (
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/router"
 	"github.com/lazylex/watch-store/store/internal/config"
 	"github.com/lazylex/watch-store/store/internal/dto"
+	"github.com/lazylex/watch-store/store/internal/logger"
 	"github.com/lazylex/watch-store/store/internal/ports/repository"
 	mockService "github.com/lazylex/watch-store/store/internal/ports/service/mocks"
-	"log/slog"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 	"time"
 )
 
-var nullLogger = slog.New(slog.NewTextHandler(os.NewFile(0, os.DevNull), nil))
+var nullLogger = logger.Null()
 
 func TestGetStockSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)

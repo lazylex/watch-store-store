@@ -59,3 +59,8 @@ func LogWithCtxData(ctx context.Context, log *slog.Logger) *slog.Logger {
 
 	return log
 }
+
+// Null возвращает логгер, который пишет в никуда. Полезно для тестирования структур и функций, зависящих от логгера
+func Null() *slog.Logger {
+	return slog.New(slog.NewTextHandler(os.NewFile(0, os.DevNull), nil))
+}

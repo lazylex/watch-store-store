@@ -6,10 +6,10 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/lazylex/watch-store/store/internal/domain/aggregates/reservation"
 	"github.com/lazylex/watch-store/store/internal/dto"
+	"github.com/lazylex/watch-store/store/internal/logger"
 	"github.com/lazylex/watch-store/store/internal/ports/repository"
 	mockrepository "github.com/lazylex/watch-store/store/internal/ports/repository/mocks"
 	"github.com/lazylex/watch-store/store/internal/ports/service"
-	"log/slog"
 	"os"
 	"os/exec"
 	"time"
@@ -17,7 +17,7 @@ import (
 	"testing"
 )
 
-var nullLogger = slog.New(slog.NewTextHandler(os.NewFile(0, os.DevNull), nil))
+var nullLogger = logger.Null()
 
 // withMockRepo позволяет подключать мок репозитория в функции service.New, чтобы покрыть её тестами
 func withMockRepo(mr repository.Interface) Option {
