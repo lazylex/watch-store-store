@@ -51,9 +51,7 @@ func (h *Handler) GetStockRecord(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	if art, err = request.GetArticleUsingChi(w, r, log); err != nil {
-		return
-	}
+	art = request.GetArticleUsingChi(r)
 
 	transferObject := dto.ArticleDTO{Article: art}
 	err = transferObject.Validate()
@@ -85,9 +83,7 @@ func (h *Handler) GetAmountInStock(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	if art, err = request.GetArticleUsingChi(w, r, log); err != nil {
-		return
-	}
+	art = request.GetArticleUsingChi(r)
 
 	transferObject := dto.ArticleDTO{Article: art}
 	err = transferObject.Validate()
@@ -115,9 +111,7 @@ func (h *Handler) UpdatePriceInStock(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	if art, err = request.GetArticleUsingChi(w, r, log); err != nil {
-		return
-	}
+	art = request.GetArticleUsingChi(r)
 	if price, err = request.GetPriceUsingChi(w, r, log); err != nil {
 		return
 	}
@@ -146,9 +140,7 @@ func (h *Handler) UpdateAmountInStock(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	if art, err = request.GetArticleUsingChi(w, r, log); err != nil {
-		return
-	}
+	art = request.GetArticleUsingChi(r)
 	if amount, err = request.GetAmountUsingChi(w, r, log); err != nil {
 		return
 	}
@@ -180,9 +172,7 @@ func (h *Handler) AddToStock(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	if art, err = request.GetArticleUsingChi(w, r, log); err != nil {
-		return
-	}
+	art = request.GetArticleUsingChi(r)
 	if amount, err = request.GetAmountUsingChi(w, r, log); err != nil {
 		return
 	}
@@ -221,9 +211,7 @@ func (h *Handler) GetSoldAmount(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	if art, err = request.GetArticleUsingChi(w, r, log); err != nil {
-		return
-	}
+	art = request.GetArticleUsingChi(r)
 
 	transferObject := dto.ArticleDTO{Article: art}
 	err = transferObject.Validate()
@@ -256,9 +244,7 @@ func (h *Handler) GetSoldAmountInTimePeriod(w http.ResponseWriter, r *http.Reque
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	if art, err = request.GetArticleUsingChi(w, r, log); err != nil {
-		return
-	}
+	art = request.GetArticleUsingChi(r)
 	if from, err = request.GetFromUsingChi(w, r, log); err != nil {
 		return
 	}

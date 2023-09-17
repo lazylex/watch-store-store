@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	restHandles "github.com/lazylex/watch-store/store/internal/adapters/rest/handlers"
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/router"
 	"github.com/lazylex/watch-store/store/internal/config"
 	"github.com/lazylex/watch-store/store/internal/logger"
@@ -26,9 +27,10 @@ func main() {
 		mysql.WithRepository(cfg, log),
 		service.WithLogger(log),
 	)
+	handlers := restHandles.New(domainService, log, cfg.QueryTimeout)
 
 	srv := &http.Server{
-		Handler:      router.New(cfg, domainService, log),
+		Handler:      router.New(cfg, handlers),
 		Addr:         cfg.Address,
 		ReadTimeout:  cfg.ReadTimeout,
 		WriteTimeout: cfg.WriteTimeout,

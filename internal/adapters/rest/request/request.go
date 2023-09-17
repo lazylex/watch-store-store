@@ -33,7 +33,6 @@ func requestErr(text string) error {
 	return errors.New(prefixes.RequestErrorsPrefix + text)
 }
 
-var ErrIncorrectArticle = requestErr("invalid article sent")
 var ErrIncorrectOrder = requestErr("invalid order number passed")
 var ErrEmptyName = requestErr("name not sent")
 var ErrIncorrectAmount = requestErr("wrong amount sent")
@@ -42,16 +41,9 @@ var ErrIncorrectDate = requestErr("invalid date passed")
 var ErrIncorrectReservationStatus = requestErr("invalid order status passed")
 var ErrEmptyProductsData = requestErr("product data not sent")
 
-// GetArticleUsingChi возвращает артукул продукта, если он есть в запросе. При отсутствии артикула или переданной в
-// качестве артикула пустой строке, в заголовок ответа записывается http.StatusBadRequest, и возвращается ошибка
-// ErrIncorrectArticle, которая так же записывается в лог
-func GetArticleUsingChi(w http.ResponseWriter, r *http.Request, logger *slog.Logger) (article.Article, error) {
-	art := chi.URLParam(r, Article)
-	if len(art) == 0 {
-		response.WriteHeaderAndLogAboutBadRequest(w, logger, ErrIncorrectArticle)
-	}
-
-	return article.Article(art), nil
+// GetArticleUsingChi возвращает артукул продукта
+func GetArticleUsingChi(r *http.Request) article.Article {
+	return article.Article(chi.URLParam(r, Article))
 }
 
 // GetNameUsingChi возвращает название продукта, если оно есть в запросе. При отсутствии названия или переданной в

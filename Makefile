@@ -10,6 +10,7 @@ test:
 	@go test ./internal/service
 	@go test ./internal/dto/validators
 	@go test ./internal/dto
+	@go test ./internal/adapters/rest/handlers
 
 cover:
 	@go test -coverprofile cover.out ./... -covermode atomic
