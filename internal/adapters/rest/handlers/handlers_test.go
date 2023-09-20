@@ -250,3 +250,66 @@ func TestHandler_UpdateAmountInStockTimeout(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestHandler_AddToStockSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost,
+		"/api/api_v1/stock/add/9/5/1000/test", nil)
+
+	service.EXPECT().AddProductToStock(
+		gomock.Any(), dto.NamedProductDTO{Article: "9", Amount: 5, Price: 1000, Name: "test"}).Times(1).Return(nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusCreated {
+		t.Fail()
+	}
+}
+
+func TestHandler_AddToStockIncorrectArticle(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost,
+		"/api/api_v1/stock/add/9.9999/5/1000/test", nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_AddToStockIncorrectPrice(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost,
+		"/api/api_v1/stock/add/9/5/too-many/test", nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_AddToStockIncorrectAmount(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost,
+		"/api/api_v1/stock/add/9/five/1000/test", nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}

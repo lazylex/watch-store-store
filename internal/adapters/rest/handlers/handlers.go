@@ -179,9 +179,7 @@ func (h *Handler) AddToStock(w http.ResponseWriter, r *http.Request) {
 	if price, err = request.GetPriceUsingChi(w, r, log); err != nil {
 		return
 	}
-	if name, err = request.GetNameUsingChi(w, r, log); err != nil {
-		return
-	}
+	name = request.GetNameUsingChi(r)
 
 	transferObject := dto.NamedProductDTO{Name: name, Article: art, Amount: amount, Price: price}
 	err = transferObject.Validate()

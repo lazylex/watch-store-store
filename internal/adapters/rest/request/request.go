@@ -34,7 +34,6 @@ func requestErr(text string) error {
 }
 
 var ErrIncorrectOrder = requestErr("invalid order number passed")
-var ErrEmptyName = requestErr("name not sent")
 var ErrIncorrectAmount = requestErr("wrong amount sent")
 var ErrIncorrectPrice = requestErr("wrong price sent")
 var ErrIncorrectDate = requestErr("invalid date passed")
@@ -46,16 +45,9 @@ func GetArticleUsingChi(r *http.Request) article.Article {
 	return article.Article(chi.URLParam(r, Article))
 }
 
-// GetNameUsingChi возвращает название продукта, если оно есть в запросе. При отсутствии названия или переданной в
-// качестве названия пустой строке, в заголовок ответа записывается http.StatusBadRequest, и возвращается ошибка
-// ErrEmptyName, которая так же записывается в лог
-func GetNameUsingChi(w http.ResponseWriter, r *http.Request, logger *slog.Logger) (string, error) {
-	name := chi.URLParam(r, Name)
-	if len(name) == 0 {
-		response.WriteHeaderAndLogAboutBadRequest(w, logger, ErrEmptyName)
-	}
-
-	return name, nil
+// GetNameUsingChi возвращает название продукта
+func GetNameUsingChi(r *http.Request) string {
+	return chi.URLParam(r, Name)
 }
 
 // GetPriceUsingChi возвращает цену продукта, если она есть в запросе. При отсутствии цены или цене, меньшей или равной
