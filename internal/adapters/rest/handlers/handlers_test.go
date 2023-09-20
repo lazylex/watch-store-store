@@ -188,3 +188,65 @@ func TestHandler_UpdatePriceInStockTimeout(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestHandler_UpdateAmountInStockSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount/9/5", nil)
+
+	service.EXPECT().ChangeAmountInStock(
+		gomock.Any(), dto.ArticleWithAmountDTO{Article: "9", Amount: uint(5)}).Times(1).Return(nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
+		t.Fail()
+	}
+}
+
+func TestHandler_UpdateAmountInStockIncorrectAmount(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount/9/5five", nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_UpdateAmountInStockIncorrectArticle(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount/9.0999/5", nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_UpdateAmountInStockTimeout(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount/9/5", nil)
+
+	service.EXPECT().ChangeAmountInStock(
+		gomock.Any(), dto.ArticleWithAmountDTO{Article: "9", Amount: uint(5)}).Times(1).Return(repository.ErrTimeout)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusRequestTimeout {
+		t.Fail()
+	}
+}
