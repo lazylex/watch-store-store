@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/golang/mock/gomock"
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/router"
 	"github.com/lazylex/watch-store/store/internal/config"
@@ -108,6 +109,82 @@ func TestHandler_GetAmountInStockNoRecord(t *testing.T) {
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusNotFound {
+		t.Fail()
+	}
+}
+
+func TestHandler_UpdatePriceInStockSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price/9/1000", nil)
+
+	service.EXPECT().ChangePriceInStock(gomock.Any(), dto.ArticleWithPriceDTO{Article: "9", Price: 1000})
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
+		t.Fail()
+	}
+}
+
+func TestHandler_UpdatePriceInStockIncorrectArticle(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price/9.0090/1000", nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_UpdatePriceInStockNegativePrice(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price/9/-1000", nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_UpdatePriceInStockIncorrectPrice(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price/9/expensive-rich", nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_UpdatePriceInStockTimeout(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price/9/1000", nil)
+
+	service.EXPECT().ChangePriceInStock(gomock.Any(),
+		dto.ArticleWithPriceDTO{Article: "9", Price: 1000}).Times(1).Return(repository.ErrTimeout)
+
+	mux.ServeHTTP(response, request)
+	fmt.Println(response.Code)
+	if response.Code != http.StatusRequestTimeout {
 		t.Fail()
 	}
 }
