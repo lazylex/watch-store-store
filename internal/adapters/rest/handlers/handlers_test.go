@@ -313,3 +313,49 @@ func TestHandler_AddToStockIncorrectAmount(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestHandler_GetSoldAmountSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9", nil)
+
+	service.EXPECT().TotalSold(gomock.Any(), dto.ArticleDTO{Article: "9"}).Times(1).Return(uint(13), nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
+		t.Fail()
+	}
+}
+
+func TestHandler_GetSoldAmountIncorrectArticle(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9.9999", nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_GetSoldAmountTimeout(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9", nil)
+
+	service.EXPECT().TotalSold(gomock.Any(), dto.ArticleDTO{Article: "9"}).Times(1).Return(uint(0), repository.ErrTimeout)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusRequestTimeout {
+		t.Fail()
+	}
+}
