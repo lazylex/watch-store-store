@@ -359,3 +359,87 @@ func TestHandler_GetSoldAmountTimeout(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestHandler_GetSoldAmountInTimePeriodSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9/2022-01-01/2023-09-28", nil)
+
+	service.EXPECT().TotalSoldInPeriod(
+		gomock.Any(),
+		dto.ArticleWithPeriodDTO{Article: "9",
+			From: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+			To:   time.Date(2023, 9, 28, 0, 0, 0, 0, time.UTC)}).Times(
+		1).Return(uint(13), nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
+		t.Fail()
+	}
+}
+
+func TestHandler_GetSoldAmountInTimePeriodIncorrectDateOrder(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9/2024-01-01/2023-09-28", nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_GetSoldAmountInTimePeriodTimeout(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9/2022-01-01/2023-09-28", nil)
+
+	service.EXPECT().TotalSoldInPeriod(
+		gomock.Any(),
+		dto.ArticleWithPeriodDTO{Article: "9",
+			From: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+			To:   time.Date(2023, 9, 28, 0, 0, 0, 0, time.UTC)}).Times(
+		1).Return(uint(13), repository.ErrTimeout)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusRequestTimeout {
+		t.Fail()
+	}
+}
+
+func TestHandler_GetSoldAmountInTimePeriodIncorrectFrom(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9/yesterday/2023-09-28", nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_GetSoldAmountInTimePeriodIncorrectTo(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9/2023-09-28/light-future", nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
