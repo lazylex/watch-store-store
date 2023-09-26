@@ -490,3 +490,93 @@ func TestHandler_CancelReservationNegativeOrder(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestHandler_MakeReservationSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(
+		http.MethodPost,
+		"/api/api_v1/reservation/make?products[]=ca-f91w,2100,20&products[]=ca-aw-591,15000,36&order_number=9&status=0",
+		nil)
+
+	service.EXPECT().MakeReservation(
+		gomock.Any(),
+		gomock.Any(),
+	).Times(1).Return(nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusCreated {
+		t.Fail()
+	}
+}
+
+func TestHandler_MakeReservationNoProducts(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(
+		http.MethodPost,
+		"/api/api_v1/reservation/make?order_number=9&status=0",
+		nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_MakeReservationNoStatus(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(
+		http.MethodPost,
+		"/api/api_v1/reservation/make?products[]=ca-f91w,2100,20&products[]=ca-aw-591,15000,36&order_number=9",
+		nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_MakeReservationNoOrder(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(
+		http.MethodPost,
+		"/api/api_v1/reservation/make?products[]=ca-f91w,2100,20&products[]=ca-aw-591,15000,36&status=0",
+		nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_MakeReservationIncorrectOrderData(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(
+		http.MethodPost,
+		"/api/api_v1/reservation/make?products[]=ca-f91w,2100,20&products[]=ca-aw-591,15000,36&status=4&order_number=5",
+		nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
