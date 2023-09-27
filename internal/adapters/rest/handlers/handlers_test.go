@@ -646,3 +646,63 @@ func TestHandler_MakeLocalSaleErrorData(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestHandler_FinishOrderSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish/9", nil)
+
+	service.EXPECT().FinishOrder(gomock.Any(), dto.OrderNumberDTO{OrderNumber: 9}).Times(1).Return(nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
+		t.Fail()
+	}
+}
+
+func TestHandler_FinishOrderNegativeOrder(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish/-9", nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_FinishOrderNotIntOrder(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish/nine", nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_FinishOrderTimeout(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish/9", nil)
+
+	service.EXPECT().FinishOrder(gomock.Any(), dto.OrderNumberDTO{OrderNumber: 9}).Times(1).Return(repository.ErrTimeout)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusRequestTimeout {
+		t.Fail()
+	}
+}
