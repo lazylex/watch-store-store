@@ -580,3 +580,69 @@ func TestHandler_MakeReservationIncorrectOrderData(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestHandler_MakeLocalSaleSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(
+		http.MethodPost, "/api/api_v1/sale/make?products[]=ca-f91w,2100,20&products[]=ca-aw-591,15000,36",
+		nil)
+
+	service.EXPECT().MakeSale(gomock.Any(), gomock.Any()).Times(1).Return(nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusCreated {
+		t.Fail()
+	}
+}
+
+func TestHandler_MakeLocalSaleNoProducts(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "/api/api_v1/sale/make", nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_MakeLocalSaleTimeout(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(
+		http.MethodPost, "/api/api_v1/sale/make?products[]=ca-f91w,2100,20&products[]=ca-aw-591,15000,36",
+		nil)
+
+	service.EXPECT().MakeSale(gomock.Any(), gomock.Any()).Times(1).Return(repository.ErrTimeout)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusRequestTimeout {
+		t.Fail()
+	}
+}
+
+func TestHandler_MakeLocalSaleErrorData(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	service := mockService.NewMockInterface(ctrl)
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(
+		http.MethodPost, "/api/api_v1/sale/make?products[]=ca-f91w.2100.20&products[]=ca-aw-591.15000.36",
+		nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}

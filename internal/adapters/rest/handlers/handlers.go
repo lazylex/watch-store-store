@@ -330,7 +330,7 @@ func (h *Handler) CancelReservation(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// MakeLocalSale товар из доступного для продажи переносится в исторю продаж. В *http.Request передается массив
+// MakeLocalSale товар из доступного для продажи переносится в историю продаж. В *http.Request передается массив
 // реализуемых покупателю продуктов вида products[]=ca-f91w,2100,20&products[]=ca-aw-591,15000,36, где сперва идет
 // артикул, затем цена и количество резервируемого товара. В случае удачного выполнения операции возвращается
 // http.StatusOK и производится запись в лог
@@ -352,6 +352,7 @@ func (h *Handler) MakeLocalSale(w http.ResponseWriter, r *http.Request) {
 		for _, p := range products {
 			logString += fmt.Sprintf("sold article: %s, amount: %d, price %.2f. ", p.Article, p.Amount, p.Price)
 		}
+		w.WriteHeader(http.StatusCreated)
 		log.Info(logString)
 	}
 }
