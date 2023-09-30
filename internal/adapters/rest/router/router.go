@@ -3,18 +3,23 @@ package router
 import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/lazylex/watch-store/store/internal/adapters/rest/middlewares/jwt"
 	"github.com/lazylex/watch-store/store/internal/config"
 	"github.com/lazylex/watch-store/store/internal/ports/rest/handlers"
+	"log/slog"
 )
 
 const apiV1 = "/api/api_v1/"
 
 // New возвращает роутер *chi.Mux для REST запросов
-func New(cfg *config.Config, handlers handlers.Interface) *chi.Mux {
+func New(cfg *config.Config, logger *slog.Logger, handlers handlers.Interface) *chi.Mux {
 	router := chi.NewRouter()
 
 	if cfg.Env == config.EnvironmentLocal {
 		router.Use(middleware.Logger)
+	} else {
+		// TODO: убрать хардхордно зашитую подпись для JWT токенов
+		router.Use(jwt.New(logger, []byte("mySecretCombination")).CheckJWT)
 	}
 
 	router.Use(middleware.Recoverer)

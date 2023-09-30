@@ -30,7 +30,7 @@ func main() {
 	handlers := restHandles.New(domainService, log, cfg.QueryTimeout)
 
 	srv := &http.Server{
-		Handler:      router.New(cfg, handlers),
+		Handler:      router.New(cfg, log, handlers),
 		Addr:         cfg.Address,
 		ReadTimeout:  cfg.ReadTimeout,
 		WriteTimeout: cfg.WriteTimeout,
