@@ -14,6 +14,7 @@ const apiV1 = "/api/api_v1/"
 // New возвращает роутер *chi.Mux для REST запросов
 func New(cfg *config.Config, logger *slog.Logger, handlers handlers.Interface) *chi.Mux {
 	router := chi.NewRouter()
+	router.Use(middleware.Recoverer, middleware.RequestID)
 
 	if cfg.Env == config.EnvironmentLocal {
 		router.Use(middleware.Logger)
@@ -21,9 +22,6 @@ func New(cfg *config.Config, logger *slog.Logger, handlers handlers.Interface) *
 		// TODO: убрать хардхордно зашитую подпись для JWT токенов
 		router.Use(jwt.New(logger, []byte("mySecretCombination")).CheckJWT)
 	}
-
-	router.Use(middleware.Recoverer)
-	router.Use(middleware.RequestID)
 
 	router.Get(apiV1+"stock/{article}", handlers.GetStockRecord)
 	router.Get(apiV1+"stock/amount/{article}", handlers.GetAmountInStock)

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/lazylex/watch-store/store/internal/logger"
 	"log/slog"
 	"net/http"
 )
@@ -32,10 +33,12 @@ func New(logger *slog.Logger, secret []byte) *MiddlewareJWT {
 func (m *MiddlewareJWT) CheckJWT(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		var notParsedToken string
+		log := logger.AddPlaceAndRequestId(m.logger, "middlewares.jwt.CheckJWT", r)
+
 		if len(r.Header.Get(header)) > len(requestHeaderPrefix) {
 			notParsedToken = r.Header.Get(header)[len(requestHeaderPrefix):]
 		} else {
-			m.logger.Error("no JWT token find")
+			log.Error("no JWT token find")
 			rw.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -50,17 +53,15 @@ func (m *MiddlewareJWT) CheckJWT(next http.Handler) http.Handler {
 			jwt.WithValidMethods(validMethods),
 		)
 
-		if token.Valid {
-			m.logger.Info("request with valid token")
-		} else {
+		if !token.Valid {
 			if errors.Is(err, jwt.ErrTokenMalformed) {
-				m.logger.Error("not a JWT token in request")
+				log.Error("not a JWT token in request")
 			} else if errors.Is(err, jwt.ErrTokenSignatureInvalid) {
-				m.logger.Error("invalid JWT token signature")
+				log.Error("invalid JWT token signature")
 			} else if errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenNotValidYet) {
-				m.logger.Error("not correct time in JWT token")
+				log.Error("not correct time in JWT token")
 			} else {
-				m.logger.Error("couldn't handle this token:", err)
+				log.Error("couldn't handle this token:", err)
 			}
 
 			rw.WriteHeader(http.StatusUnauthorized)
