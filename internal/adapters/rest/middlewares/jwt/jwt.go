@@ -58,8 +58,10 @@ func (m *MiddlewareJWT) CheckJWT(next http.Handler) http.Handler {
 				log.Error("not a JWT token in request")
 			} else if errors.Is(err, jwt.ErrTokenSignatureInvalid) {
 				log.Error("invalid JWT token signature")
-			} else if errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenNotValidYet) {
-				log.Error("not correct time in JWT token")
+			} else if errors.Is(err, jwt.ErrTokenExpired) {
+				log.Error("token expired")
+			} else if errors.Is(err, jwt.ErrTokenNotValidYet) {
+				log.Error("token not valid yet")
 			} else {
 				log.Error("couldn't handle this token:", err)
 			}
