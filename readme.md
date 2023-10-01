@@ -10,6 +10,7 @@
 ![Obsidian](https://img.shields.io/badge/Obsidian-%23483699.svg?style=for-the-badge&logo=obsidian&logoColor=white)
 ![Markdown](https://img.shields.io/badge/markdown-%23000000.svg?style=for-the-badge&logo=markdown&logoColor=white)
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
 
 #### Содержание  
 [1. Описание проекта](#описание)
@@ -18,7 +19,9 @@
 
 [3. Доступные команды](#команды)
 
-[4. Для чего это всё написано?](#длячего)
+[4. Конфигурация](#конфигурация)
+
+[5. Для чего это всё написано?](#длячего)
 
 #### Описание
 
@@ -43,6 +46,70 @@
 + **make test** - запускает тесты
 + **make cover** - выводит покрытие кода тестами в браузере по умолчанию
 
+#### Конфигурация
+
+Конфигурация приложения сохраняется в YAML-файлах, имеющих следующую структуру:
+
+```yaml
+# в каком окружении запускается программа. Есть три варианта - "local", для обычной разработки, "debug" - для  
+# отладки/разработки с проверкой прав доступа и "production" - для запуска на боевом сервере
+env: "local"
+# название экземпляра запущенного приложения. Служит уникальным идентификатором приложения в системе
+instance: "instance1"
+# раздел настройки http
+http_server:
+  # адрес и порт http-сервера
+  address: "localhost:8091"
+  # таймаут чтения
+  read_timeout: 5s
+  # таймаут записи
+  write_timeout: 10s
+  # таймаут простоя  
+  idle_timeout: 60s
+  # таймаут на завершение работы http-сервера при gracefully shutdown
+  shutdown_timeout: 15s
+# раздел настройки хранилища
+storage:
+  # логин базы данных
+  database_login: "login"
+  # пароль базы данных
+  database_password: "password"
+  # адрес базы данных
+  database_address: "localhost"
+  # максимально доступное количество открытых соединений базы данных
+  database_max_open_connections: 10
+  # имя базы данных
+  database_name: "db_name"
+  # таймаут запроса
+  query_timeout: 5s
+# раздел настройки безопасности
+secure:
+  # секретная подпись для валидации JWT
+  secure_signature: "secure signature"
+  # адрес сервера, выдающего JWT токены и имеющего право знать секретную подпись
+  secure_server: "localhost:8095"
+```
+Есть возможность переопределять значения из конфигурационных файлов переменными окружения. Соответствие опций из конфигурационного файла переменным окружения представлено в таблице ниже:
+
+| В файле конфигурации          | Переменная окружения          |
+|-------------------------------|-------------------------------|
+| instance                      | INSTANCE                      |
+| env                           | ENV                           |
+| secure_signature              | SECURE_SIGNATURE              |
+| secure_server                 | SECURE_SERVER                 |
+| address                       | ADDRESS                       |
+| read_timeout                  | READ_TIMEOUT                  |
+| write_timeout                 | WRITE_TIMEOUT                 |
+| idle_timeout                  | IDLE_TIMEOUT                  |
+| shutdown_timeout              | SHUTDOWN_TIMEOUT              |
+| database_login                | DATABASE_LOGIN                |
+| database_password             | DATABASE_PASSWORD             |
+| database_address              | DATABASE_ADDRESS              |
+| database_name                 | DATABASE_NAME                 |
+| database_max_open_connections | DATABASE_MAX_OPEN_CONNECTIONS |
+| query_timeout                 | QUERY_TIMEOUT                 |
+
+Путь к файлу конфигурации можно указывать по ключу *config* при запуске приложения или в переменной окружения *STORE_CONFIG_PATH*. При отсутствии конфигурации приложение завершится с ошибкой.
 
 #### ДляЧего?
 
