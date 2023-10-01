@@ -18,6 +18,12 @@ type Config struct {
 	Env        string `yaml:"env" env:"ENV" env-required:"true"`
 	HttpServer `yaml:"http_server"`
 	Storage    `yaml:"storage"`
+	Secure     `yaml:"secure"`
+}
+
+type Secure struct {
+	Signature string `yaml:"secure_signature" env:"SECURE_SIGNATURE" env-required:"true"`
+	Server    string `yaml:"secure_server" env:"SECURE_SERVER" env-required:"true"`
 }
 
 type HttpServer struct {
@@ -40,7 +46,7 @@ type Storage struct {
 
 // MustLoad возвращает конфигурацию, считанную из файла, путь к которому передан как аргумент функции или содержится в
 // переменной окружения STORE_CONFIG_PATH. Переопределение конфигурационных значений может находится в соответсвующих
-// переменных окружения, описанных в структурах Config, HttpServer и Storage
+// переменных окружения, описанных в структурах Config, HttpServer, Secure и Storage
 func MustLoad(configPath *string) *Config {
 	var cfg Config
 

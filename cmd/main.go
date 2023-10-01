@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	restHandles "github.com/lazylex/watch-store/store/internal/adapters/rest/handlers"
+	"github.com/lazylex/watch-store/store/internal/adapters/rest/middlewares/jwt"
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/router"
 	"github.com/lazylex/watch-store/store/internal/config"
 	"github.com/lazylex/watch-store/store/internal/logger"
@@ -28,9 +29,10 @@ func main() {
 		service.WithLogger(log),
 	)
 	handlers := restHandles.New(domainService, log, cfg.QueryTimeout)
+	secureMiddleware := jwt.New(log, []byte(cfg.Signature)).CheckJWT
 
 	srv := &http.Server{
-		Handler:      router.New(cfg, log, handlers),
+		Handler:      router.New(cfg, handlers, secureMiddleware),
 		Addr:         cfg.Address,
 		ReadTimeout:  cfg.ReadTimeout,
 		WriteTimeout: cfg.WriteTimeout,
