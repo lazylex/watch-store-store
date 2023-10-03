@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/lazylex/watch-store/store/internal/adapters/message_broker/kafka"
 	restHandles "github.com/lazylex/watch-store/store/internal/adapters/rest/handlers"
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/middlewares/jwt"
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/router"
@@ -47,6 +48,14 @@ func main() {
 			os.Exit(1)
 		}
 	}()
+
+	if cfg.UseKafka {
+		if len(cfg.Brokers) > 0 {
+			kafka.Start(domainService, cfg, log)
+		} else {
+			log.Error("empty kafka brokers list")
+		}
+	}
 
 	defer func(Repository repository.Interface) {
 		err := Repository.Close()

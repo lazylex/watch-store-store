@@ -1,5 +1,6 @@
 env: "debug"
 instance: "store1"
+use_kafka: true
 http_server:
   address: "localhost:8091"
   read_timeout: 5s
@@ -16,3 +17,5 @@ storage:
 secure:
   secure_signature: "it's just secure signature for debug"
   secure_server: "localhost:8095"
+kafka:
+  kafka_brokers: ["localhost:9092"]

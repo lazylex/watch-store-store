@@ -16,9 +16,11 @@ const (
 type Config struct {
 	Instance   string `yaml:"instance" env:"INSTANCE" env-required:"true"`
 	Env        string `yaml:"env" env:"ENV" env-required:"true"`
+	UseKafka   bool   `yaml:"use_kafka" env:"USE_KAFKA"`
 	HttpServer `yaml:"http_server"`
 	Storage    `yaml:"storage"`
 	Secure     `yaml:"secure"`
+	Kafka      `yaml:"kafka"`
 }
 
 type Secure struct {
@@ -42,6 +44,10 @@ type Storage struct {
 	DatabaseMaxOpenConnections int    `yaml:"database_max_open_connections" env:"DATABASE_MAX_OPEN_CONNECTIONS" env-required:"true"`
 
 	QueryTimeout time.Duration `yaml:"query_timeout" env:"QUERY_TIMEOUT" env-required:"true"`
+}
+
+type Kafka struct {
+	Brokers []string `yaml:"kafka_brokers" env:"KAFKA_BROKERS"`
 }
 
 // MustLoad возвращает конфигурацию, считанную из файла, путь к которому передан как аргумент функции или содержится в
