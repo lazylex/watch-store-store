@@ -55,8 +55,12 @@ func (s *Service) ChangePriceInStock(ctx context.Context, data dto.ArticleWithPr
 	if err := data.Validate(); err != nil {
 		return err
 	}
+	_, err := s.GetStock(ctx, dto.ArticleDTO{Article: data.Article})
+	if err != nil {
+		return err
+	}
 
-	err := s.Repository.UpdateStockPrice(ctx, &data)
+	err = s.Repository.UpdateStockPrice(ctx, &data)
 	if err == nil {
 		logger.LogWithCtxData(ctx, s.Logger.With(logger.OPLabel, "service.ChangePriceInStock")).Info(
 			fmt.Sprintf("change price to %.2f in stock record with article %s", data.Price, data.Article))

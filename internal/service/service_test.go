@@ -100,6 +100,7 @@ func TestService_ChangePriceInStockCorrectDTO(t *testing.T) {
 	data := dto.ArticleWithPriceDTO{Article: "test-9", Price: 10}
 	s := Service{Repository: mockRepo, Logger: nullLogger}
 
+	mockRepo.EXPECT().ReadStock(gomock.Any(), gomock.Any()).Times(1)
 	mockRepo.EXPECT().UpdateStockPrice(context.Background(), &data).Times(1).Return(nil)
 
 	err := s.ChangePriceInStock(context.Background(), data)
