@@ -18,10 +18,14 @@ import (
 
 var nullLogger = logger.Null()
 
+func nullSecure(next http.Handler) http.Handler {
+	return next
+}
+
 func TestHandler_GetStockSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 	service.EXPECT().GetStock(gomock.Any(), gomock.Any()).Times(1).Return(
 		dto.NamedProductDTO{Name: "CASIO G-SHOCK DW-5600E-1V", Article: "1",
 			Price: 7950, Amount: 22,
@@ -39,7 +43,7 @@ func TestHandler_GetStockSuccess(t *testing.T) {
 func TestHandler_GetStockBadArticle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/stock/9.9999", nil)
@@ -53,7 +57,7 @@ func TestHandler_GetStockBadArticle(t *testing.T) {
 func TestHandler_GetStockNoRecord(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 	service.EXPECT().GetStock(gomock.Any(), gomock.Any()).Times(1).Return(
 		dto.NamedProductDTO{}, repository.ErrNoRecord)
 
@@ -69,7 +73,7 @@ func TestHandler_GetStockNoRecord(t *testing.T) {
 func TestHandler_GetAmountInStockSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 	service.EXPECT().GetAmountInStock(gomock.Any(), gomock.Any()).Times(1).Return(
 		uint(15), nil)
 
@@ -85,7 +89,7 @@ func TestHandler_GetAmountInStockSuccess(t *testing.T) {
 func TestHandler_GetAmountInStockIncorrectArticle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/stock/amount/1.0009", nil)
@@ -99,7 +103,7 @@ func TestHandler_GetAmountInStockIncorrectArticle(t *testing.T) {
 func TestHandler_GetAmountInStockNoRecord(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/stock/amount/1", nil)
@@ -116,7 +120,7 @@ func TestHandler_GetAmountInStockNoRecord(t *testing.T) {
 func TestHandler_UpdatePriceInStockSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price/9/1000", nil)
@@ -132,7 +136,7 @@ func TestHandler_UpdatePriceInStockSuccess(t *testing.T) {
 func TestHandler_UpdatePriceInStockIncorrectArticle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price/9.0090/1000", nil)
@@ -146,7 +150,7 @@ func TestHandler_UpdatePriceInStockIncorrectArticle(t *testing.T) {
 func TestHandler_UpdatePriceInStockNegativePrice(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price/9/-1000", nil)
@@ -160,7 +164,7 @@ func TestHandler_UpdatePriceInStockNegativePrice(t *testing.T) {
 func TestHandler_UpdatePriceInStockIncorrectPrice(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price/9/expensive-rich", nil)
@@ -174,7 +178,7 @@ func TestHandler_UpdatePriceInStockIncorrectPrice(t *testing.T) {
 func TestHandler_UpdatePriceInStockTimeout(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price/9/1000", nil)
@@ -192,7 +196,7 @@ func TestHandler_UpdatePriceInStockTimeout(t *testing.T) {
 func TestHandler_UpdateAmountInStockSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount/9/5", nil)
@@ -209,7 +213,7 @@ func TestHandler_UpdateAmountInStockSuccess(t *testing.T) {
 func TestHandler_UpdateAmountInStockIncorrectAmount(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount/9/5five", nil)
@@ -223,7 +227,7 @@ func TestHandler_UpdateAmountInStockIncorrectAmount(t *testing.T) {
 func TestHandler_UpdateAmountInStockIncorrectArticle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount/9.0999/5", nil)
@@ -237,7 +241,7 @@ func TestHandler_UpdateAmountInStockIncorrectArticle(t *testing.T) {
 func TestHandler_UpdateAmountInStockTimeout(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount/9/5", nil)
@@ -254,7 +258,7 @@ func TestHandler_UpdateAmountInStockTimeout(t *testing.T) {
 func TestHandler_AddToStockSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost,
@@ -272,7 +276,7 @@ func TestHandler_AddToStockSuccess(t *testing.T) {
 func TestHandler_AddToStockIncorrectArticle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost,
@@ -287,7 +291,7 @@ func TestHandler_AddToStockIncorrectArticle(t *testing.T) {
 func TestHandler_AddToStockIncorrectPrice(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost,
@@ -302,7 +306,7 @@ func TestHandler_AddToStockIncorrectPrice(t *testing.T) {
 func TestHandler_AddToStockIncorrectAmount(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost,
@@ -317,7 +321,7 @@ func TestHandler_AddToStockIncorrectAmount(t *testing.T) {
 func TestHandler_GetSoldAmountSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9", nil)
@@ -333,7 +337,7 @@ func TestHandler_GetSoldAmountSuccess(t *testing.T) {
 func TestHandler_GetSoldAmountIncorrectArticle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9.9999", nil)
@@ -347,7 +351,7 @@ func TestHandler_GetSoldAmountIncorrectArticle(t *testing.T) {
 func TestHandler_GetSoldAmountTimeout(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9", nil)
@@ -363,7 +367,7 @@ func TestHandler_GetSoldAmountTimeout(t *testing.T) {
 func TestHandler_GetSoldAmountInTimePeriodSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9/2022-01-01/2023-09-28", nil)
@@ -384,7 +388,7 @@ func TestHandler_GetSoldAmountInTimePeriodSuccess(t *testing.T) {
 func TestHandler_GetSoldAmountInTimePeriodIncorrectDateOrder(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9/2024-01-01/2023-09-28", nil)
@@ -398,7 +402,7 @@ func TestHandler_GetSoldAmountInTimePeriodIncorrectDateOrder(t *testing.T) {
 func TestHandler_GetSoldAmountInTimePeriodTimeout(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9/2022-01-01/2023-09-28", nil)
@@ -419,7 +423,7 @@ func TestHandler_GetSoldAmountInTimePeriodTimeout(t *testing.T) {
 func TestHandler_GetSoldAmountInTimePeriodIncorrectFrom(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9/yesterday/2023-09-28", nil)
@@ -433,7 +437,7 @@ func TestHandler_GetSoldAmountInTimePeriodIncorrectFrom(t *testing.T) {
 func TestHandler_GetSoldAmountInTimePeriodIncorrectTo(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9/2023-09-28/light-future", nil)
@@ -447,7 +451,7 @@ func TestHandler_GetSoldAmountInTimePeriodIncorrectTo(t *testing.T) {
 func TestHandler_CancelReservationSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/cancel/9", nil)
@@ -466,7 +470,7 @@ func TestHandler_CancelReservationSuccess(t *testing.T) {
 func TestHandler_CancelReservationIncorrectOrder(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/cancel/nine", nil)
@@ -480,7 +484,7 @@ func TestHandler_CancelReservationIncorrectOrder(t *testing.T) {
 func TestHandler_CancelReservationNegativeOrder(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/cancel/-9", nil)
@@ -494,7 +498,7 @@ func TestHandler_CancelReservationNegativeOrder(t *testing.T) {
 func TestHandler_MakeReservationSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
@@ -516,7 +520,7 @@ func TestHandler_MakeReservationSuccess(t *testing.T) {
 func TestHandler_MakeReservationNoProducts(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
@@ -533,7 +537,7 @@ func TestHandler_MakeReservationNoProducts(t *testing.T) {
 func TestHandler_MakeReservationNoStatus(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
@@ -550,7 +554,7 @@ func TestHandler_MakeReservationNoStatus(t *testing.T) {
 func TestHandler_MakeReservationNoOrder(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
@@ -567,7 +571,7 @@ func TestHandler_MakeReservationNoOrder(t *testing.T) {
 func TestHandler_MakeReservationIncorrectOrderData(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
@@ -584,7 +588,7 @@ func TestHandler_MakeReservationIncorrectOrderData(t *testing.T) {
 func TestHandler_MakeLocalSaleSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
@@ -602,7 +606,7 @@ func TestHandler_MakeLocalSaleSuccess(t *testing.T) {
 func TestHandler_MakeLocalSaleNoProducts(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost, "/api/api_v1/sale/make", nil)
@@ -616,7 +620,7 @@ func TestHandler_MakeLocalSaleNoProducts(t *testing.T) {
 func TestHandler_MakeLocalSaleTimeout(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
@@ -634,7 +638,7 @@ func TestHandler_MakeLocalSaleTimeout(t *testing.T) {
 func TestHandler_MakeLocalSaleErrorData(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
@@ -650,7 +654,7 @@ func TestHandler_MakeLocalSaleErrorData(t *testing.T) {
 func TestHandler_FinishOrderSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish/9", nil)
@@ -666,7 +670,7 @@ func TestHandler_FinishOrderSuccess(t *testing.T) {
 func TestHandler_FinishOrderNegativeOrder(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish/-9", nil)
@@ -680,7 +684,7 @@ func TestHandler_FinishOrderNegativeOrder(t *testing.T) {
 func TestHandler_FinishOrderNotIntOrder(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish/nine", nil)
@@ -694,7 +698,7 @@ func TestHandler_FinishOrderNotIntOrder(t *testing.T) {
 func TestHandler_FinishOrderTimeout(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second))
+	mux := router.New(&config.Config{Env: config.EnvironmentLocal}, New(service, nullLogger, 1*time.Second), nullSecure)
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish/9", nil)
