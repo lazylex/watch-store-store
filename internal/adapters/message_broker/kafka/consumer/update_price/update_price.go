@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/lazylex/watch-store/store/internal/config"
 	"github.com/lazylex/watch-store/store/internal/dto"
 	"github.com/lazylex/watch-store/store/internal/logger"
 	"github.com/lazylex/watch-store/store/internal/ports/service"
@@ -12,8 +13,14 @@ import (
 )
 
 // UpdatePrice обновляет цену товара, находящегося в продаже, если считывает в топике store.update-price новую цену
-func UpdatePrice(service service.Interface, log *slog.Logger, brokers []string) {
-	r := kafka.NewReader(kafka.ReaderConfig{Brokers: brokers, Topic: "store.update-price", Partition: 0, MaxBytes: 10e6})
+func UpdatePrice(service service.Interface, log *slog.Logger, cfg *config.Config) {
+	r := kafka.NewReader(kafka.ReaderConfig{
+		Brokers:   cfg.Brokers,
+		Topic:     "store.update-price",
+		Partition: 0,
+		MaxBytes:  10e6,
+		GroupID:   cfg.Instance,
+	})
 
 	log = log.With(slog.String(logger.OPLabel, "kafka.consumer.UpdatePrice"))
 	for {

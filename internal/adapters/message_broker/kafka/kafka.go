@@ -8,5 +8,5 @@ import (
 )
 
 func Start(service service.Interface, cfg *config.Config, logger *slog.Logger) {
-	go update_price.UpdatePrice(service, logger, cfg.Brokers)
+	go update_price.UpdatePrice(service, logger, cfg)
 }
