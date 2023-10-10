@@ -15,11 +15,10 @@ import (
 // UpdatePrice обновляет цену товара, находящегося в продаже, если считывает в топике store.update-price новую цену
 func UpdatePrice(service service.Interface, log *slog.Logger, cfg *config.Config) {
 	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:   cfg.Brokers,
-		Topic:     "store.update-price",
-		Partition: 0,
-		MaxBytes:  10e6,
-		GroupID:   cfg.Instance,
+		Brokers:  cfg.Brokers,
+		Topic:    "store.update-price",
+		MaxBytes: 10e6,
+		GroupID:  cfg.Instance,
 	})
 
 	log = log.With(slog.String(logger.OPLabel, "kafka.consumer.UpdatePrice"))
