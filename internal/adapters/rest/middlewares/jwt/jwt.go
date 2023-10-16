@@ -78,38 +78,44 @@ func (m *MiddlewareJWT) CheckJWT(next http.Handler) http.Handler {
 			return
 		}
 
-		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			switch r.Method {
-			case http.MethodPost:
-				if claims[crudCreate] != true {
-					rw.WriteHeader(http.StatusForbidden)
-					log.Warn(fmt.Sprintf("trying to crudCreate without permissions. Client: %s", r.RemoteAddr))
-					return
-				}
-			case http.MethodGet:
-				if claims[crudRead] != true {
-					rw.WriteHeader(http.StatusForbidden)
-					log.Warn(fmt.Sprintf("trying to read without permissions. Client: %s", r.RemoteAddr))
-					return
-				}
-			case http.MethodPut:
-				if claims[crudUpdate] != true {
-					rw.WriteHeader(http.StatusForbidden)
-					log.Warn(fmt.Sprintf("trying to update without permissions. Client: %s", r.RemoteAddr))
-					return
-				}
-			case http.MethodDelete:
-				if claims[crudDelete] != true {
-					rw.WriteHeader(http.StatusForbidden)
-					log.Warn(fmt.Sprintf("trying to delete without permissions. Client: %s", r.RemoteAddr))
-					return
-				}
-			}
-
-		} else {
-			log.Error(err.Error())
+		if err = checkPermissions(token, r.Method); err != nil {
+			rw.WriteHeader(http.StatusForbidden)
+			log.Warn(err.Error())
+			return
 		}
 
 		next.ServeHTTP(rw, r)
 	})
+}
+
+// checkPermissions производит проверку на существование в теле токена разрешения на CRUD операцию, соответствующую
+// переданному методу запроса. Разрешения "c", "r", "u", "d" должны иметь значение true, чтобы считаться выданными.
+// При невозможности извлечь из тела токена разрешения или при несоответсвии разрешений переданному методу, возвращается
+// ошибка.
+func checkPermissions(token *jwt.Token, method string) error {
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		switch method {
+		case http.MethodPost:
+			if claims[crudCreate] != true {
+				return errors.New("trying to create without permissions")
+			}
+		case http.MethodGet:
+			if claims[crudRead] != true {
+				return errors.New("trying to read without permissions")
+			}
+		case http.MethodPut:
+			if claims[crudUpdate] != true {
+				return errors.New("trying to update without permissions")
+			}
+		case http.MethodDelete:
+			if claims[crudDelete] != true {
+				return errors.New("trying to delete without permissions")
+			}
+		}
+
+	} else {
+		return errors.New("no claims in token")
+	}
+
+	return nil
 }
