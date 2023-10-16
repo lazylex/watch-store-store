@@ -12,6 +12,10 @@ import (
 const (
 	requestHeaderPrefix = "Bearer "
 	header              = "Authorization"
+	crudCreate          = "c"
+	crudRead            = "r"
+	crudUpdate          = "u"
+	crudDelete          = "d"
 )
 
 var (
@@ -28,8 +32,12 @@ func New(logger *slog.Logger, secret []byte) *MiddlewareJWT {
 	return &MiddlewareJWT{secret: secret, logger: logger}
 }
 
-// CheckJWT проверяет JWT токен в запросе и в случае, если токен не валидный, прекращает дальнейшую обработку запроса
-// сервисом. Ошибка выводится в лог, а отправителю возвращается ответ с кодом 401
+// CheckJWT проверяет JWT токен в запросе. В случае, если токен не валидный, функция прекращает дальнейшую обработку
+// запроса сервисом. Ошибка логгируется, отправителю возвращается ответ с кодом http.StatusUnauthorized. При валидном
+// токене производится проверка на существование в теле токена разрешения на CRUD операцию, соответствующую http-методу
+// запроса. Разрешения "c", "r", "u", "d" должны иметь значение true, чтобы считаться выданными. При несоответствии или
+// отсутствии разрешения, прекращается обработка запроса, ошибка выводится в лог, а отправителю возвращается ошибка
+// http.StatusForbidden.
 func (m *MiddlewareJWT) CheckJWT(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		var notParsedToken string
@@ -68,6 +76,38 @@ func (m *MiddlewareJWT) CheckJWT(next http.Handler) http.Handler {
 
 			rw.WriteHeader(http.StatusUnauthorized)
 			return
+		}
+
+		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			switch r.Method {
+			case http.MethodPost:
+				if claims[crudCreate] != true {
+					rw.WriteHeader(http.StatusForbidden)
+					log.Warn(fmt.Sprintf("trying to crudCreate without permissions. Client: %s", r.RemoteAddr))
+					return
+				}
+			case http.MethodGet:
+				if claims[crudRead] != true {
+					rw.WriteHeader(http.StatusForbidden)
+					log.Warn(fmt.Sprintf("trying to read without permissions. Client: %s", r.RemoteAddr))
+					return
+				}
+			case http.MethodPut:
+				if claims[crudUpdate] != true {
+					rw.WriteHeader(http.StatusForbidden)
+					log.Warn(fmt.Sprintf("trying to update without permissions. Client: %s", r.RemoteAddr))
+					return
+				}
+			case http.MethodDelete:
+				if claims[crudDelete] != true {
+					rw.WriteHeader(http.StatusForbidden)
+					log.Warn(fmt.Sprintf("trying to delete without permissions. Client: %s", r.RemoteAddr))
+					return
+				}
+			}
+
+		} else {
+			log.Error(err.Error())
 		}
 
 		next.ServeHTTP(rw, r)
