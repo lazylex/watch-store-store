@@ -47,7 +47,8 @@ type Storage struct {
 }
 
 type Kafka struct {
-	Brokers []string `yaml:"kafka_brokers" env:"KAFKA_BROKERS"`
+	Brokers          []string `yaml:"kafka_brokers" env:"KAFKA_BROKERS"`
+	UpdatePriceTopic string   `yaml:"kafka_topic_update_price" env:"KAFKA_TOPIC_UPDATE_PRICE"`
 }
 
 // MustLoad возвращает конфигурацию, считанную из файла, путь к которому передан как аргумент функции или содержится в

@@ -19,3 +19,4 @@ secure:
   secure_server: "localhost:8095"
 kafka:
   kafka_brokers: ["localhost:9092"]
+  kafka_topic_update_price: "store.update-price"

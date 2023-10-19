@@ -29,7 +29,7 @@ func UpdatePrice(service service.Interface, log *slog.Logger, cfg *config.Config
 
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:  cfg.Brokers,
-		Topic:    "store.update-price",
+		Topic:    cfg.UpdatePriceTopic,
 		MaxBytes: 10e6,
 		GroupID:  cfg.Instance,
 	})
