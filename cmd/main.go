@@ -49,13 +49,15 @@ func main() {
 		}
 	}()
 
-	if cfg.UseKafka {
-		if len(cfg.Brokers) > 0 {
-			kafka.Start(domainService, cfg, log)
-		} else {
-			log.Error("empty kafka brokers list")
+	go func() {
+		if cfg.UseKafka {
+			if len(cfg.Brokers) > 0 {
+				kafka.Start(domainService, cfg, log)
+			} else {
+				log.Error("empty kafka brokers list")
+			}
 		}
-	}
+	}()
 
 	defer func(Repository repository.Interface) {
 		err := Repository.Close()
