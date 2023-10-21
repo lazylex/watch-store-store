@@ -83,7 +83,7 @@ func UpdatePrice(service service.Interface, log *slog.Logger, cfg *config.Config
 		}
 	}
 
-	if err := r.Close(); err != nil {
+	if err = r.Close(); err != nil {
 		log.Error("failed to close reader:", err)
 	}
 }
