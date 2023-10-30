@@ -2,25 +2,13 @@ package router
 
 import (
 	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
-	"github.com/lazylex/watch-store/store/internal/config"
 	"github.com/lazylex/watch-store/store/internal/ports/rest/handlers"
-	"net/http"
 )
 
 const apiV1 = "/api/api_v1/"
 
-// New возвращает роутер *chi.Mux для REST запросов
-func New(cfg *config.Config, handlers handlers.Interface, secureMiddleware func(n http.Handler) http.Handler) *chi.Mux {
-	router := chi.NewRouter()
-	router.Use(middleware.Recoverer, middleware.RequestID)
-
-	if cfg.Env == config.EnvironmentLocal {
-		router.Use(middleware.Logger)
-	} else {
-		router.Use(secureMiddleware)
-	}
-
+// AddHandlers возвращает роутер *chi.Mux с добавленными хендлерами REST запросов
+func AddHandlers(router *chi.Mux, handlers handlers.Interface) *chi.Mux {
 	router.Get(apiV1+"stock/{article}", handlers.GetStockRecord)
 	router.Get(apiV1+"stock/amount/{article}", handlers.GetAmountInStock)
 	router.Put(apiV1+"stock/amount/{article}/{amount}", handlers.UpdateAmountInStock)

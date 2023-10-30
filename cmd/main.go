@@ -5,6 +5,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/lazylex/watch-store/store/internal/adapters/message_broker/kafka"
 	restHandles "github.com/lazylex/watch-store/store/internal/adapters/rest/handlers"
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/middlewares/jwt"
@@ -33,11 +35,18 @@ func main() {
 		service.WithLogger(log),
 		service.WithMetrics(metrics),
 	)
-	handlers := restHandles.New(domainService, log, cfg.QueryTimeout)
-	secureMiddleware := jwt.New(log, []byte(cfg.Signature)).CheckJWT
+
+	mux := chi.NewRouter()
+	mux.Use(middleware.Recoverer, middleware.RequestID)
+
+	if cfg.Env == config.EnvironmentLocal {
+		mux.Use(middleware.Logger)
+	} else {
+		mux.Use(jwt.New(log, []byte(cfg.Signature)).CheckJWT)
+	}
 
 	srv := &http.Server{
-		Handler:      router.New(cfg, handlers, secureMiddleware),
+		Handler:      router.AddHandlers(mux, restHandles.New(domainService, log, cfg.QueryTimeout)),
 		Addr:         cfg.Address,
 		ReadTimeout:  cfg.ReadTimeout,
 		WriteTimeout: cfg.WriteTimeout,
