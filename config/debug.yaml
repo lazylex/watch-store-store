@@ -20,3 +20,6 @@ secure:
 kafka:
   kafka_brokers: ["localhost:9092"]
   kafka_topic_update_price: "store.update-price"
+prometheus:
+  prometheus_port: "9099"
+  prometheus_metrics_url: "/metrics"

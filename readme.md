@@ -9,9 +9,11 @@
 ![Notepad++](https://img.shields.io/badge/Notepad++-90E59A.svg?style=for-the-badge&logo=notepad%2b%2b&logoColor=black)
 ![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-000?style=for-the-badge&logo=apachekafka)
 ![Obsidian](https://img.shields.io/badge/Obsidian-%23483699.svg?style=for-the-badge&logo=obsidian&logoColor=white)
+![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white)
 ![Markdown](https://img.shields.io/badge/markdown-%23000000.svg?style=for-the-badge&logo=markdown&logoColor=white)
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
+![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white)
 
 #### Содержание  
 [1. Описание проекта](#описание)
@@ -99,6 +101,12 @@ kafka:
   kafka_brokers: ["localhost:9092"]
   # название топика с обновлениями цены
   kafka_topic_update_price: "store.update-price"
+# раздел настройки Prometheus 
+prometheus:
+  # на каком порту собирать метрики. Если не задан, то по умолчанию порт 9323
+  prometheus_port: "9099"
+  # url для сбора метрик Prometheus. Если не задан, то по умолчанию используется /metrics 
+  prometheus_metrics_url: "/metrics"
 ```
 Есть возможность переопределять значения из конфигурационных файлов переменными окружения. Соответствие опций из конфигурационного файла переменным окружения представлено в таблице ниже:
 
@@ -121,6 +129,8 @@ kafka:
 | query_timeout                 | QUERY_TIMEOUT                 |
 | kafka_brokers                 | KAFKA_BROKERS                 |
 | kafka_topic_update_price      | KAFKA_TOPIC_UPDATE_PRICE      |
+| prometheus_port               | PROMETHEUS_PORT               |
+| prometheus_metrics_url        | PROMETHEUS_METRICS_URL        |
 
 Путь к файлу конфигурации можно указывать по ключу *config* при запуске приложения или в переменной окружения *STORE_CONFIG_PATH*. При отсутствии конфигурации приложение завершится с ошибкой.
 

@@ -9,6 +9,7 @@ import (
 	"github.com/lazylex/watch-store/store/internal/helpers/constants/prefixes"
 	"github.com/lazylex/watch-store/store/internal/helpers/constants/various"
 	"github.com/lazylex/watch-store/store/internal/logger"
+	"github.com/lazylex/watch-store/store/internal/metrics"
 	"github.com/lazylex/watch-store/store/internal/ports/repository"
 	"github.com/lazylex/watch-store/store/internal/ports/service"
 	standartLog "log"
@@ -19,6 +20,7 @@ import (
 type Service struct {
 	Repository repository.Interface
 	Logger     *slog.Logger
+	Metrics    *metrics.Metrics
 }
 
 type Option func(*Service)
@@ -31,10 +33,17 @@ func WithLogger(logger *slog.Logger) Option {
 	}
 }
 
+// WithMetrics служит для внедрения в сервис уже инициализированных метрик для Prometheus
+func WithMetrics(metrics *metrics.Metrics) Option {
+	return func(s *Service) {
+		s.Metrics = metrics
+	}
+}
+
 // New создаёт сервис. В качестве параметров передаются функции, инициализирующие в сервисе репозиторий с интерфейсом
 // repository.Interface и логгер *slog.Logger
 func New(options ...Option) *Service {
-	requiredOptions, initializedOptions := 2, 0
+	requiredOptions, initializedOptions := 3, 0
 
 	s := &Service{}
 	for _, opt := range options {

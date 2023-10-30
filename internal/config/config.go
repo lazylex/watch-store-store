@@ -21,6 +21,7 @@ type Config struct {
 	Storage    `yaml:"storage"`
 	Secure     `yaml:"secure"`
 	Kafka      `yaml:"kafka"`
+	Prometheus `yaml:"prometheus"`
 }
 
 type Secure struct {
@@ -49,6 +50,11 @@ type Storage struct {
 type Kafka struct {
 	Brokers          []string `yaml:"kafka_brokers" env:"KAFKA_BROKERS"`
 	UpdatePriceTopic string   `yaml:"kafka_topic_update_price" env:"KAFKA_TOPIC_UPDATE_PRICE"`
+}
+
+type Prometheus struct {
+	PrometheusPort       string `yaml:"prometheus_port" env:"PROMETHEUS_PORT"`
+	PrometheusMetricsURL string `yaml:"prometheus_metrics_url" env:"PROMETHEUS_METRICS_URL"`
 }
 
 // MustLoad возвращает конфигурацию, считанную из файла, путь к которому передан как аргумент функции или содержится в

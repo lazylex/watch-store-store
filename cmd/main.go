@@ -11,6 +11,7 @@ import (
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/router"
 	"github.com/lazylex/watch-store/store/internal/config"
 	"github.com/lazylex/watch-store/store/internal/logger"
+	prometheusMetrics "github.com/lazylex/watch-store/store/internal/metrics"
 	"github.com/lazylex/watch-store/store/internal/ports/repository"
 	"github.com/lazylex/watch-store/store/internal/repository/mysql"
 	"github.com/lazylex/watch-store/store/internal/service"
@@ -25,9 +26,12 @@ func main() {
 	flag.Parse()
 	cfg := config.MustLoad(configPath)
 	log := logger.MustCreate(cfg.Env, cfg.Instance)
+	metrics := prometheusMetrics.MustCreate(cfg, log)
+
 	domainService := service.New(
 		mysql.WithRepository(cfg, log),
 		service.WithLogger(log),
+		service.WithMetrics(metrics),
 	)
 	handlers := restHandles.New(domainService, log, cfg.QueryTimeout)
 	secureMiddleware := jwt.New(log, []byte(cfg.Signature)).CheckJWT
