@@ -10,6 +10,7 @@ import (
 	"github.com/lazylex/watch-store/store/internal/adapters/message_broker/kafka"
 	restHandles "github.com/lazylex/watch-store/store/internal/adapters/rest/handlers"
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/middlewares/jwt"
+	requestMetrics "github.com/lazylex/watch-store/store/internal/adapters/rest/middlewares/request_metrics"
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/router"
 	"github.com/lazylex/watch-store/store/internal/config"
 	"github.com/lazylex/watch-store/store/internal/logger"
@@ -37,7 +38,7 @@ func main() {
 	)
 
 	mux := chi.NewRouter()
-	mux.Use(middleware.Recoverer, middleware.RequestID)
+	mux.Use(middleware.Recoverer, middleware.RequestID, requestMetrics.New(metrics).RequestsInc)
 
 	if cfg.Env == config.EnvironmentLocal {
 		mux.Use(middleware.Logger)
