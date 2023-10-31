@@ -74,7 +74,7 @@ func startHTTP(url, port string, log *slog.Logger) {
 		mux := http.NewServeMux()
 
 		mux.Handle(url, promhttp.Handler())
-		log.Info(fmt.Sprintf("%s:%s ready for prometheus", url, port))
+		log.Info(fmt.Sprintf(":%s%s ready for prometheus", port, url))
 		err := http.ListenAndServe(":"+port, mux)
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Error("can't start http server for prometheus")
