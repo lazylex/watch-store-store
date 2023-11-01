@@ -136,7 +136,10 @@ func (h *Handler) UpdatePriceInStock(w http.ResponseWriter, r *http.Request) {
 		transferObject.Price, transferObject.Article))
 }
 
-// UpdateAmountInStock обновляет количество единиц товара. В пути запроса передаются новое количество и артикул товара
+// UpdateAmountInStock обновляет количество единиц товара. В теле запроса передается передаются новое количество и
+// артикул товара в формате JSON. Пример передаваемых данных:
+//
+// {"article":"3", "amount":6759}
 func (h *Handler) UpdateAmountInStock(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var transferObject dto.ArticleWithAmountDTO
@@ -169,25 +172,18 @@ func (h *Handler) UpdateAmountInStock(w http.ResponseWriter, r *http.Request) {
 // название товара
 func (h *Handler) AddToStock(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var name string
-	var amount uint
-	var price float64
-	var art article.Article
+	var transferObject dto.NamedProductDTO
 	log := logger.AddPlaceAndRequestId(h.logger, "rest.handlers.CreateStock", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	art = request.GetArticleUsingChi(r)
-	if amount, err = request.GetAmountUsingChi(w, r, log); err != nil {
+	err = json.NewDecoder(r.Body).Decode(&transferObject)
+	if err != nil {
+		response.WriteHeaderAndLogAboutBadRequest(w, log, err)
 		return
 	}
-	if price, err = request.GetPriceUsingChi(w, r, log); err != nil {
-		return
-	}
-	name = request.GetNameUsingChi(r)
 
-	transferObject := dto.NamedProductDTO{Name: name, Article: art, Amount: amount, Price: price}
 	err = transferObject.Validate()
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
 		return
@@ -197,7 +193,7 @@ func (h *Handler) AddToStock(w http.ResponseWriter, r *http.Request) {
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err == nil {
 		w.WriteHeader(http.StatusCreated)
 		log.Info(fmt.Sprintf("add product to stock with article %v, amount %d, price %.2f, name %s",
-			art, amount, price, name))
+			transferObject.Article, transferObject.Amount, transferObject.Price, transferObject.Name))
 	}
 }
 

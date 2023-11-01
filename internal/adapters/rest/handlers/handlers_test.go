@@ -268,8 +268,10 @@ func TestHandler_AddToStockSuccess(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPost,
-		"/api/api_v1/stock/add/9/5/1000/test", nil)
+	request := httptest.NewRequest(
+		http.MethodPost,
+		"/api/api_v1/stock/add",
+		strings.NewReader("{\"Article\": \"9\", \"Amount\": 5, \"Price\":1000, \"Name\":\"test\"}"))
 
 	service.EXPECT().AddProductToStock(
 		gomock.Any(), dto.NamedProductDTO{Article: "9", Amount: 5, Price: 1000, Name: "test"}).Times(1).Return(nil)
@@ -288,7 +290,8 @@ func TestHandler_AddToStockIncorrectArticle(t *testing.T) {
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost,
-		"/api/api_v1/stock/add/9.9999/5/1000/test", nil)
+		"/api/api_v1/stock/add",
+		strings.NewReader("{\"Article\": \"9.9999\", \"Amount\": 5, \"Price\":1000, \"Name\":\"test\"}"))
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {
@@ -304,7 +307,8 @@ func TestHandler_AddToStockIncorrectPrice(t *testing.T) {
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost,
-		"/api/api_v1/stock/add/9/5/too-many/test", nil)
+		"/api/api_v1/stock/add",
+		strings.NewReader("{\"Article\": \"9\", \"Amount\": 5, \"Price\":\"too-many\", \"Name\":\"test\"}"))
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {
@@ -320,7 +324,8 @@ func TestHandler_AddToStockIncorrectAmount(t *testing.T) {
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost,
-		"/api/api_v1/stock/add/9/five/1000/test", nil)
+		"/api/api_v1/stock/add",
+		strings.NewReader("{\"Article\": \"9\", \"Amount\": \"five\", \"Price\":1000, \"Name\":\"test\"}"))
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {
