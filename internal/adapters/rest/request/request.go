@@ -8,12 +8,10 @@ import (
 	"github.com/lazylex/watch-store/store/internal/domain/value_objects/article"
 	"github.com/lazylex/watch-store/store/internal/dto"
 	"github.com/lazylex/watch-store/store/internal/helpers/constants/prefixes"
-	"github.com/lazylex/watch-store/store/internal/helpers/constants/various"
 	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 )
 
 const (
@@ -39,6 +37,7 @@ var ErrIncorrectPrice = requestErr("wrong price sent")
 var ErrIncorrectDate = requestErr("invalid date passed")
 var ErrIncorrectReservationStatus = requestErr("invalid order status passed")
 var ErrEmptyProductsData = requestErr("product data not sent")
+var ErrEmptyFromDate = requestErr("no 'from' date in request")
 
 // GetArticleUsingChi возвращает артукул продукта
 func GetArticleUsingChi(r *http.Request) article.Article {
@@ -103,28 +102,6 @@ func GetOrderFromURLQuery(w http.ResponseWriter, r *http.Request, logger *slog.L
 		response.WriteHeaderAndLogAboutBadRequest(w, logger, ErrIncorrectOrder)
 	}
 	return reservation.OrderNumber(order), err
-}
-
-// GetFromUsingChi возвращает начальную дату периода, если она есть в запросе. При отсутствии даты в заголовок ответа
-// записывается http.StatusBadRequest, и возвращается ошибка ErrIncorrectDate, которая так же записывается в лог
-func GetFromUsingChi(w http.ResponseWriter, r *http.Request, logger *slog.Logger) (time.Time, error) {
-	result, err := time.Parse(various.DateLayout, chi.URLParam(r, From))
-	if err != nil {
-		response.WriteHeaderAndLogAboutBadRequest(w, logger, ErrIncorrectDate)
-	}
-
-	return result, err
-}
-
-// GetToUsingChi возвращает конечную дату периода, если она есть в запросе. При отсутствии даты в заголовок ответа
-// записывается http.StatusBadRequest, и возвращается ошибка ErrIncorrectDate, которая так же записывается в лог
-func GetToUsingChi(w http.ResponseWriter, r *http.Request, logger *slog.Logger) (time.Time, error) {
-	result, err := time.Parse(various.DateLayout, chi.URLParam(r, To))
-	if err != nil {
-		response.WriteHeaderAndLogAboutBadRequest(w, logger, ErrIncorrectDate)
-	}
-
-	return result, err
 }
 
 // GetProductDTOs возращает []dto.ProductDTO, полученный из аргументов запроса, содержащего данные о продукте в таком

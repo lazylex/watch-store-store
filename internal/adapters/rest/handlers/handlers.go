@@ -11,6 +11,7 @@ import (
 	"github.com/lazylex/watch-store/store/internal/domain/aggregates/reservation"
 	"github.com/lazylex/watch-store/store/internal/domain/value_objects/article"
 	"github.com/lazylex/watch-store/store/internal/dto"
+	"github.com/lazylex/watch-store/store/internal/helpers/constants/various"
 	"github.com/lazylex/watch-store/store/internal/logger"
 	"github.com/lazylex/watch-store/store/internal/ports/service"
 	"log/slog"
@@ -200,7 +201,10 @@ func (h *Handler) AddToStock(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetSoldAmount возвращает общее количество проданного товара. В пути запроса передается артикул.
+// GetSoldAmount возвращает общее количество проданного товара. В пути запроса передается артикул. Параметрами запроса
+// опционально передаются даты from и to для указания времено́го диапазона. Если передать только параметр from, то в
+// качестве параметра to будет текущая дата (определяется временем на сервере, где запущено приложение, а не БД). Если
+// передан только параметр to, то возвращается ответ http.StatusBadRequest
 // Пример возвращаемого значения:
 // {
 // "amount": 13
@@ -215,58 +219,52 @@ func (h *Handler) GetSoldAmount(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	art = request.GetArticleUsingChi(r)
+	fromParam := r.URL.Query().Get(request.From)
+	toParam := r.URL.Query().Get(request.To)
 
-	transferObject := dto.ArticleDTO{Article: art}
-	err = transferObject.Validate()
+	if len(fromParam) == 0 && len(toParam) == 0 {
+		transferObject := dto.ArticleDTO{Article: art}
+		err = transferObject.Validate()
+		if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
+			return
+		}
+
+		amount, err = h.service.TotalSold(injectRequestIDToCtx(ctx, r), transferObject)
+
+	} else if len(fromParam) == 0 {
+		response.WriteHeaderAndLogAboutBadRequest(w, log, request.ErrEmptyFromDate)
+		return
+	} else {
+		var from, to time.Time
+
+		if len(toParam) == 0 {
+			to = time.Now()
+		} else {
+			if to, err = time.Parse(various.DateLayout, toParam); err != nil {
+				response.WriteHeaderAndLogAboutBadRequest(w, log, request.ErrIncorrectDate)
+				return
+			}
+		}
+
+		if from, err = time.Parse(various.DateLayout, fromParam); err != nil {
+			response.WriteHeaderAndLogAboutBadRequest(w, log, request.ErrIncorrectDate)
+			return
+		}
+
+		transferObject := dto.ArticleWithPeriodDTO{Article: art, From: from, To: to}
+		err = transferObject.Validate()
+		if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
+			return
+		}
+
+		amount, err = h.service.TotalSoldInPeriod(injectRequestIDToCtx(ctx, r), transferObject)
+	}
+
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
 		return
 	}
 
-	amount, err = h.service.TotalSold(injectRequestIDToCtx(ctx, r), transferObject)
-	if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
-		return
-	}
-
-	log.Info(fmt.Sprintf("requested total amount of sold with article %s", art))
-
-	render.JSON(w, r, map[string]uint{request.Amount: amount})
-}
-
-// GetSoldAmountInTimePeriod возвращает общее количество проданного товара за период времени. В пути запроса передается
-// артикул. Пример возвращаемого значения:
-// {
-// "amount": 13
-// }
-func (h *Handler) GetSoldAmountInTimePeriod(w http.ResponseWriter, r *http.Request) {
-	var err error
-	var amount uint
-	var from, to time.Time
-	var art article.Article
-	log := logger.AddPlaceAndRequestId(h.logger, "rest.handlers.GetSoldAmountInTimePeriod", r)
-
-	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
-	defer cancel()
-
-	art = request.GetArticleUsingChi(r)
-	if from, err = request.GetFromUsingChi(w, r, log); err != nil {
-		return
-	}
-	if to, err = request.GetToUsingChi(w, r, log); err != nil {
-		return
-	}
-
-	transferObject := dto.ArticleWithPeriodDTO{Article: art, From: from, To: to}
-	err = transferObject.Validate()
-	if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
-		return
-	}
-
-	amount, err = h.service.TotalSoldInPeriod(injectRequestIDToCtx(ctx, r), transferObject)
-	if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
-		return
-	}
-
-	log.Info(fmt.Sprintf("requested total amount of sold with article %s in time period", art))
+	log.Info(fmt.Sprintf("requested amount of sold with article %s", art))
 
 	render.JSON(w, r, map[string]uint{request.Amount: amount})
 }

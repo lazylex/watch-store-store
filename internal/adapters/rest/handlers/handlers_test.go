@@ -384,7 +384,7 @@ func TestHandler_GetSoldAmountInTimePeriodSuccess(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9/2022-01-01/2023-09-28", nil)
+	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9?from=2022-01-01&to=2023-09-28", nil)
 
 	service.EXPECT().TotalSoldInPeriod(
 		gomock.Any(),
@@ -406,7 +406,7 @@ func TestHandler_GetSoldAmountInTimePeriodIncorrectDateOrder(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9/2024-01-01/2023-09-28", nil)
+	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9?from=2024-01-01&to=2023-09-28", nil)
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {
@@ -421,7 +421,7 @@ func TestHandler_GetSoldAmountInTimePeriodTimeout(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9/2022-01-01/2023-09-28", nil)
+	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9?from=2022-01-01&to=2023-09-28", nil)
 
 	service.EXPECT().TotalSoldInPeriod(
 		gomock.Any(),
@@ -443,7 +443,7 @@ func TestHandler_GetSoldAmountInTimePeriodIncorrectFrom(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9/yesterday/2023-09-28", nil)
+	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9?from=yesterday&to=2023-09-28", nil)
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {
@@ -458,10 +458,41 @@ func TestHandler_GetSoldAmountInTimePeriodIncorrectTo(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9/2023-09-28/light-future", nil)
+	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9?from=2023-09-28&to=light-future", nil)
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_GetSoldAmountWithoutFrom(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mux := chi.NewRouter()
+	service := mockService.NewMockInterface(ctrl)
+	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9?to=2022-01-01", nil)
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_GetSoldAmountWithoutTo(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mux := chi.NewRouter()
+	service := mockService.NewMockInterface(ctrl)
+	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9?from=2022-01-01", nil)
+
+	service.EXPECT().TotalSoldInPeriod(gomock.Any(), gomock.Any()).Times(1).Return(uint(13), nil)
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
 		t.Fail()
 	}
 }
