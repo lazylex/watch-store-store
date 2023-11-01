@@ -168,8 +168,10 @@ func (h *Handler) UpdateAmountInStock(w http.ResponseWriter, r *http.Request) {
 		transferObject.Amount, transferObject.Article))
 }
 
-// AddToStock добавляет новую запись о доступном товаре. В пути запроса передатся артикул, количество, цена и
-// название товара
+// AddToStock добавляет новую запись о доступном товаре. В теле запроса передается передаются новое количество, артикул,
+// цена и название товара в формате JSON. Пример передаваемых данных:
+//
+// {"article":"3", "amount":6759, "price": 16000, "name": "plum-bus"}
 func (h *Handler) AddToStock(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var transferObject dto.NamedProductDTO
