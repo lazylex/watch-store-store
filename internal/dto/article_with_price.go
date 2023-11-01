@@ -7,7 +7,7 @@ import (
 
 type ArticleWithPriceDTO struct {
 	Article article.Article `json:"article"`
-	Price   float64         `json:"Price"`
+	Price   float64         `json:"price"`
 }
 
 // Validate валидация корректности сохраненных в DTO данных
