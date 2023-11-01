@@ -16,12 +16,10 @@ import (
 
 const (
 	Article     = "article"
-	Price       = "price"
 	Products    = "products[]"
 	Amount      = "amount"
 	OrderNumber = "order_number"
 	Status      = "status"
-	Name        = "name"
 	From        = "from"
 	To          = "to"
 )
@@ -32,8 +30,6 @@ func requestErr(text string) error {
 }
 
 var ErrIncorrectOrder = requestErr("invalid order number passed")
-var ErrIncorrectAmount = requestErr("wrong amount sent")
-var ErrIncorrectPrice = requestErr("wrong price sent")
 var ErrIncorrectDate = requestErr("invalid date passed")
 var ErrIncorrectReservationStatus = requestErr("invalid order status passed")
 var ErrEmptyProductsData = requestErr("product data not sent")
@@ -42,34 +38,6 @@ var ErrEmptyFromDate = requestErr("no 'from' date in request")
 // GetArticleUsingChi возвращает артукул продукта
 func GetArticleUsingChi(r *http.Request) article.Article {
 	return article.Article(chi.URLParam(r, Article))
-}
-
-// GetNameUsingChi возвращает название продукта
-func GetNameUsingChi(r *http.Request) string {
-	return chi.URLParam(r, Name)
-}
-
-// GetPriceUsingChi возвращает цену продукта, если она есть в запросе. При отсутствии цены или цене, меньшей или равной
-// нулю, в заголовок ответа записывается http.StatusBadRequest, и возвращается ошибка ErrIncorrectPrice, которая так же
-// записывается в лог
-func GetPriceUsingChi(w http.ResponseWriter, r *http.Request, logger *slog.Logger) (float64, error) {
-	price, err := strconv.ParseFloat(chi.URLParam(r, Price), 64)
-	if err != nil || price <= 0 {
-		response.WriteHeaderAndLogAboutBadRequest(w, logger, ErrIncorrectPrice)
-	}
-
-	return price, err
-}
-
-// GetAmountUsingChi возвращает количество товара, если оно есть в запросе. При отсутствии количества в заголовок ответа
-// записывается http.StatusBadRequest, и возвращается ошибка ErrIncorrectAmount, которая так же записывается в лог
-func GetAmountUsingChi(w http.ResponseWriter, r *http.Request, logger *slog.Logger) (uint, error) {
-	parseUint, err := strconv.ParseUint(chi.URLParam(r, Amount), 10, 64)
-	if err != nil {
-		response.WriteHeaderAndLogAboutBadRequest(w, logger, ErrIncorrectAmount)
-	}
-
-	return uint(parseUint), err
 }
 
 // GetStatusFromURLQuery возвращает статус заказа, если он есть в запросе. При отсутствии статуса в заголовок ответа
