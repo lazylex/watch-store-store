@@ -202,7 +202,7 @@ func TestHandler_UpdateAmountInStockSuccess(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount/9/5", nil)
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount", strings.NewReader("{\"Article\": \"9\", \"Amount\": 5}"))
 
 	service.EXPECT().ChangeAmountInStock(
 		gomock.Any(), dto.ArticleWithAmountDTO{Article: "9", Amount: uint(5)}).Times(1).Return(nil)
@@ -220,7 +220,7 @@ func TestHandler_UpdateAmountInStockIncorrectAmount(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount/9/5five", nil)
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount", strings.NewReader("{\"Article\": \"9\", \"Amount\": \"five\"}"))
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {
@@ -235,7 +235,7 @@ func TestHandler_UpdateAmountInStockIncorrectArticle(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount/9.0999/5", nil)
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount", strings.NewReader("{\"Article\": \"9.0999\", \"Amount\": 5}"))
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {
@@ -250,7 +250,7 @@ func TestHandler_UpdateAmountInStockTimeout(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount/9/5", nil)
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount", strings.NewReader("{\"Article\": \"9\", \"Amount\": 5}"))
 
 	service.EXPECT().ChangeAmountInStock(
 		gomock.Any(), dto.ArticleWithAmountDTO{Article: "9", Amount: uint(5)}).Times(1).Return(repository.ErrTimeout)

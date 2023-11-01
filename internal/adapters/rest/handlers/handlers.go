@@ -138,19 +138,18 @@ func (h *Handler) UpdatePriceInStock(w http.ResponseWriter, r *http.Request) {
 // UpdateAmountInStock обновляет количество единиц товара. В пути запроса передаются новое количество и артикул товара
 func (h *Handler) UpdateAmountInStock(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var amount uint
-	var art article.Article
+	var transferObject dto.ArticleWithAmountDTO
 	log := logger.AddPlaceAndRequestId(h.logger, "rest.handlers.UpdateAmountInStock", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	art = request.GetArticleUsingChi(r)
-	if amount, err = request.GetAmountUsingChi(w, r, log); err != nil {
+	err = json.NewDecoder(r.Body).Decode(&transferObject)
+	if err != nil {
+		response.WriteHeaderAndLogAboutBadRequest(w, log, err)
 		return
 	}
 
-	transferObject := dto.ArticleWithAmountDTO{Article: art, Amount: amount}
 	err = transferObject.Validate()
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
 		return
@@ -161,7 +160,8 @@ func (h *Handler) UpdateAmountInStock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info(fmt.Sprintf("amount udpaded to %d in stock record with article %v", amount, art))
+	log.Info(fmt.Sprintf("amount udpaded to %d in stock record with article %v",
+		transferObject.Amount, transferObject.Article))
 }
 
 // AddToStock добавляет новую запись о доступном товаре. В пути запроса передатся артикул, количество, цена и

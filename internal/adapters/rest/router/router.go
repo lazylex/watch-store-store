@@ -11,7 +11,7 @@ const apiV1 = "/api/api_v1/"
 func AddHandlers(router *chi.Mux, handlers handlers.Interface) *chi.Mux {
 	router.Get(apiV1+"stock/{article}", handlers.GetStockRecord)
 	router.Get(apiV1+"stock/amount/{article}", handlers.GetAmountInStock)
-	router.Put(apiV1+"stock/amount/{article}/{amount}", handlers.UpdateAmountInStock)
+	router.Put(apiV1+"stock/amount", handlers.UpdateAmountInStock)
 	router.Put(apiV1+"stock/price", handlers.UpdatePriceInStock)
 	router.Post(apiV1+"stock/add/{article}/{amount}/{price}/{name}", handlers.AddToStock)
 
