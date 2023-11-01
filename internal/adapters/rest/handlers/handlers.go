@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
@@ -101,7 +102,10 @@ func (h *Handler) GetAmountInStock(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, map[string]uint{request.Amount: amount})
 }
 
-// UpdatePriceInStock обновляет цену для товара. В пути запроса передается новая цена и артикул товара
+// UpdatePriceInStock обновляет цену для товара. В теле запроса передается новая цена и артикул товара в формате JSON
+// Пример передаваемых данных:
+//
+// {"article":"3", "price":6759}
 func (h *Handler) UpdatePriceInStock(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var art article.Article
@@ -111,12 +115,14 @@ func (h *Handler) UpdatePriceInStock(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	art = request.GetArticleUsingChi(r)
-	if price, err = request.GetPriceUsingChi(w, r, log); err != nil {
+	var transferObject dto.ArticleWithPriceDTO
+
+	err = json.NewDecoder(r.Body).Decode(&transferObject)
+	if err != nil {
+		response.WriteHeaderAndLogAboutBadRequest(w, log, err)
 		return
 	}
 
-	transferObject := dto.ArticleWithPriceDTO{Article: art, Price: price}
 	err = transferObject.Validate()
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
 		return

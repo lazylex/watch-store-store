@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/golang/mock/gomock"
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/router"
@@ -118,12 +117,11 @@ func TestHandler_GetAmountInStockNoRecord(t *testing.T) {
 
 func TestHandler_UpdatePriceInStockSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	mux := router.AddHandlers(chi.NewRouter(), New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price/9/1000", nil)
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price", strings.NewReader("{\"Article\": \"9\", \"Price\": 1000}"))
 
 	service.EXPECT().ChangePriceInStock(gomock.Any(), dto.ArticleWithPriceDTO{Article: "9", Price: 1000})
 
@@ -140,7 +138,7 @@ func TestHandler_UpdatePriceInStockIncorrectArticle(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price/9.0090/1000", nil)
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price", strings.NewReader("{\"Article\": \"9.0090\", \"Price\": 1000}"))
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {
@@ -155,7 +153,7 @@ func TestHandler_UpdatePriceInStockNegativePrice(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price/9/-1000", nil)
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price", strings.NewReader("{\"Article\": \"9\", \"Price\": -1000}"))
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {
@@ -170,7 +168,7 @@ func TestHandler_UpdatePriceInStockIncorrectPrice(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price/9/expensive-rich", nil)
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price", strings.NewReader("{\"Article\": \"9\", \"Price\": \"Expensive\"}"))
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {
@@ -185,13 +183,13 @@ func TestHandler_UpdatePriceInStockTimeout(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price/9/1000", nil)
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price", strings.NewReader("{\"Article\": \"9\", \"Price\": 1000}"))
 
 	service.EXPECT().ChangePriceInStock(gomock.Any(),
 		dto.ArticleWithPriceDTO{Article: "9", Price: 1000}).Times(1).Return(repository.ErrTimeout)
 
 	mux.ServeHTTP(response, request)
-	fmt.Println(response.Code)
+
 	if response.Code != http.StatusRequestTimeout {
 		t.Fail()
 	}

@@ -12,7 +12,7 @@ func AddHandlers(router *chi.Mux, handlers handlers.Interface) *chi.Mux {
 	router.Get(apiV1+"stock/{article}", handlers.GetStockRecord)
 	router.Get(apiV1+"stock/amount/{article}", handlers.GetAmountInStock)
 	router.Put(apiV1+"stock/amount/{article}/{amount}", handlers.UpdateAmountInStock)
-	router.Put(apiV1+"stock/price/{article}/{price}", handlers.UpdatePriceInStock)
+	router.Put(apiV1+"stock/price", handlers.UpdatePriceInStock)
 	router.Post(apiV1+"stock/add/{article}/{amount}/{price}/{name}", handlers.AddToStock)
 
 	router.Get(apiV1+"sold/amount/{article}", handlers.GetSoldAmount)

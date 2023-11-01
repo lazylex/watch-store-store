@@ -34,6 +34,10 @@ func WriteHeaderAndLogAboutErr(w http.ResponseWriter, logger *slog.Logger, err e
 
 // WriteHeaderAndLogAboutBadRequest записывает заголовок ответа http.StatusBadRequest и переданную ошибку в лог
 func WriteHeaderAndLogAboutBadRequest(w http.ResponseWriter, logger *slog.Logger, err error) {
+	if err == nil {
+		return
+	}
+
 	w.WriteHeader(http.StatusBadRequest)
 	logger.Warn(err.Error())
 }
