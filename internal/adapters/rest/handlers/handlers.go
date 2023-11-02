@@ -266,7 +266,7 @@ func (h *Handler) GetSoldAmount(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, map[string]uint{request.Amount: amount})
 }
 
-// MakeReservation резервирует группу товаров под переданным номером заказа. В теле запроса передается номер заказа.
+// MakeReservation резервирует группу товаров под переданным номером заказа. В теле запроса передается номер заказа,
 // статус резервирования (описание в internal/domain/aggregates/reservation/reservation.go) и массив резервируемых
 // продуктов в формате JSON. В случае удачного резервирования возвращается http.StatusCreated и производится запись в
 // лог. Пример передаваемых данных:
@@ -344,10 +344,22 @@ func (h *Handler) CancelReservation(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// MakeLocalSale товар из доступного для продажи переносится в историю продаж. В *http.Request передается массив
-// реализуемых покупателю продуктов вида products[]=ca-f91w,2100,20&products[]=ca-aw-591,15000,36, где сперва идет
-// артикул, затем цена и количество резервируемого товара. В случае удачного выполнения операции возвращается
-// http.StatusOK и производится запись в лог
+// MakeLocalSale товар из доступного для продажи переносится в историю продаж. В случае удачного выполнения операции
+// возвращается http.StatusOK и производится запись в лог. В теле запроса передается массив резервируемых продуктов
+// в формате JSON. Пример передаваемых данных:
+//
+//	[
+//		{
+//			"article" : "9",
+//			"price" : 1330,
+//			"amount":6
+//		},
+//		{
+//			"article":"1",
+//			"price":3530,
+//			"amount":5
+//		}
+//	]
 func (h *Handler) MakeLocalSale(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var products []dto.ProductDTO
@@ -356,7 +368,9 @@ func (h *Handler) MakeLocalSale(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	if products, err = request.GetProductDTOs(w, r, log); err != nil {
+	err = json.NewDecoder(r.Body).Decode(&products)
+	if err != nil {
+		response.WriteHeaderAndLogAboutBadRequest(w, log, err)
 		return
 	}
 

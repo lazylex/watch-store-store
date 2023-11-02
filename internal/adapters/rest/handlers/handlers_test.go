@@ -676,8 +676,8 @@ func TestHandler_MakeLocalSaleSuccess(t *testing.T) {
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
-		http.MethodPost, "/api/api_v1/sale/make?products[]=ca-f91w,2100,20&products[]=ca-aw-591,15000,36",
-		nil)
+		http.MethodPost, "/api/api_v1/sale/make",
+		strings.NewReader("[{\"article\":\"9\",\"price\":1330,\"amount\":6},{\"article\":\"1\",\"price\":3530,\"amount\":5}]"))
 
 	service.EXPECT().MakeSale(gomock.Any(), gomock.Any()).Times(1).Return(nil)
 
@@ -710,8 +710,8 @@ func TestHandler_MakeLocalSaleTimeout(t *testing.T) {
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
-		http.MethodPost, "/api/api_v1/sale/make?products[]=ca-f91w,2100,20&products[]=ca-aw-591,15000,36",
-		nil)
+		http.MethodPost, "/api/api_v1/sale/make",
+		strings.NewReader("[{\"article\":\"9\",\"price\":1330,\"amount\":6},{\"article\":\"1\",\"price\":3530,\"amount\":5}]"))
 
 	service.EXPECT().MakeSale(gomock.Any(), gomock.Any()).Times(1).Return(repository.ErrTimeout)
 
@@ -729,8 +729,8 @@ func TestHandler_MakeLocalSaleErrorData(t *testing.T) {
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
-		http.MethodPost, "/api/api_v1/sale/make?products[]=ca-f91w.2100.20&products[]=ca-aw-591.15000.36",
-		nil)
+		http.MethodPost, "/api/api_v1/sale/make",
+		strings.NewReader("[{\"article\":\"9,\"pri\":1330,\"amt\":6},{\"article\":\"1\",\"price\":3530,\"amount\":5}]"))
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {

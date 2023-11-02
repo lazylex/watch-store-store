@@ -17,7 +17,6 @@ func AddHandlers(router *chi.Mux, handlers handlers.Interface) *chi.Mux {
 
 	router.Get(apiV1+"sold/amount/{article}", handlers.GetSoldAmount)
 
-	// TODO передавать параметры в JSON
 	router.Post(apiV1+"sale/make", handlers.MakeLocalSale)
 
 	router.Post(apiV1+"reservation/make", handlers.MakeReservation)
