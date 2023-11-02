@@ -21,9 +21,8 @@ func AddHandlers(router *chi.Mux, handlers handlers.Interface) *chi.Mux {
 	router.Post(apiV1+"sale/make", handlers.MakeLocalSale)
 
 	router.Post(apiV1+"reservation/make", handlers.MakeReservation)
-	// TODO передавать параметры в JSON
-	router.Put(apiV1+"reservation/cancel/{order_number}", handlers.CancelReservation)
-	router.Put(apiV1+"reservation/finish/{order_number}", handlers.FinishOrder)
+	router.Put(apiV1+"reservation/cancel", handlers.CancelReservation)
+	router.Put(apiV1+"reservation/finish", handlers.FinishOrder)
 
 	return router
 }

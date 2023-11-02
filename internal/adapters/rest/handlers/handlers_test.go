@@ -509,7 +509,8 @@ func TestHandler_CancelReservationSuccess(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/cancel/9", nil)
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/cancel",
+		strings.NewReader("{\"order_number\": 9}"))
 
 	service.EXPECT().CancelReservation(
 		gomock.Any(),
@@ -529,7 +530,8 @@ func TestHandler_CancelReservationIncorrectOrder(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/cancel/nine", nil)
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/cancel",
+		strings.NewReader("{\"order_number\": \"nine\"}"))
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {
@@ -544,7 +546,8 @@ func TestHandler_CancelReservationNegativeOrder(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/cancel/-9", nil)
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/cancel",
+		strings.NewReader("{\"order_number\": -9}"))
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {
@@ -742,7 +745,8 @@ func TestHandler_FinishOrderSuccess(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish/9", nil)
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish",
+		strings.NewReader("{\"order_number\": 9}"))
 
 	service.EXPECT().FinishOrder(gomock.Any(), dto.OrderNumberDTO{OrderNumber: 9}).Times(1).Return(nil)
 
@@ -759,7 +763,8 @@ func TestHandler_FinishOrderNegativeOrder(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish/-9", nil)
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish",
+		strings.NewReader("{\"order_number\": -9}"))
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {
@@ -774,7 +779,8 @@ func TestHandler_FinishOrderNotIntOrder(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish/nine", nil)
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish",
+		strings.NewReader("{\"order_number\": \"nine\"}"))
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {
@@ -789,7 +795,8 @@ func TestHandler_FinishOrderTimeout(t *testing.T) {
 	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
 
 	response := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish/9", nil)
+	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish",
+		strings.NewReader("{\"order_number\": 9}"))
 
 	service.EXPECT().FinishOrder(gomock.Any(), dto.OrderNumberDTO{OrderNumber: 9}).Times(1).Return(repository.ErrTimeout)
 

@@ -8,7 +8,6 @@ import (
 	"github.com/go-chi/render"
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/request"
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/response"
-	"github.com/lazylex/watch-store/store/internal/domain/aggregates/reservation"
 	"github.com/lazylex/watch-store/store/internal/domain/value_objects/article"
 	"github.com/lazylex/watch-store/store/internal/dto"
 	"github.com/lazylex/watch-store/store/internal/helpers/constants/various"
@@ -317,20 +316,23 @@ func (h *Handler) MakeReservation(w http.ResponseWriter, r *http.Request) {
 
 // CancelReservation отменяет заказ с переданным в пути запроса номером заказа. Продукты из заказа возвращаются в
 // продажу по актуальной на данный момент цене. В случае успешной отмены возвращается http.StatusOK и производится
-// запись в лог
+// запись в лог. Данные в запросе передаются в теле в виде JSON. Например:
+//
+// {"order_number": 9}
 func (h *Handler) CancelReservation(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var order reservation.OrderNumber
+	var transferObject dto.OrderNumberDTO
 	log := logger.AddPlaceAndRequestId(h.logger, "rest.handlers.CancelReservation", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	if order, err = request.GetOrderUsingChi(w, r, log); err != nil {
+	err = json.NewDecoder(r.Body).Decode(&transferObject)
+	if err != nil {
+		response.WriteHeaderAndLogAboutBadRequest(w, log, err)
 		return
 	}
 
-	transferObject := dto.OrderNumberDTO{OrderNumber: order}
 	err = transferObject.Validate()
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
 		return
@@ -338,7 +340,7 @@ func (h *Handler) CancelReservation(w http.ResponseWriter, r *http.Request) {
 
 	err = h.service.CancelReservation(injectRequestIDToCtx(ctx, r), transferObject)
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err == nil {
-		log.Info(fmt.Sprintf("cancel order %d", order))
+		log.Info(fmt.Sprintf("cancel order %d", transferObject.OrderNumber))
 	}
 }
 
@@ -370,19 +372,24 @@ func (h *Handler) MakeLocalSale(w http.ResponseWriter, r *http.Request) {
 }
 
 // FinishOrder отмечает заказ выполненым (отданым локальному покупателю или отправленным интернет-покупателю)
-// и заносит зарезервированные продукты в историю проданных товаров
+// и заносит зарезервированные продукты в историю проданных товаров. Данные в запросе передаются в теле в виде JSON.
+// Например:
+//
+// {"order_number": 9}
 func (h *Handler) FinishOrder(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var order reservation.OrderNumber
+	var transferObject dto.OrderNumberDTO
 	log := logger.AddPlaceAndRequestId(h.logger, "rest.handlers.FinishOrder", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	if order, err = request.GetOrderUsingChi(w, r, log); err != nil {
+	err = json.NewDecoder(r.Body).Decode(&transferObject)
+	if err != nil {
+		response.WriteHeaderAndLogAboutBadRequest(w, log, err)
 		return
 	}
-	transferObject := dto.OrderNumberDTO{OrderNumber: order}
+
 	err = transferObject.Validate()
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
 		return
@@ -390,6 +397,6 @@ func (h *Handler) FinishOrder(w http.ResponseWriter, r *http.Request) {
 
 	err = h.service.FinishOrder(injectRequestIDToCtx(ctx, r), transferObject)
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err == nil {
-		log.Info(fmt.Sprintf("finish order %d", order))
+		log.Info(fmt.Sprintf("finish order %d", transferObject.OrderNumber))
 	}
 }
