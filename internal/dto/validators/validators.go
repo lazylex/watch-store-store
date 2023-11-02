@@ -19,12 +19,13 @@ var (
 	ErrIncorrectOrder                 = dtoErr("incorrect order")
 	ErrNegativePrice                  = dtoErr("negative product price")
 	ErrZeroPrice                      = dtoErr("zero product price")
-	ErrEmptyName                      = dtoErr("empty product testName")
+	ErrEmptyName                      = dtoErr("empty product name")
 	ErrIncorrectDatesOrder            = dtoErr("incorrect dates order")
 	ErrDatesIsEqual                   = dtoErr("dates is equal")
 	ErrCashRegisterOrder              = dtoErr("order number for cash register can't be higher than 10")
 	ErrOrderForInternetCustomer       = dtoErr("number for internet based orders must be higher than 10")
 	ErrDuplicateProductsInReservation = dtoErr("duplicate products in reservation")
+	ErrNoProductsInReservation        = dtoErr("no products in reservation")
 )
 
 // Article валидатор для артукула

@@ -8,7 +8,7 @@ import (
 )
 
 type ReservationDTO struct {
-	Products    []ProductDTO
+	Products    []ProductDTO   `json:"products"`
 	OrderNumber rs.OrderNumber `json:"order_number"`
 	Date        time.Time      `json:"date"`
 	State       uint           `json:"state"`
@@ -35,6 +35,10 @@ func (r *ReservationDTO) Validate() error {
 
 	if r.State != rs.NewForCashRegister && r.OrderNumber <= rs.MaxCashRegisterNumber {
 		return validators.ErrOrderForInternetCustomer
+	}
+
+	if len(r.Products) == 0 {
+		return validators.ErrNoProductsInReservation
 	}
 
 	articles := make(map[article.Article]bool)

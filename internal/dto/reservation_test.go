@@ -12,60 +12,76 @@ func TestReservationDTO_Validate(t *testing.T) {
 		testName    string
 		state       uint
 		order       reservation.OrderNumber
+		products    []ProductDTO
 		expectedErr error
 	}{
 		{
 			testName:    "negative order number",
 			state:       reservation.NewForCashRegister,
 			order:       reservation.OrderNumber(-1),
+			products:    []ProductDTO{{Article: "ca-09.1000", Price: 4660, Amount: 5}},
 			expectedErr: validators.ErrIncorrectOrder,
 		},
 		{
 			testName:    "incorrect state",
 			state:       200,
 			order:       reservation.OrderNumber(1987),
+			products:    []ProductDTO{{Article: "ca-09.1000", Price: 4660, Amount: 5}},
 			expectedErr: validators.ErrIncorrectState,
 		},
 		{
 			testName:    "correct order for cash register",
 			state:       reservation.NewForCashRegister,
 			order:       reservation.OrderNumber(reservation.MaxCashRegisterNumber),
+			products:    []ProductDTO{{Article: "ca-09.1000", Price: 4660, Amount: 5}},
 			expectedErr: nil,
 		},
 		{
 			testName:    "incorrect order for cash register",
 			state:       reservation.NewForCashRegister,
 			order:       reservation.OrderNumber(reservation.MaxCashRegisterNumber + 1),
+			products:    []ProductDTO{{Article: "ca-09.1000", Price: 4660, Amount: 5}},
 			expectedErr: validators.ErrCashRegisterOrder,
 		},
 		{
 			testName:    "correct order for local customer",
 			state:       reservation.NewForLocalCustomer,
 			order:       reservation.OrderNumber(reservation.MaxCashRegisterNumber + 1),
+			products:    []ProductDTO{{Article: "ca-09.1000", Price: 4660, Amount: 5}},
 			expectedErr: nil,
 		},
 		{
 			testName:    "incorrect order for local customer",
 			state:       reservation.NewForLocalCustomer,
 			order:       reservation.OrderNumber(reservation.MaxCashRegisterNumber),
+			products:    []ProductDTO{{Article: "ca-09.1000", Price: 4660, Amount: 5}},
 			expectedErr: validators.ErrOrderForInternetCustomer,
 		},
 		{
 			testName:    "correct order for internet customer",
 			state:       reservation.NewForInternetCustomer,
 			order:       reservation.OrderNumber(reservation.MaxCashRegisterNumber + 1),
+			products:    []ProductDTO{{Article: "ca-09.1000", Price: 4660, Amount: 5}},
 			expectedErr: nil,
 		},
 		{
 			testName:    "incorrect order for internet customer",
 			state:       reservation.NewForInternetCustomer,
 			order:       reservation.OrderNumber(reservation.MaxCashRegisterNumber),
+			products:    []ProductDTO{{Article: "ca-09.1000", Price: 4660, Amount: 5}},
 			expectedErr: validators.ErrOrderForInternetCustomer,
+		},
+		{
+			testName:    "empty products",
+			state:       reservation.NewForCashRegister,
+			order:       reservation.OrderNumber(reservation.MaxCashRegisterNumber),
+			products:    []ProductDTO{},
+			expectedErr: validators.ErrNoProductsInReservation,
 		},
 	}
 
 	for _, tc := range testCases {
-		r := &ReservationDTO{OrderNumber: tc.order, State: tc.state}
+		r := &ReservationDTO{OrderNumber: tc.order, State: tc.state, Products: tc.products}
 		t.Run(tc.testName, func(t *testing.T) {
 			if !errors.Is(r.Validate(), tc.expectedErr) {
 				t.Fail()

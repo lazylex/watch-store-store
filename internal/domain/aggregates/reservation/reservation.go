@@ -10,8 +10,9 @@ type OrderNumber int
 const MaxCashRegisterNumber = 10
 
 const (
-	NewForCashRegister  = iota
-	NewForLocalCustomer = iota
+	_ = iota
+	NewForCashRegister
+	NewForLocalCustomer
 	NewForInternetCustomer
 	Finished
 	Cancel

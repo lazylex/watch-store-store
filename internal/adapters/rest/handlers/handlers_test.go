@@ -561,8 +561,8 @@ func TestHandler_MakeReservationSuccess(t *testing.T) {
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
 		http.MethodPost,
-		"/api/api_v1/reservation/make?products[]=ca-f91w,2100,20&products[]=ca-aw-591,15000,36&order_number=9&status=0",
-		nil)
+		"/api/api_v1/reservation/make",
+		strings.NewReader("{\"order_number\":13,\"state\":2,\"products\":[{\"article\":\"9\",\"price\":1330,\"amount\":6},{\"article\":\"1\",\"price\":3530,\"amount\":5}]}"))
 
 	service.EXPECT().MakeReservation(
 		gomock.Any(),
@@ -584,8 +584,8 @@ func TestHandler_MakeReservationNoProducts(t *testing.T) {
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
 		http.MethodPost,
-		"/api/api_v1/reservation/make?order_number=9&status=0",
-		nil)
+		"/api/api_v1/reservation/make",
+		strings.NewReader("{\"order_number\":13,\"state\":1}"))
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {
@@ -602,8 +602,26 @@ func TestHandler_MakeReservationNoStatus(t *testing.T) {
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
 		http.MethodPost,
-		"/api/api_v1/reservation/make?products[]=ca-f91w,2100,20&products[]=ca-aw-591,15000,36&order_number=9",
-		nil)
+		"/api/api_v1/reservation/make",
+		strings.NewReader("{\"order_number\":9,\"products\":[{\"article\":\"9\",\"price\":1330,\"amount\":6},{\"article\":\"1\",\"price\":3530,\"amount\":5}]}"))
+
+	mux.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fail()
+	}
+}
+
+func TestHandler_MakeReservationIncorrectJSON(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mux := chi.NewRouter()
+	service := mockService.NewMockInterface(ctrl)
+	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+
+	response := httptest.NewRecorder()
+	request := httptest.NewRequest(
+		http.MethodPost,
+		"/api/api_v1/reservation/make",
+		strings.NewReader("{\"order_number:9,\"products\":[{\"article\":\"9\",\"price\":1330,\"amount\":6},{\"article\":\"1\",\"price\":3530,\"amount\":5}]}"))
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {
@@ -621,7 +639,7 @@ func TestHandler_MakeReservationNoOrder(t *testing.T) {
 	request := httptest.NewRequest(
 		http.MethodPost,
 		"/api/api_v1/reservation/make?products[]=ca-f91w,2100,20&products[]=ca-aw-591,15000,36&status=0",
-		nil)
+		strings.NewReader("{\"state\":1,\"products\":[{\"article\":\"9\",\"price\":1330,\"amount\":6},{\"article\":\"1\",\"price\":3530,\"amount\":5}]}"))
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {
@@ -638,8 +656,8 @@ func TestHandler_MakeReservationIncorrectOrderData(t *testing.T) {
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
 		http.MethodPost,
-		"/api/api_v1/reservation/make?products[]=ca-f91w,2100,20&products[]=ca-aw-591,15000,36&status=4&order_number=5",
-		nil)
+		"/api/api_v1/reservation/make",
+		strings.NewReader("{\"order_number\":5,\"state\":5,\"products\":[{\"article\":\"9\",\"price\":1330,\"amount\":6},{\"article\":\"1\",\"price\":3530,\"amount\":5}]}"))
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusBadRequest {

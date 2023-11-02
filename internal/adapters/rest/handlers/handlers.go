@@ -267,31 +267,42 @@ func (h *Handler) GetSoldAmount(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, map[string]uint{request.Amount: amount})
 }
 
-// MakeReservation резервирует группу товаров под переданным номером заказа. В *http.Request передается номер заказа и
-// массив резервируемых продуктов вида products[]=ca-f91w,2100,20&products[]=ca-aw-591,15000,36, где сперва идет
-// артикул, затем цена и количество резервируемого товара. В случае удачного резервирования возвращается
-// http.StatusCreated и производится запись в лог
+// MakeReservation резервирует группу товаров под переданным номером заказа. В теле запроса передается номер заказа.
+// статус резервирования (описание в internal/domain/aggregates/reservation/reservation.go) и массив резервируемых
+// продуктов в формате JSON. В случае удачного резервирования возвращается http.StatusCreated и производится запись в
+// лог. Пример передаваемых данных:
+//
+//	{
+//		"order_number":13,
+//		"state":1,
+//		"products":[
+//			{
+//				"article" : "9",
+//				"price" : 1330,
+//				"amount":6
+//			},
+//			{
+//				"article":"1",
+//				"price":3530,
+//				"amount":5
+//			}
+//		]
+//	}
 func (h *Handler) MakeReservation(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var status uint
-	var products []dto.ProductDTO
-	var order reservation.OrderNumber
+	var transferObject dto.ReservationDTO
 	log := logger.AddPlaceAndRequestId(h.logger, "rest.handlers.MakeReservation", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	if products, err = request.GetProductDTOs(w, r, log); err != nil {
-		return
-	}
-	if order, err = request.GetOrderFromURLQuery(w, r, log); err != nil {
-		return
-	}
-	if status, err = request.GetStatusFromURLQuery(w, r, log); err != nil {
+	err = json.NewDecoder(r.Body).Decode(&transferObject)
+	if err != nil {
+		response.WriteHeaderAndLogAboutBadRequest(w, log, err)
 		return
 	}
 
-	transferObject := dto.ReservationDTO{Products: products, OrderNumber: order, Date: time.Now(), State: status}
+	transferObject.Date = time.Now()
 	err = transferObject.Validate()
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
 		return
@@ -300,7 +311,7 @@ func (h *Handler) MakeReservation(w http.ResponseWriter, r *http.Request) {
 	err = h.service.MakeReservation(injectRequestIDToCtx(ctx, r), transferObject)
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err == nil {
 		w.WriteHeader(http.StatusCreated)
-		log.Info(fmt.Sprintf("succesfully saved order %d", order))
+		log.Info(fmt.Sprintf("succesfully saved order %d", transferObject.OrderNumber))
 	}
 }
 
