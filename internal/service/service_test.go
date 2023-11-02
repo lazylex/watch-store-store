@@ -122,6 +122,23 @@ func TestService_ChangePriceInStockIncorrectDTO(t *testing.T) {
 	}
 }
 
+func TestService_ChangePriceInStockNoInRepo(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	data := dto.ArticleWithPriceDTO{Article: "test-9", Price: 100}
+	s := Service{Repository: mockRepo, Logger: logger.Null()}
+
+	mockRepo.EXPECT().ReadStock(context.Background(), &dto.ArticleDTO{Article: "test-9"}).Times(1).
+		Return(dto.NamedProductDTO{}, errors.New("no in stock"))
+	mockRepo.EXPECT().UpdateStockPrice(context.Background(), &data).Times(0)
+
+	err := s.ChangePriceInStock(context.Background(), data)
+	if err == nil {
+		t.Fail()
+	}
+}
+
 func TestService_GetStockCorrectDTO(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
