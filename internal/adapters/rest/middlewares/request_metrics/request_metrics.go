@@ -27,7 +27,7 @@ func (m *MiddlewareRequests) RequestsInc(next http.Handler) http.Handler {
 		if r.Method == http.MethodGet {
 			path = string([]rune(r.RequestURI)[0 : strings.LastIndex(r.RequestURI, "/")+1])
 		} else {
-			path = r.RequestURI
+			path = r.URL.Path
 		}
 
 		if router.IsExistPath(path) {
