@@ -3,7 +3,9 @@ package metrics
 import (
 	"errors"
 	"fmt"
+	"github.com/lazylex/watch-store/store/internal/adapters/rest/router"
 	"github.com/lazylex/watch-store/store/internal/config"
+	"github.com/lazylex/watch-store/store/internal/helpers/constants/various"
 	"github.com/lazylex/watch-store/store/internal/logger"
 	p "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -60,6 +62,11 @@ func registerMetrics() (*Metrics, error) {
 	if err = p.Register(requests); err != nil {
 		return nil, err
 	}
+
+	for _, path := range router.ExistentPaths() {
+		requests.With(p.Labels{PATH: path})
+	}
+	requests.With(p.Labels{PATH: various.NonExistentPath})
 
 	return &Metrics{
 		Service: struct{}{},

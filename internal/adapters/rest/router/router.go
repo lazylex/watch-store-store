@@ -24,6 +24,16 @@ func init() {
 	paths["/api/api_v1/reservation/finish"] = "/api/api_v1/reservation/finish"
 }
 
+// ExistentPaths возвращает слайс доступных в приложении путей
+func ExistentPaths() []string {
+	var existentPaths []string
+	for k, _ := range paths {
+		existentPaths = append(existentPaths, k)
+	}
+
+	return existentPaths
+}
+
 // IsExistPath возвращает true, если в приложении используется передаваемый путь. Иначе - false
 func IsExistPath(path string) bool {
 	if _, ok := paths[path]; ok {
