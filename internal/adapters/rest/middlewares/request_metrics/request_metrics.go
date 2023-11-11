@@ -7,6 +7,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type MiddlewareRequests struct {
@@ -22,6 +23,18 @@ func New(metrics *metrics.Metrics) *MiddlewareRequests {
 func (m *MiddlewareRequests) BeforeHandle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		m.requestsInc(r)
+		next.ServeHTTP(rw, r)
+	})
+}
+
+func (m *MiddlewareRequests) AfterHandle(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		defer func() {
+			duration := float64(time.Now().UnixMilli()-start.UnixMilli()) * 0.001
+			m.metrics.HTTP.Duration.With(prometheus.Labels{}).Observe(duration)
+		}()
+
 		next.ServeHTTP(rw, r)
 	})
 }

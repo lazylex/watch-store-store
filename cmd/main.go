@@ -38,7 +38,8 @@ func main() {
 	)
 
 	mux := chi.NewRouter()
-	mux.Use(middleware.Recoverer, middleware.RequestID, requestMetrics.New(metrics).BeforeHandle)
+	rm := requestMetrics.New(metrics)
+	mux.Use(middleware.Recoverer, middleware.RequestID, rm.BeforeHandle, rm.AfterHandle)
 
 	if cfg.Env == config.EnvironmentLocal {
 		mux.Use(middleware.Logger)
