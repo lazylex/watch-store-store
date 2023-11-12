@@ -27,6 +27,7 @@ func (m *MiddlewareRequests) BeforeHandle(next http.Handler) http.Handler {
 	})
 }
 
+// AfterHandle - middleware для метрик, подсчитываемых после выполнения обработчика запроса
 func (m *MiddlewareRequests) AfterHandle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		start := time.Now()
