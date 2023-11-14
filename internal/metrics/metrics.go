@@ -58,8 +58,47 @@ func MustCreate(cfg *config.Config, log *slog.Logger) *Metrics {
 
 // registerMetrics заносит метрики в регистр и возвращает их. При неудаче возвращает ошибку
 func registerMetrics() (*Metrics, error) {
+	var (
+		err             error
+		requests        *p.CounterVec
+		requestDuration *p.HistogramVec
+	)
+
+	requests, err = createHTTPRequestsTotalMetric()
+	if err != nil {
+		return nil, err
+	}
+	requestDuration, err = createHTTPRequestDurationSecondsBucketMetric()
+	if err != nil {
+		return nil, err
+	}
+
+	return &Metrics{
+		Service: struct{}{},
+		HTTP:    HTTP{Requests: requests, Duration: requestDuration},
+	}, nil
+}
+
+// createHTTPRequestDurationSecondsBucketMetric создает и регистрирует метрику http_request_duration_seconds_bucket
+func createHTTPRequestDurationSecondsBucketMetric() (*p.HistogramVec, error) {
 	var err error
-	// http_requests_total
+	requestDuration := p.NewHistogramVec(p.HistogramOpts{
+		Namespace: NAMESPACE,
+		Name:      "http_request_duration_seconds_bucket",
+		Help:      "Duration of the request",
+	}, []string{})
+	if err = p.Register(requestDuration); err != nil {
+		return nil, err
+	}
+
+	requestDuration.With(p.Labels{})
+
+	return requestDuration, nil
+}
+
+// createHTTPRequestsTotalMetric создает и регистрирует метрику http_requests_total, являющуюся счетчиком http-запросов
+func createHTTPRequestsTotalMetric() (*p.CounterVec, error) {
+	var err error
 	requests := p.NewCounterVec(p.CounterOpts{
 		Name:      "http_requests_total",
 		Namespace: NAMESPACE,
@@ -74,22 +113,7 @@ func registerMetrics() (*Metrics, error) {
 	}
 	requests.With(p.Labels{PATH: various.NonExistentPath})
 
-	// http_request_duration_seconds_bucket
-	requestDuration := p.NewHistogramVec(p.HistogramOpts{
-		Namespace: NAMESPACE,
-		Name:      "http_request_duration_seconds_bucket",
-		Help:      "Duration of the request",
-	}, []string{})
-	if err = p.Register(requestDuration); err != nil {
-		return nil, err
-	}
-
-	requestDuration.With(p.Labels{})
-
-	return &Metrics{
-		Service: struct{}{},
-		HTTP:    HTTP{Requests: requests, Duration: requestDuration},
-	}, nil
+	return requests, nil
 }
 
 // startHTTP запускает http сервер для связи с Prometheus на переданном в функцию порту и url. При неудаче выводит
