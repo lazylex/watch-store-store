@@ -651,7 +651,7 @@ func TestService_CancelReservationInternet(t *testing.T) {
 	mockServiceMetrics := mock_service.NewMockMetricsInterface(ctrl)
 	data := dto.OrderNumberDTO{OrderNumber: 555}
 	s := Service{Repository: mockRepo, Logger: logger.Null(),
-		Metrics: &metrics.Metrics{HTTP: metrics.HTTP{}, Service: mockServiceMetrics}}
+		Metrics: &metrics.Metrics{HTTP: nil, Service: mockServiceMetrics}}
 
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 	resData := dto.ReservationDTO{Products: []dto.ProductDTO{{Article: "test-9", Amount: 1, Price: 698}},

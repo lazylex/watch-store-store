@@ -4,7 +4,6 @@ import (
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/router"
 	"github.com/lazylex/watch-store/store/internal/helpers/constants/various"
 	"github.com/lazylex/watch-store/store/internal/metrics"
-	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
 	"strings"
 	"time"
@@ -33,7 +32,7 @@ func (m *MiddlewareRequests) AfterHandle(next http.Handler) http.Handler {
 		start := time.Now()
 		defer func() {
 			duration := float64(time.Now().UnixMilli()-start.UnixMilli()) * 0.001
-			m.metrics.HTTP.Duration.With(prometheus.Labels{}).Observe(duration)
+			m.metrics.HTTP.RequestsDurationObserve(duration)
 		}()
 
 		next.ServeHTTP(rw, r)
@@ -52,8 +51,8 @@ func (m *MiddlewareRequests) requestsInc(r *http.Request) {
 	}
 
 	if router.IsExistPath(path) {
-		m.metrics.HTTP.Requests.With(prometheus.Labels{metrics.PATH: path}).Inc()
+		m.metrics.HTTP.RequestsTotalInc(map[string]string{metrics.PATH: path})
 	} else {
-		m.metrics.HTTP.Requests.With(prometheus.Labels{metrics.PATH: various.NonExistentPath}).Inc()
+		m.metrics.HTTP.RequestsTotalInc(map[string]string{metrics.PATH: various.NonExistentPath})
 	}
 }

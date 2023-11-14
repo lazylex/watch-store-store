@@ -3,12 +3,11 @@ package metrics
 import (
 	"errors"
 	"fmt"
-	"github.com/lazylex/watch-store/store/internal/adapters/rest/router"
 	"github.com/lazylex/watch-store/store/internal/config"
-	"github.com/lazylex/watch-store/store/internal/helpers/constants/various"
 	"github.com/lazylex/watch-store/store/internal/logger"
+	httpMetrics "github.com/lazylex/watch-store/store/internal/ports/metrics/http"
 	"github.com/lazylex/watch-store/store/internal/ports/metrics/service"
-	p "github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log/slog"
 	"net/http"
@@ -17,13 +16,8 @@ import (
 
 const NAMESPACE = "store"
 
-type HTTP struct {
-	Requests *p.CounterVec
-	Duration *p.HistogramVec
-}
-
 type Metrics struct {
-	HTTP    HTTP
+	HTTP    httpMetrics.MetricsInterface
 	Service service.MetricsInterface
 }
 
@@ -58,8 +52,8 @@ func MustCreate(cfg *config.Config, log *slog.Logger) *Metrics {
 func registerMetrics() (*Metrics, error) {
 	var (
 		err                      error
-		requests, canceledOrders *p.CounterVec
-		requestDuration          *p.HistogramVec
+		requests, canceledOrders *prometheus.CounterVec
+		requestDuration          *prometheus.HistogramVec
 	)
 
 	requests, err = createHTTPRequestsTotalMetric()
@@ -79,45 +73,8 @@ func registerMetrics() (*Metrics, error) {
 
 	return &Metrics{
 		Service: &Service{canceledOrders: canceledOrders},
-		HTTP:    HTTP{Requests: requests, Duration: requestDuration},
+		HTTP:    &HTTP{requests: requests, duration: requestDuration},
 	}, nil
-}
-
-// createHTTPRequestDurationSecondsBucketMetric создает и регистрирует метрику http_request_duration_seconds_bucket
-func createHTTPRequestDurationSecondsBucketMetric() (*p.HistogramVec, error) {
-	var err error
-	requestDuration := p.NewHistogramVec(p.HistogramOpts{
-		Namespace: NAMESPACE,
-		Name:      "http_request_duration_seconds_bucket",
-		Help:      "Duration of the request",
-	}, []string{})
-	if err = p.Register(requestDuration); err != nil {
-		return nil, err
-	}
-
-	requestDuration.With(p.Labels{})
-
-	return requestDuration, nil
-}
-
-// createHTTPRequestsTotalMetric создает и регистрирует метрику http_requests_total, являющуюся счетчиком http-запросов
-func createHTTPRequestsTotalMetric() (*p.CounterVec, error) {
-	var err error
-	requests := p.NewCounterVec(p.CounterOpts{
-		Name:      "http_requests_total",
-		Namespace: NAMESPACE,
-		Help:      "Count of http requests",
-	}, []string{PATH})
-	if err = p.Register(requests); err != nil {
-		return nil, err
-	}
-
-	for _, path := range router.ExistentPaths() {
-		requests.With(p.Labels{PATH: path})
-	}
-	requests.With(p.Labels{PATH: various.NonExistentPath})
-
-	return requests, nil
 }
 
 // startHTTP запускает http сервер для связи с Prometheus на переданном в функцию порту и url. При неудаче выводит
