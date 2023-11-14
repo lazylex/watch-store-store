@@ -7,6 +7,8 @@ import (
 	"github.com/lazylex/watch-store/store/internal/domain/aggregates/reservation"
 	"github.com/lazylex/watch-store/store/internal/dto"
 	"github.com/lazylex/watch-store/store/internal/logger"
+	"github.com/lazylex/watch-store/store/internal/metrics"
+	mock_service "github.com/lazylex/watch-store/store/internal/ports/metrics/service/mocks"
 	"github.com/lazylex/watch-store/store/internal/ports/repository"
 	mockrepository "github.com/lazylex/watch-store/store/internal/ports/repository/mocks"
 	"github.com/lazylex/watch-store/store/internal/ports/service"
@@ -646,8 +648,10 @@ func TestService_CancelReservationInternet(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
+	mockServiceMetrics := mock_service.NewMockMetricsInterface(ctrl)
 	data := dto.OrderNumberDTO{OrderNumber: 555}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo, Logger: logger.Null(),
+		Metrics: &metrics.Metrics{HTTP: metrics.HTTP{}, Service: mockServiceMetrics}}
 
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 	resData := dto.ReservationDTO{Products: []dto.ProductDTO{{Article: "test-9", Amount: 1, Price: 698}},
@@ -661,6 +665,8 @@ func TestService_CancelReservationInternet(t *testing.T) {
 	// Тест фейлился из-за расхождений во времени запуска time.Now() при создании DTO для функции UpdateReservation в
 	// сервисе и тесте. Пришлось использовать в моке gomock.Any() вместо dto.ReservationDTO
 	mockRepo.EXPECT().UpdateReservation(ctx, gomock.Any()).Times(1).Return(nil)
+
+	mockServiceMetrics.EXPECT().CancelOrdersInc().Times(1)
 
 	err := s.CancelReservation(ctx, data)
 	if err != nil {

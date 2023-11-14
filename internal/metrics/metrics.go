@@ -7,6 +7,7 @@ import (
 	"github.com/lazylex/watch-store/store/internal/config"
 	"github.com/lazylex/watch-store/store/internal/helpers/constants/various"
 	"github.com/lazylex/watch-store/store/internal/logger"
+	"github.com/lazylex/watch-store/store/internal/ports/metrics/service"
 	p "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log/slog"
@@ -21,12 +22,9 @@ type HTTP struct {
 	Duration *p.HistogramVec
 }
 
-type Service struct {
-}
-
 type Metrics struct {
 	HTTP    HTTP
-	Service Service
+	Service service.MetricsInterface
 }
 
 // MustCreate возвращает метрики *Metrics или останавливает программу, если не удалось запустить http сервер для
@@ -59,22 +57,28 @@ func MustCreate(cfg *config.Config, log *slog.Logger) *Metrics {
 // registerMetrics заносит метрики в регистр и возвращает их. При неудаче возвращает ошибку
 func registerMetrics() (*Metrics, error) {
 	var (
-		err             error
-		requests        *p.CounterVec
-		requestDuration *p.HistogramVec
+		err                      error
+		requests, canceledOrders *p.CounterVec
+		requestDuration          *p.HistogramVec
 	)
 
 	requests, err = createHTTPRequestsTotalMetric()
 	if err != nil {
 		return nil, err
 	}
+
 	requestDuration, err = createHTTPRequestDurationSecondsBucketMetric()
 	if err != nil {
 		return nil, err
 	}
 
+	canceledOrders, err = createCanceledOrdersTotalMetric()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Metrics{
-		Service: struct{}{},
+		Service: &Service{canceledOrders: canceledOrders},
 		HTTP:    HTTP{Requests: requests, Duration: requestDuration},
 	}, nil
 }

@@ -214,12 +214,18 @@ func (s *Service) CancelReservation(ctx context.Context, data dto.OrderNumberDTO
 			return s.Repository.DeleteReservation(txCtx, &dto.OrderNumberDTO{OrderNumber: data.OrderNumber})
 		}
 
-		return s.Repository.UpdateReservation(txCtx, &dto.ReservationDTO{
+		err = s.Repository.UpdateReservation(txCtx, &dto.ReservationDTO{
 			Products:    res.Products,
 			OrderNumber: data.OrderNumber,
 			Date:        time.Now(),
 			State:       reservation.Cancel,
 		})
+
+		if err == nil {
+			s.Metrics.Service.CancelOrdersInc()
+		}
+
+		return err
 	})
 }
 
