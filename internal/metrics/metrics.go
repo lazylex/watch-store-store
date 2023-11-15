@@ -51,9 +51,9 @@ func MustCreate(cfg *config.Config, log *slog.Logger) *Metrics {
 // registerMetrics заносит метрики в регистр и возвращает их. При неудаче возвращает ошибку
 func registerMetrics() (*Metrics, error) {
 	var (
-		err                      error
-		requests, canceledOrders *prometheus.CounterVec
-		requestDuration          *prometheus.HistogramVec
+		err                                                               error
+		requests, canceledOrders, placedInternetOrders, placedLocalOrders *prometheus.CounterVec
+		requestDuration                                                   *prometheus.HistogramVec
 	)
 
 	requests, err = createHTTPRequestsTotalMetric()
@@ -71,9 +71,22 @@ func registerMetrics() (*Metrics, error) {
 		return nil, err
 	}
 
+	placedInternetOrders, err = createPlacedInternetOrdersTotalMetric()
+	if err != nil {
+		return nil, err
+	}
+
+	placedLocalOrders, err = createPlacedLocalOrdersTotalMetric()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Metrics{
-		Service: &Service{canceledOrders: canceledOrders},
-		HTTP:    &HTTP{requests: requests, duration: requestDuration},
+		Service: &Service{
+			canceledOrders:       canceledOrders,
+			placedLocalOrders:    placedLocalOrders,
+			placedInternetOrders: placedInternetOrders},
+		HTTP: &HTTP{requests: requests, duration: requestDuration},
 	}, nil
 }
 

@@ -44,3 +44,27 @@ func (mr *MockMetricsInterfaceMockRecorder) CancelOrdersInc() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CancelOrdersInc", reflect.TypeOf((*MockMetricsInterface)(nil).CancelOrdersInc))
 }
+
+// PlacedInternetOrdersInc mocks base method.
+func (m *MockMetricsInterface) PlacedInternetOrdersInc() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "PlacedInternetOrdersInc")
+}
+
+// PlacedInternetOrdersInc indicates an expected call of PlacedInternetOrdersInc.
+func (mr *MockMetricsInterfaceMockRecorder) PlacedInternetOrdersInc() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PlacedInternetOrdersInc", reflect.TypeOf((*MockMetricsInterface)(nil).PlacedInternetOrdersInc))
+}
+
+// PlacedLocalOrdersInc mocks base method.
+func (m *MockMetricsInterface) PlacedLocalOrdersInc() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "PlacedLocalOrdersInc")
+}
+
+// PlacedLocalOrdersInc indicates an expected call of PlacedLocalOrdersInc.
+func (mr *MockMetricsInterfaceMockRecorder) PlacedLocalOrdersInc() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PlacedLocalOrdersInc", reflect.TypeOf((*MockMetricsInterface)(nil).PlacedLocalOrdersInc))
+}

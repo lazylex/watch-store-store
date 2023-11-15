@@ -176,6 +176,14 @@ func (s *Service) MakeReservation(ctx context.Context, data dto.ReservationDTO) 
 			return err
 		}
 
+		if data.State == reservation.NewForInternetCustomer {
+			s.Metrics.Service.PlacedInternetOrdersInc()
+		}
+
+		if data.State == reservation.NewForLocalCustomer {
+			s.Metrics.Service.PlacedLocalOrdersInc()
+		}
+
 		logger.LogWithCtxData(txCtx, s.Logger.With(logger.OPLabel, "service.MakeReservation")).Info(
 			fmt.Sprintf("succesfully saved order %d", data.OrderNumber))
 		return nil
