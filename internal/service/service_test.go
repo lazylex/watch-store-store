@@ -421,6 +421,60 @@ func TestService_MakeReservationSuccess(t *testing.T) {
 	}
 }
 
+func TestService_MakeReservationForInternetSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	mockServiceMetrics := mock_service.NewMockMetricsInterface(ctrl)
+	data := dto.ReservationDTO{
+		Products:    []dto.ProductDTO{{Article: "test-9", Amount: 1, Price: 698}},
+		OrderNumber: reservation.MaxCashRegisterNumber + 1,
+		Date:        time.Now(),
+		State:       reservation.NewForInternetCustomer,
+	}
+	s := Service{Repository: mockRepo, Logger: logger.Null(),
+		Metrics: &metrics.Metrics{Service: mockServiceMetrics}}
+
+	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
+	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(5), nil)
+	mockRepo.EXPECT().UpdateStockAmount(ctx,
+		&dto.ArticleWithAmountDTO{Article: "test-9", Amount: uint(4)}).Times(1).Return(nil)
+	mockRepo.EXPECT().CreateReservation(ctx, &data).Times(1).Return(nil)
+	mockServiceMetrics.EXPECT().PlacedInternetOrdersInc().Times(1)
+
+	err := s.MakeReservation(ctx, data)
+	if err != nil {
+		t.Fail()
+	}
+}
+
+func TestService_MakeReservationForLocalSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mockrepository.NewMockInterface(ctrl)
+	mockServiceMetrics := mock_service.NewMockMetricsInterface(ctrl)
+	data := dto.ReservationDTO{
+		Products:    []dto.ProductDTO{{Article: "test-9", Amount: 1, Price: 698}},
+		OrderNumber: reservation.MaxCashRegisterNumber + 1,
+		Date:        time.Now(),
+		State:       reservation.NewForLocalCustomer,
+	}
+	s := Service{Repository: mockRepo, Logger: logger.Null(),
+		Metrics: &metrics.Metrics{Service: mockServiceMetrics}}
+
+	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
+	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(5), nil)
+	mockRepo.EXPECT().UpdateStockAmount(ctx,
+		&dto.ArticleWithAmountDTO{Article: "test-9", Amount: uint(4)}).Times(1).Return(nil)
+	mockRepo.EXPECT().CreateReservation(ctx, &data).Times(1).Return(nil)
+	mockServiceMetrics.EXPECT().PlacedLocalOrdersInc().Times(1)
+
+	err := s.MakeReservation(ctx, data)
+	if err != nil {
+		t.Fail()
+	}
+}
+
 func TestService_MakeReservationErrAmount(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
