@@ -1,24 +1,16 @@
 package main
 
 import (
-	"context"
-	"errors"
 	"flag"
 	"fmt"
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
 	"github.com/lazylex/watch-store/store/internal/adapters/message_broker/kafka"
-	restHandles "github.com/lazylex/watch-store/store/internal/adapters/rest/handlers"
-	"github.com/lazylex/watch-store/store/internal/adapters/rest/middlewares/jwt"
-	requestMetrics "github.com/lazylex/watch-store/store/internal/adapters/rest/middlewares/request_metrics"
-	"github.com/lazylex/watch-store/store/internal/adapters/rest/router"
+	restServer "github.com/lazylex/watch-store/store/internal/adapters/rest/server"
 	"github.com/lazylex/watch-store/store/internal/config"
 	"github.com/lazylex/watch-store/store/internal/logger"
 	prometheusMetrics "github.com/lazylex/watch-store/store/internal/metrics"
 	"github.com/lazylex/watch-store/store/internal/ports/repository"
 	"github.com/lazylex/watch-store/store/internal/repository/mysql"
 	"github.com/lazylex/watch-store/store/internal/service"
-	"net/http"
 	"os"
 	"os/signal"
 )
@@ -37,32 +29,11 @@ func main() {
 		service.WithMetrics(metrics),
 	)
 
-	mux := chi.NewRouter()
-	rm := requestMetrics.New(metrics)
-	mux.Use(middleware.Recoverer, middleware.RequestID, rm.BeforeHandle, rm.AfterHandle)
+	server := restServer.New(
+		cfg.Address, cfg.ReadTimeout, cfg.WriteTimeout, cfg.IdleTimeout, cfg.ShutdownTimeout, cfg.QueryTimeout,
+		domainService, log, metrics, cfg.Env, cfg.Signature)
 
-	if cfg.Env == config.EnvironmentLocal {
-		mux.Use(middleware.Logger)
-	} else {
-		mux.Use(jwt.New(log, []byte(cfg.Signature)).CheckJWT)
-	}
-
-	srv := &http.Server{
-		Handler:      router.AddHandlers(mux, restHandles.New(domainService, log, cfg.QueryTimeout)),
-		Addr:         cfg.Address,
-		ReadTimeout:  cfg.ReadTimeout,
-		WriteTimeout: cfg.WriteTimeout,
-		IdleTimeout:  cfg.IdleTimeout,
-	}
-
-	go func() {
-		log.Info("start http server on " + cfg.Address)
-		err := srv.ListenAndServe()
-		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Error("server startup error")
-			os.Exit(1)
-		}
-	}()
+	server.MustRun()
 
 	go func() {
 		if cfg.UseKafka {
@@ -90,12 +61,5 @@ func main() {
 	fmt.Println() // так красивее, если вывод логов производится в стандартный терминал
 	log.Info(fmt.Sprintf("%s signal received. Shutdown started", sig))
 
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeout)
-	defer cancel()
-
-	if err := srv.Shutdown(ctx); err != nil {
-		log.Error("failed to gracefully shutdown http server")
-	} else {
-		log.Info("gracefully shut down http server")
-	}
+	server.Shutdown()
 }
