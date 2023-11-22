@@ -23,7 +23,7 @@ type Metrics struct {
 
 // MustCreate возвращает метрики *Metrics или останавливает программу, если не удалось запустить http сервер для
 // работы с Prometheus или занести метрики в регистр
-func MustCreate(cfg *config.Config, log *slog.Logger) *Metrics {
+func MustCreate(cfg *config.Prometheus, log *slog.Logger) *Metrics {
 	var port = "9323"
 	var url = "/metrics"
 

@@ -17,13 +17,8 @@ import (
 func main() {
 	cfg := config.MustLoad()
 	log := logger.MustCreate(cfg.Env, cfg.Instance)
-	metrics := prometheusMetrics.MustCreate(cfg, log)
-
-	domainService := service.New(
-		mysql.WithRepository(cfg, log),
-		service.WithLogger(log),
-		service.WithMetrics(metrics),
-	)
+	metrics := prometheusMetrics.MustCreate(&cfg.Prometheus, log)
+	domainService := service.New(mysql.WithRepository(cfg, log), service.WithLogger(log), service.WithMetrics(metrics))
 
 	server := restServer.New(
 		cfg.Address, cfg.ReadTimeout, cfg.WriteTimeout, cfg.IdleTimeout, cfg.ShutdownTimeout, cfg.QueryTimeout,
