@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"github.com/lazylex/watch-store/store/internal/adapters/message_broker/kafka"
 	restServer "github.com/lazylex/watch-store/store/internal/adapters/rest/server"
@@ -15,11 +14,8 @@ import (
 	"os/signal"
 )
 
-var configPath = flag.String("config", "", "путь к файлу конфигурации")
-
 func main() {
-	flag.Parse()
-	cfg := config.MustLoad(configPath)
+	cfg := config.MustLoad()
 	log := logger.MustCreate(cfg.Env, cfg.Instance)
 	metrics := prometheusMetrics.MustCreate(cfg, log)
 

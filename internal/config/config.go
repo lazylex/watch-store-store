@@ -1,6 +1,7 @@
 package config
 
 import (
+	"flag"
 	"github.com/ilyakaznacheev/cleanenv"
 	"log"
 	"os"
@@ -57,10 +58,13 @@ type Prometheus struct {
 	PrometheusMetricsURL string `yaml:"prometheus_metrics_url" env:"PROMETHEUS_METRICS_URL"`
 }
 
-// MustLoad возвращает конфигурацию, считанную из файла, путь к которому передан как аргумент функции или содержится в
-// переменной окружения STORE_CONFIG_PATH. Переопределение конфигурационных значений может находится в соответсвующих
-// переменных окружения, описанных в структурах Config, HttpServer, Secure и Storage
-func MustLoad(configPath *string) *Config {
+// MustLoad возвращает конфигурацию, считанную из файла, путь к которому передан из командной строки по флагу config или
+// содержится в переменной окружения STORE_CONFIG_PATH. Переопределение конфигурационных значений может находится в
+// соответсвующих переменных окружения, описанных в структурах Config, HttpServer, Secure и Storage
+func MustLoad() *Config {
+	flag.Parse()
+
+	var configPath = flag.String("config", "", "путь к файлу конфигурации")
 	var cfg Config
 
 	if *configPath == "" {
