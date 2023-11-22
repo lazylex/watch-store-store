@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lazylex/watch-store/store/internal/config"
-	"github.com/lazylex/watch-store/store/internal/logger"
+	internalLogger "github.com/lazylex/watch-store/store/internal/logger"
 	httpMetrics "github.com/lazylex/watch-store/store/internal/ports/metrics/http"
 	"github.com/lazylex/watch-store/store/internal/ports/metrics/service"
 	"github.com/prometheus/client_golang/prometheus"
@@ -23,11 +23,11 @@ type Metrics struct {
 
 // MustCreate возвращает метрики *Metrics или останавливает программу, если не удалось запустить http сервер для
 // работы с Prometheus или занести метрики в регистр
-func MustCreate(cfg *config.Prometheus, log *slog.Logger) *Metrics {
+func MustCreate(cfg *config.Prometheus, logger *slog.Logger) *Metrics {
 	var port = "9323"
 	var url = "/metrics"
 
-	log = log.With(slog.String(logger.OPLabel, "metrics.MustCreate"))
+	log := logger.With(slog.String(internalLogger.OPLabel, "metrics.MustCreate"))
 
 	if len(cfg.PrometheusPort) > 0 {
 		port = cfg.PrometheusPort
@@ -37,7 +37,7 @@ func MustCreate(cfg *config.Prometheus, log *slog.Logger) *Metrics {
 		url = cfg.PrometheusMetricsURL
 	}
 
-	startHTTP(url, port, log)
+	startHTTP(url, port, logger)
 
 	metrics, err := registerMetrics()
 	if err != nil {
