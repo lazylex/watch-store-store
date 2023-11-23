@@ -8,7 +8,7 @@ import (
 	"github.com/lazylex/watch-store/store/internal/dto"
 	"github.com/lazylex/watch-store/store/internal/logger"
 	"github.com/lazylex/watch-store/store/internal/metrics"
-	mock_service "github.com/lazylex/watch-store/store/internal/ports/metrics/service/mocks"
+	mockService "github.com/lazylex/watch-store/store/internal/ports/metrics/service/mocks"
 	"github.com/lazylex/watch-store/store/internal/ports/repository"
 	mockrepository "github.com/lazylex/watch-store/store/internal/ports/repository/mocks"
 	"github.com/lazylex/watch-store/store/internal/ports/service"
@@ -425,7 +425,7 @@ func TestService_MakeReservationForInternetSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
-	mockServiceMetrics := mock_service.NewMockMetricsInterface(ctrl)
+	mockServiceMetrics := mockService.NewMockMetricsInterface(ctrl)
 	data := dto.ReservationDTO{
 		Products:    []dto.ProductDTO{{Article: "test-9", Amount: 1, Price: 698}},
 		OrderNumber: reservation.MaxCashRegisterNumber + 1,
@@ -452,7 +452,7 @@ func TestService_MakeReservationForLocalSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
-	mockServiceMetrics := mock_service.NewMockMetricsInterface(ctrl)
+	mockServiceMetrics := mockService.NewMockMetricsInterface(ctrl)
 	data := dto.ReservationDTO{
 		Products:    []dto.ProductDTO{{Article: "test-9", Amount: 1, Price: 698}},
 		OrderNumber: reservation.MaxCashRegisterNumber + 1,
@@ -702,7 +702,7 @@ func TestService_CancelReservationInternet(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
-	mockServiceMetrics := mock_service.NewMockMetricsInterface(ctrl)
+	mockServiceMetrics := mockService.NewMockMetricsInterface(ctrl)
 	data := dto.OrderNumberDTO{OrderNumber: 555}
 	s := Service{Repository: mockRepo, Logger: logger.Null(),
 		Metrics: &metrics.Metrics{HTTP: nil, Service: mockServiceMetrics}}
