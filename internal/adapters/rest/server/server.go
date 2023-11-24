@@ -27,7 +27,7 @@ type Server struct {
 // New возвращает REST-сервер, который является оберткой над http.Server с настроенными middlewares и ручками. В
 // качестве параметров передается адрес, таймауты, доменный сервис, логгер, метрики, окружение и строка безопасности для
 // JWT-токена, если передано не локальное окружение для запуска
-func New(address string, readTimeout, writeTimeout, idleTimeout, shutdownTimeout, queryTimeout time.Duration,
+func New(cfg *config.HttpServer, queryTimeout time.Duration,
 	domainService *service.Service,
 	log *slog.Logger,
 	metrics *metrics.Metrics,
@@ -47,13 +47,13 @@ func New(address string, readTimeout, writeTimeout, idleTimeout, shutdownTimeout
 	return &Server{
 		srv: &http.Server{
 			Handler:      router.AddHandlers(mux, restHandles.New(domainService, log, queryTimeout)),
-			Addr:         address,
-			ReadTimeout:  readTimeout,
-			WriteTimeout: writeTimeout,
-			IdleTimeout:  idleTimeout,
+			Addr:         cfg.Address,
+			ReadTimeout:  cfg.ReadTimeout,
+			WriteTimeout: cfg.WriteTimeout,
+			IdleTimeout:  cfg.IdleTimeout,
 		},
 		log:             log,
-		shutdownTimeout: shutdownTimeout,
+		shutdownTimeout: cfg.ShutdownTimeout,
 	}
 }
 

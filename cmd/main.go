@@ -20,10 +20,7 @@ func main() {
 	metrics := prometheusMetrics.MustCreate(&cfg.Prometheus, log)
 	domainService := service.New(mysql.WithRepository(cfg, log), service.WithLogger(log), service.WithMetrics(metrics))
 
-	server := restServer.New(
-		cfg.Address, cfg.ReadTimeout, cfg.WriteTimeout, cfg.IdleTimeout, cfg.ShutdownTimeout, cfg.QueryTimeout,
-		domainService, log, metrics, cfg.Env, cfg.Signature)
-
+	server := restServer.New(&cfg.HttpServer, cfg.QueryTimeout, domainService, log, metrics, cfg.Env, cfg.Signature)
 	server.MustRun()
 
 	if cfg.UseKafka {
