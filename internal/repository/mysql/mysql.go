@@ -29,7 +29,13 @@ type Repository struct {
 
 // Close закрывает пул подключений к БД
 func (r *Repository) Close() error {
-	return r.db.Close()
+	log := r.logger.With(slog.String(logger.OPLabel, "mysql.Close"))
+	err := r.db.Close()
+	if err != nil {
+		log.Error("error close repository")
+	}
+	log.Info("close repository")
+	return r.ConvertToCommonErr(err)
 }
 
 // createDSN создает строку подключения к БД из параметров, переданных в конфигурации
@@ -60,19 +66,21 @@ func generateTransactionNumber() string {
 // WithRepository служит для инициализации репозитория и внедрение его в сервис, используя паттерн Options
 func WithRepository(cfg *config.Storage, log *slog.Logger) service.Option {
 	return func(s *service.Service) {
-		initialLogger := log.With(slog.String(logger.OPLabel, "mysql.WithRepository"))
+		internalLogger := log.With(slog.String(logger.OPLabel, "mysql.WithRepository"))
 		db, err := sql.Open("mysql", createDSN(cfg))
 		if err != nil {
-			initialLogger.Error(err.Error())
+			internalLogger.Error(err.Error())
 			os.Exit(1)
 		}
 
 		db.SetMaxOpenConns(cfg.DatabaseMaxOpenConnections)
 
 		if err = db.Ping(); err != nil {
-			initialLogger.Error(err.Error())
+			internalLogger.Error(err.Error())
 			os.Exit(1)
 		}
+
+		internalLogger.Info("successfully ping db")
 
 		s.Repository = &Repository{db: db, logger: log}
 	}

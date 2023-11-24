@@ -29,11 +29,7 @@ func main() {
 	}
 
 	defer func(Repository repository.Interface) {
-		err := Repository.Close()
-		if err != nil {
-			log.Error("error close repository")
-		}
-		log.Info("close repository")
+		_ = Repository.Close()
 	}(domainService.Repository)
 
 	c := make(chan os.Signal, 1)
