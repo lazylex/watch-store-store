@@ -33,7 +33,7 @@ func (r *Repository) Close() error {
 }
 
 // createDSN создает строку подключения к БД из параметров, переданных в конфигурации
-func createDSN(cfg *config.Config) string {
+func createDSN(cfg *config.Storage) string {
 	return fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true&interpolateParams=true",
 		cfg.DatabaseLogin,
 		cfg.DatabasePassword,
@@ -58,7 +58,7 @@ func generateTransactionNumber() string {
 }
 
 // WithRepository служит для инициализации репозитория и внедрение его в сервис, используя паттерн Options
-func WithRepository(cfg *config.Config, log *slog.Logger) service.Option {
+func WithRepository(cfg *config.Storage, log *slog.Logger) service.Option {
 	return func(s *service.Service) {
 		initialLogger := log.With(slog.String(logger.OPLabel, "mysql.WithRepository"))
 		db, err := sql.Open("mysql", createDSN(cfg))
