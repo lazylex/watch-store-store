@@ -28,9 +28,11 @@ func main() {
 		kafka.MustRun(domainService, &cfg.Kafka, log, cfg.Instance)
 	}
 
-	defer func(Repository repository.Interface) {
-		_ = Repository.Close()
-	}(domainService.Repository)
+	defer func(repo repository.SQLDBInterface) {
+		if repo != nil {
+			_ = repo.Close()
+		}
+	}(domainService.SQLRepository)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)

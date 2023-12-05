@@ -18,9 +18,10 @@ import (
 )
 
 type Service struct {
-	Repository repository.Interface
-	Logger     *slog.Logger
-	Metrics    *metrics.Metrics
+	Repository    repository.Interface
+	SQLRepository repository.SQLDBInterface
+	Logger        *slog.Logger
+	Metrics       *metrics.Metrics
 }
 
 type Option func(*Service)

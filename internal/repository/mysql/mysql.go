@@ -86,8 +86,9 @@ func WithRepository(cfg *config.Storage, log *slog.Logger) service.Option {
 		}
 
 		internalLogger.Info("successfully ping db")
-
-		s.Repository = &Repository{db: db, logger: log}
+		repo := &Repository{db: db, logger: log}
+		s.Repository = repo
+		s.SQLRepository = repo
 	}
 }
 

@@ -22,7 +22,6 @@ var (
 //go:generate mockgen -source=repository.go -destination=mocks/repository.go
 type Interface interface {
 	ConvertToCommonErr(error) error
-	Close() error
 
 	WithinTransaction(context.Context, func(context.Context) error) error
 
@@ -48,4 +47,5 @@ type Interface interface {
 
 type SQLDBInterface interface {
 	GetDB() *sql.DB
+	Close() error
 }
