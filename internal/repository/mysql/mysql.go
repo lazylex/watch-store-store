@@ -27,6 +27,11 @@ type Repository struct {
 	logger *slog.Logger
 }
 
+// GetDB возвращает структуру DB репозитория
+func (r *Repository) GetDB() *sql.DB {
+	return r.db
+}
+
 // Close закрывает пул подключений к БД
 func (r *Repository) Close() error {
 	log := r.logger.With(slog.String(logger.OPLabel, "mysql.Close"))

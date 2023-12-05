@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"github.com/lazylex/watch-store/store/internal/dto"
 	"github.com/lazylex/watch-store/store/internal/helpers/constants/prefixes"
@@ -43,4 +44,8 @@ type Interface interface {
 	ReadSoldAmount(context.Context, *dto.ArticleDTO) (uint, error)
 	ReadSoldRecordsInPeriod(context.Context, *dto.ArticleWithPeriodDTO) ([]dto.SoldDTO, error)
 	ReadSoldAmountInPeriod(context.Context, *dto.ArticleWithPeriodDTO) (uint, error)
+}
+
+type SQLDBInterface interface {
+	GetDB() *sql.DB
 }
