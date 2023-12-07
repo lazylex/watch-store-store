@@ -31,7 +31,7 @@ func Start(db *sql.DB, log *slog.Logger, port string) {
 	}
 
 	http.HandleFunc("/tables", reader.displayTablesList)
-	err = http.ListenAndServe("port", nil)
+	err = http.ListenAndServe(port, nil)
 	if err != nil {
 		if errors.Is(err, http.ErrServerClosed) {
 			log.Error("server closed")
@@ -106,10 +106,15 @@ func (rd *Reader) tableNames() []string {
 // displayTablesList отображает страницу со списком таблиц
 func (rd *Reader) displayTablesList(w http.ResponseWriter, r *http.Request) {
 	linkStyle := makeStyles(map[string]string{"color": "black", "text-decoration": "none"})
+	var rows [][]string
+
 	for _, name := range rd.tableNames() {
-		_, err := io.WriteString(w, makeLink(name, makePath([]string{"tables", name}), linkStyle)+"<br>")
-		if err != nil {
-			return
-		}
+		rows = append(rows, []string{makeLink(name, makePath([]string{"tables", name}), linkStyle)})
 	}
+
+	_, err := io.WriteString(w, makeTable([]string{"Таблицы"}, rows))
+	if err != nil {
+		return
+	}
+
 }
