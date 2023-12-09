@@ -1,12 +1,15 @@
 package db_reader
 
 import (
-	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
+	"reflect"
+	"strings"
+	"time"
 )
 
 type Reader struct {
@@ -31,6 +34,7 @@ func Start(db *sql.DB, log *slog.Logger, port string) {
 	}
 
 	http.HandleFunc("/tables", reader.displayTablesList)
+	http.HandleFunc("/table", reader.displayTable)
 	err = http.ListenAndServe(port, nil)
 	if err != nil {
 		if errors.Is(err, http.ErrServerClosed) {
@@ -61,11 +65,10 @@ func (rd *Reader) readTables() (map[string][]string, error) {
 	var rows *sql.Rows
 	var err error
 	result := make(map[string][]string)
-	ctx := context.Background()
 
 	stmt := `SELECT table_name FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE' AND table_schema=?;`
 
-	if rows, err = rd.db.QueryContext(ctx, stmt, rd.dbName); err != nil {
+	if rows, err = rd.db.Query(stmt, rd.dbName); err != nil {
 		return nil, err
 	}
 	for rows.Next() {
@@ -77,14 +80,15 @@ func (rd *Reader) readTables() (map[string][]string, error) {
 	}
 
 	for table, _ := range result {
-		stmt = `SELECT column_name FROM information_schema.columns WHERE table_schema=? AND table_name=?;`
-
-		if rows, err = rd.db.QueryContext(ctx, stmt, rd.dbName, table); err != nil {
+		stmt = fmt.Sprintf("describe %s;", table)
+		if rows, err = rd.db.Query(stmt); err != nil {
+			rd.log.Error(err.Error())
 			return nil, err
 		}
+
 		for rows.Next() {
-			var record []uint8
-			if err = rows.Scan(&record); err != nil {
+			var record, trash []uint8
+			if err = rows.Scan(&record, &trash, &trash, &trash, &trash, &trash); err != nil {
 				return nil, err
 			}
 			result[table] = append(result[table], string(record))
@@ -92,6 +96,49 @@ func (rd *Reader) readTables() (map[string][]string, error) {
 	}
 
 	return result, nil
+}
+
+func (rd *Reader) selectAll(tableName string) [][]string {
+	var s string
+	var err error
+	var rows *sql.Rows
+	var result [][]string
+	caption := rd.tables[tableName]
+	numCols := len(caption)
+	log := rd.log.With("op", "db_reader.selectAll")
+
+	// при построении запроса неизвестно количество запрашиваемых столбцов, поэтому запрос строится небезопасным методом
+	stmt := "SELECT " + strings.Join(caption, ", ") + " FROM " + tableName + ";"
+	if rows, err = rd.db.Query(stmt); err != nil {
+		log.Error(err.Error())
+		return [][]string{}
+	}
+
+	for rows.Next() {
+		t := make([]interface{}, numCols)
+		for i := range t {
+			t[i] = &t[i]
+		}
+
+		err = rows.Scan(t...)
+		if err != nil {
+			log.Error(err.Error())
+			return nil
+		}
+		result = append(result, make([]string, numCols))
+		for i := range t {
+			if reflect.ValueOf(t[i]).Type().String() == "time.Time" {
+				timeVal := t[i].(time.Time)
+				s = timeVal.String()
+			} else {
+				anotherVal := t[i].([]uint8)
+				s = string(anotherVal)
+			}
+			result[len(result)-1][i] = s
+		}
+	}
+
+	return result
 }
 
 // tableNames возвращает список с названиями таблиц
@@ -109,12 +156,27 @@ func (rd *Reader) displayTablesList(w http.ResponseWriter, r *http.Request) {
 	var rows [][]string
 
 	for _, name := range rd.tableNames() {
-		rows = append(rows, []string{makeLink(name, makePath([]string{"tables", name}), linkStyle)})
+		rows = append(rows, []string{makeLink(name, fmt.Sprintf("table?name=%s", name), linkStyle)})
 	}
 
-	_, err := io.WriteString(w, makeTable([]string{"Таблицы"}, rows))
-	if err != nil {
+	if _, err := io.WriteString(w, makeTable([]string{"Таблицы"}, rows)); err != nil {
 		return
 	}
+}
 
+// displayTable хендлер для отображения таблицы. В GET параметре name передается название таблицы, которую необходимо
+// отобразить
+func (rd *Reader) displayTable(w http.ResponseWriter, r *http.Request) {
+	tableName := r.URL.Query().Get("name")
+	caption := rd.tables[tableName]
+
+	if len(tableName) == 0 || len(caption) == 0 {
+		_, _ = io.WriteString(w, "Нет таблицы для отображения")
+		return
+	}
+	data := rd.selectAll(tableName)
+	table := makeTable(caption, data)
+	if _, err := io.WriteString(w, table); err != nil {
+		return
+	}
 }

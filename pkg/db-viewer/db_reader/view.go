@@ -22,21 +22,11 @@ func makeStyles(styles map[string]string) string {
 	return result
 }
 
-// makePath объединяет переданные строки в путь вида "строка1/строка2/.../строкаN"
-func makePath(pathParts []string) string {
-	var result string
-	for idx, part := range pathParts {
-		result += part
-		if idx != len(pathParts) {
-			result += "/"
-		}
-	}
-	return result
-}
-
 // makeTableHeader возвращает строку, содержащую html-код заголовка таблицы
 func makeTableHeader(header []string) string {
-	th := tags("th", "", header)
+	th := tags("th",
+		makeStyles(map[string]string{"border": "solid 1px black", "padding": "5px", "background": "#E0DBD9"}),
+		header)
 	row := tag("tr", th, "")
 	return tag("thead", row, "")
 }
@@ -46,7 +36,7 @@ func makeTableBody(data [][]string) string {
 	var rows string
 	for _, row := range data {
 		rows += tag("tr",
-			tags("td", makeStyles(map[string]string{"border": "solid 1px black"}), row),
+			tags("td", makeStyles(map[string]string{"border": "solid 1px black", "padding": "5px"}), row),
 			"")
 	}
 	return tag("tbody", rows, "")
@@ -58,7 +48,7 @@ func makeTable(caption []string, data [][]string) string {
 	return tag("div",
 		tag("table",
 			makeTableHeader(caption)+makeTableBody(data),
-			makeStyles(map[string]string{"border": "solid", "display": "inline-block"})),
+			makeStyles(map[string]string{"border": "solid", "display": "inline-block", "border-collapse": "collapse"})),
 		makeStyles(map[string]string{"text-align": "center"}))
 }
 
