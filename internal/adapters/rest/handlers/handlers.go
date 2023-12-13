@@ -12,9 +12,11 @@ import (
 	"github.com/lazylex/watch-store/store/internal/dto"
 	"github.com/lazylex/watch-store/store/internal/helpers/constants/various"
 	"github.com/lazylex/watch-store/store/internal/logger"
+	"github.com/lazylex/watch-store/store/internal/ports/rest/handlers"
 	"github.com/lazylex/watch-store/store/internal/ports/service"
 	"log/slog"
 	"net/http"
+	"reflect"
 	"time"
 )
 
@@ -412,5 +414,26 @@ func (h *Handler) FinishOrder(w http.ResponseWriter, r *http.Request) {
 	err = h.service.FinishOrder(injectRequestIDToCtx(ctx, r), transferObject)
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err == nil {
 		log.Info(fmt.Sprintf("finish order %d", transferObject.OrderNumber))
+	}
+}
+
+// GetAllHandlers возвращает нумерованный список всех доступных хендлеров, кроме этого. Список возвращаемых хендлеров
+// начинается с единицы. Ноль зарезервирован для данного хендлера. Этот список нужен для сервиса безопасности, который
+// получив сопоставление хендлера и его номера в сервисе, в дальнейшем будет в JWT-токене предоставлять только номера
+// разрешенных в запросе ручек, что позволит уменьшить размер передаваемых данных. Ноль зарезервирован для этой ручки,
+// чтобы сервис безопасности мог сам обратится сюда за списком ручек и всегда знал, какой номер передать в своём запросе
+func (h *Handler) GetAllHandlers(w http.ResponseWriter, r *http.Request) {
+	log := h.logger.With(logger.OPLabel, "handlers.GetAllHandlers")
+	t := reflect.TypeOf((*handlers.Interface)(nil)).Elem()
+
+	for i := 0; i < t.NumMethod(); i++ {
+		method := t.Method(i).Name
+		if method == "GetAllHandlers" {
+			continue
+		}
+		_, err := w.Write([]byte(fmt.Sprintf("%d:%s\n", i+1, method)))
+		if err != nil {
+			log.Error(err.Error())
+		}
 	}
 }
