@@ -24,11 +24,12 @@ type Handler struct {
 	logger       *slog.Logger
 	service      service.Interface
 	queryTimeout time.Duration
+	handlerNames map[int]string
 }
 
 // New конструктор хендлеров. Возвращает созданный обработчик *Handler
 func New(service service.Interface, logger *slog.Logger, queryTimeout time.Duration) *Handler {
-	return &Handler{logger: logger, service: service, queryTimeout: queryTimeout}
+	return &Handler{logger: logger, service: service, queryTimeout: queryTimeout, handlerNames: getAllHandlers()}
 }
 
 // injectRequestIDToCtx возвращает контекст с внедренным идентификатором запроса, для дальнейшего использования логгером
@@ -424,6 +425,20 @@ func (h *Handler) FinishOrder(w http.ResponseWriter, r *http.Request) {
 // чтобы сервис безопасности мог сам обратится сюда за списком ручек и всегда знал, какой номер передать в своём запросе
 func (h *Handler) GetAllHandlers(w http.ResponseWriter, r *http.Request) {
 	log := h.logger.With(logger.OPLabel, "handlers.GetAllHandlers")
+
+	for i, method := range h.handlerNames {
+		_, err := w.Write([]byte(fmt.Sprintf("%d:%s\n", i, method)))
+		if err != nil {
+			log.Error(err.Error())
+		}
+	}
+}
+
+// getAllHandlers возвращает мапу, где ключем служит порядковый номер ручки, начинающийся с нуля, а значением - название
+// ручки. В мапу заносятся все хендлеры, кроме GetAllHandlers, у которого по умолчанию порядковый номер ноль. Данные для
+// функции берутся из интерфейса с использованием рефлексии
+func getAllHandlers() map[int]string {
+	result := make(map[int]string)
 	t := reflect.TypeOf((*handlers.Interface)(nil)).Elem()
 
 	for i := 0; i < t.NumMethod(); i++ {
@@ -431,9 +446,13 @@ func (h *Handler) GetAllHandlers(w http.ResponseWriter, r *http.Request) {
 		if method == "GetAllHandlers" {
 			continue
 		}
-		_, err := w.Write([]byte(fmt.Sprintf("%d:%s\n", i+1, method)))
-		if err != nil {
-			log.Error(err.Error())
-		}
+		result[i+1] = method
 	}
+
+	return result
+}
+
+// HandlerMap геттер для названий всех ручек с их порядковыми номерами
+func (h *Handler) HandlerMap() map[int]string {
+	return h.handlerNames
 }

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	restHandles "github.com/lazylex/watch-store/store/internal/adapters/rest/handlers"
+	restHandlers "github.com/lazylex/watch-store/store/internal/adapters/rest/handlers"
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/middlewares/jwt"
 	requestMetrics "github.com/lazylex/watch-store/store/internal/adapters/rest/middlewares/request_metrics"
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/router"
@@ -33,7 +33,7 @@ func New(cfg *config.HttpServer, queryTimeout time.Duration,
 	metrics *metrics.Metrics,
 	environment,
 	signature string) *Server {
-
+	handlers := restHandlers.New(domainService, log, queryTimeout)
 	mux := chi.NewRouter()
 	rm := requestMetrics.New(metrics)
 	mux.Use(middleware.Recoverer, middleware.RequestID, rm.BeforeHandle, rm.AfterHandle)
@@ -46,7 +46,7 @@ func New(cfg *config.HttpServer, queryTimeout time.Duration,
 
 	return &Server{
 		srv: &http.Server{
-			Handler:      router.AddHandlers(mux, restHandles.New(domainService, log, queryTimeout)),
+			Handler:      router.AddHandlers(mux, handlers),
 			Addr:         cfg.Address,
 			ReadTimeout:  cfg.ReadTimeout,
 			WriteTimeout: cfg.WriteTimeout,
