@@ -58,7 +58,5 @@ func AddHandlers(router *chi.Mux, handlers handlers.Interface) *chi.Mux {
 	router.Put(paths["/api/api_v1/reservation/cancel"], handlers.CancelReservation)
 	router.Put(paths["/api/api_v1/reservation/finish"], handlers.FinishOrder)
 
-	router.Get("/get-all-handlers", handlers.GetAllHandlers)
-
 	return router
 }

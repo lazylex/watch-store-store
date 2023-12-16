@@ -15,5 +15,4 @@ type Interface interface {
 	CancelReservation(w http.ResponseWriter, r *http.Request)
 	MakeLocalSale(w http.ResponseWriter, r *http.Request)
 	FinishOrder(w http.ResponseWriter, r *http.Request)
-	GetAllHandlers(w http.ResponseWriter, r *http.Request)
 }
