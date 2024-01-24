@@ -5,4 +5,5 @@ const (
 	RequestErrorsPrefix = "request: "
 	RepositoryPrefix    = "repository: "
 	ServicePrefix       = "service: "
+	MetricsPrefix       = "metrics: "
 )

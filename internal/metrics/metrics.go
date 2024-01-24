@@ -4,11 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lazylex/watch-store/store/internal/config"
+	"github.com/lazylex/watch-store/store/internal/helpers/constants/prefixes"
 	internalLogger "github.com/lazylex/watch-store/store/internal/logger"
 	httpMetrics "github.com/lazylex/watch-store/store/internal/ports/metrics/http"
 	"github.com/lazylex/watch-store/store/internal/ports/metrics/service"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	standartLog "log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -21,13 +23,32 @@ type Metrics struct {
 	Service service.MetricsInterface
 }
 
+// dtoErr добавляет к тексту ошибки префикс, указывающий на её принадлежность к DTO
+func metricsErr(text string) error {
+	return errors.New(prefixes.MetricsPrefix + text)
+}
+
+var (
+	ErrNilConfigPointer = metricsErr("nil config pointer")
+	ErrNilLoggerPointer = metricsErr("nil config pointer")
+)
+
 // MustCreate возвращает метрики *Metrics или останавливает программу, если не удалось запустить http сервер для
 // работы с Prometheus или занести метрики в регистр
 func MustCreate(cfg *config.Prometheus, logger *slog.Logger) *Metrics {
-	var port = "9323"
-	var url = "/metrics"
+	if logger == nil {
+		standartLog.Fatal(ErrNilLoggerPointer.Error())
+	}
 
 	log := logger.With(slog.String(internalLogger.OPLabel, "metrics.MustCreate"))
+
+	if cfg == nil {
+		log.Error(ErrNilConfigPointer.Error())
+		os.Exit(1)
+	}
+
+	var port = "9323"
+	var url = "/metrics"
 
 	if len(cfg.PrometheusPort) > 0 {
 		port = cfg.PrometheusPort
@@ -93,6 +114,11 @@ func registerMetrics() (*Metrics, error) {
 // startHTTP запускает http сервер для связи с Prometheus на переданном в функцию порту и url. При неудаче выводит
 // ошибку в лог и останавливает программу
 func startHTTP(url, port string, log *slog.Logger) {
+
+	if log == nil {
+		standartLog.Fatal(ErrNilLoggerPointer.Error())
+	}
+
 	go func() {
 		mux := http.NewServeMux()
 
