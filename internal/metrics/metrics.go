@@ -30,7 +30,7 @@ func metricsErr(text string) error {
 
 var (
 	ErrNilConfigPointer = metricsErr("nil config pointer")
-	ErrNilLoggerPointer = metricsErr("nil config pointer")
+	ErrNilLoggerPointer = metricsErr("nil logger pointer")
 )
 
 // MustCreate возвращает метрики *Metrics или останавливает программу, если не удалось запустить http сервер для
