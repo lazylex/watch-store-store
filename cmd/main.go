@@ -21,7 +21,8 @@ func main() {
 	domainService := service.New(mysql.WithRepository(&cfg.Storage, log), service.WithLogger(log),
 		service.WithMetrics(metrics))
 
-	server := restServer.New(&cfg.HttpServer, cfg.QueryTimeout, domainService, log, metrics, cfg.Env, cfg.Signature)
+	server := restServer.MustCreate(&cfg.HttpServer, cfg.QueryTimeout, domainService, log, metrics, cfg.Env,
+		cfg.Signature)
 	server.MustRun()
 
 	if cfg.UseKafka {

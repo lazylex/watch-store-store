@@ -10,8 +10,10 @@ import (
 	requestMetrics "github.com/lazylex/watch-store/store/internal/adapters/rest/middlewares/request_metrics"
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/router"
 	"github.com/lazylex/watch-store/store/internal/config"
+	"github.com/lazylex/watch-store/store/internal/helpers/constants/prefixes"
 	"github.com/lazylex/watch-store/store/internal/metrics"
 	"github.com/lazylex/watch-store/store/internal/service"
+	standartLog "log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -24,10 +26,22 @@ type Server struct {
 	shutdownTimeout time.Duration
 }
 
-// New возвращает REST-сервер, который является оберткой над http.Server с настроенными middlewares и ручками. В
+// dtoErr добавляет к тексту ошибки префикс, указывающий на её принадлежность к DTO
+func serverErr(text string) error {
+	return errors.New(prefixes.RestServerPrefix + text)
+}
+
+var (
+	ErrNilConfigPointer  = serverErr("nil config pointer")
+	ErrNilLoggerPointer  = serverErr("nil logger pointer")
+	ErrNilServicePointer = serverErr("nil domain service pointer")
+	ErrNilMetricsPointer = serverErr("nil metrics pointer")
+)
+
+// MustCreate возвращает REST-сервер, который является оберткой над http.Server с настроенными middlewares и ручками. В
 // качестве параметров передается адрес, таймауты, доменный сервис, логгер, метрики, окружение и строка безопасности для
 // JWT-токена, если передано не локальное окружение для запуска
-func New(cfg *config.HttpServer, queryTimeout time.Duration,
+func MustCreate(cfg *config.HttpServer, queryTimeout time.Duration,
 	domainService *service.Service,
 	log *slog.Logger,
 	metrics *metrics.Metrics,
@@ -37,6 +51,22 @@ func New(cfg *config.HttpServer, queryTimeout time.Duration,
 	mux := chi.NewRouter()
 	rm := requestMetrics.New(metrics)
 	mux.Use(middleware.Recoverer, middleware.RequestID, rm.BeforeHandle, rm.AfterHandle)
+
+	if log == nil {
+		standartLog.Fatal(ErrNilLoggerPointer.Error())
+	}
+	if cfg == nil {
+		log.Error(ErrNilConfigPointer.Error())
+		os.Exit(1)
+	}
+	if metrics == nil {
+		log.Error(ErrNilMetricsPointer.Error())
+		os.Exit(1)
+	}
+	if domainService == nil {
+		log.Error(ErrNilServicePointer.Error())
+		os.Exit(1)
+	}
 
 	if environment == config.EnvironmentLocal {
 		mux.Use(middleware.Logger)

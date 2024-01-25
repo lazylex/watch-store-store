@@ -6,4 +6,5 @@ const (
 	RepositoryPrefix    = "repository: "
 	ServicePrefix       = "service: "
 	MetricsPrefix       = "metrics: "
+	RestServerPrefix    = "rest server: "
 )
