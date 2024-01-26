@@ -11,9 +11,11 @@ import (
 	"github.com/lazylex/watch-store/store/internal/config"
 	"github.com/lazylex/watch-store/store/internal/domain/aggregates/reservation"
 	"github.com/lazylex/watch-store/store/internal/dto"
+	"github.com/lazylex/watch-store/store/internal/helpers/constants/prefixes"
 	"github.com/lazylex/watch-store/store/internal/logger"
 	"github.com/lazylex/watch-store/store/internal/ports/repository"
 	"github.com/lazylex/watch-store/store/internal/service"
+	standartLog "log"
 	"log/slog"
 	"os"
 	"strings"
@@ -26,6 +28,15 @@ type Repository struct {
 	db     *sql.DB
 	logger *slog.Logger
 }
+
+func mysqlErr(text string) error {
+	return errors.New(prefixes.MySQLPrefix + text)
+}
+
+var (
+	ErrNilConfigPointer = mysqlErr("nil config pointer")
+	ErrNilLoggerPointer = mysqlErr("nil logger pointer")
+)
 
 // GetDB возвращает структуру DB репозитория
 func (r *Repository) GetDB() *sql.DB {
@@ -70,6 +81,15 @@ func generateTransactionNumber() string {
 
 // WithRepository служит для инициализации репозитория и внедрение его в сервис, используя паттерн Options
 func WithRepository(cfg *config.Storage, log *slog.Logger) service.Option {
+
+	if log == nil {
+		standartLog.Fatal(ErrNilLoggerPointer.Error())
+	}
+	if cfg == nil {
+		log.Error(ErrNilConfigPointer.Error())
+		os.Exit(1)
+	}
+
 	return func(s *service.Service) {
 		internalLogger := log.With(slog.String(logger.OPLabel, "mysql.WithRepository"))
 		db, err := sql.Open("mysql", createDSN(cfg))

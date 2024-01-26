@@ -7,4 +7,5 @@ const (
 	ServicePrefix       = "service: "
 	MetricsPrefix       = "metrics: "
 	RestServerPrefix    = "rest server: "
+	MySQLPrefix         = "mysql: "
 )
