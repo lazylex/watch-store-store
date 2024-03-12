@@ -5,7 +5,6 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/router"
 	"github.com/lazylex/watch-store/store/internal/dto"
-	"github.com/lazylex/watch-store/store/internal/logger"
 	"github.com/lazylex/watch-store/store/internal/ports/repository"
 	mockService "github.com/lazylex/watch-store/store/internal/ports/service/mocks"
 	"net/http"
@@ -19,7 +18,7 @@ func TestHandler_GetStockSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 	service.EXPECT().GetStock(gomock.Any(), gomock.Any()).Times(1).Return(
 		dto.NamedProductDTO{Name: "CASIO G-SHOCK DW-5600E-1V", Article: "1",
 			Price: 7950, Amount: 22,
@@ -38,7 +37,7 @@ func TestHandler_GetStockBadArticle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/stock/9.9999", nil)
 
@@ -52,7 +51,7 @@ func TestHandler_GetStockNoRecord(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 	service.EXPECT().GetStock(gomock.Any(), gomock.Any()).Times(1).Return(
 		dto.NamedProductDTO{}, repository.ErrNoRecord)
 
@@ -69,7 +68,7 @@ func TestHandler_GetAmountInStockSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 	service.EXPECT().GetAmountInStock(gomock.Any(), gomock.Any()).Times(1).Return(
 		uint(15), nil)
 
@@ -86,7 +85,7 @@ func TestHandler_GetAmountInStockIncorrectArticle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/stock/amount/1.0009", nil)
@@ -101,7 +100,7 @@ func TestHandler_GetAmountInStockNoRecord(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/stock/amount/1", nil)
@@ -118,7 +117,7 @@ func TestHandler_GetAmountInStockNoRecord(t *testing.T) {
 func TestHandler_UpdatePriceInStockSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
-	mux := router.AddHandlers(chi.NewRouter(), New(service, logger.Null(), time.Second))
+	mux := router.AddHandlers(chi.NewRouter(), New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price", strings.NewReader("{\"Article\": \"9\", \"Price\": 1000}"))
@@ -135,7 +134,7 @@ func TestHandler_UpdatePriceInStockIncorrectArticle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price", strings.NewReader("{\"Article\": \"9.0090\", \"Price\": 1000}"))
@@ -150,7 +149,7 @@ func TestHandler_UpdatePriceInStockNegativePrice(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price", strings.NewReader("{\"Article\": \"9\", \"Price\": -1000}"))
@@ -165,7 +164,7 @@ func TestHandler_UpdatePriceInStockIncorrectPrice(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price", strings.NewReader("{\"Article\": \"9\", \"Price\": \"Expensive\"}"))
@@ -180,7 +179,7 @@ func TestHandler_UpdatePriceInStockTimeout(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price", strings.NewReader("{\"Article\": \"9\", \"Price\": 1000}"))
@@ -199,7 +198,7 @@ func TestHandler_UpdateAmountInStockSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount", strings.NewReader("{\"Article\": \"9\", \"Amount\": 5}"))
@@ -217,7 +216,7 @@ func TestHandler_UpdateAmountInStockIncorrectAmount(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount", strings.NewReader("{\"Article\": \"9\", \"Amount\": \"five\"}"))
@@ -232,7 +231,7 @@ func TestHandler_UpdateAmountInStockIncorrectArticle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount", strings.NewReader("{\"Article\": \"9.0999\", \"Amount\": 5}"))
@@ -247,7 +246,7 @@ func TestHandler_UpdateAmountInStockTimeout(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/amount", strings.NewReader("{\"Article\": \"9\", \"Amount\": 5}"))
@@ -265,7 +264,7 @@ func TestHandler_AddToStockSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
@@ -286,7 +285,7 @@ func TestHandler_AddToStockIncorrectArticle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost,
@@ -303,7 +302,7 @@ func TestHandler_AddToStockIncorrectPrice(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost,
@@ -320,7 +319,7 @@ func TestHandler_AddToStockIncorrectAmount(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost,
@@ -337,7 +336,7 @@ func TestHandler_GetSoldAmountSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9", nil)
@@ -354,7 +353,7 @@ func TestHandler_GetSoldAmountIncorrectArticle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9.9999", nil)
@@ -369,7 +368,7 @@ func TestHandler_GetSoldAmountTimeout(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9", nil)
@@ -386,7 +385,7 @@ func TestHandler_GetSoldAmountInTimePeriodSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9?from=2022-01-01&to=2023-09-28", nil)
@@ -408,7 +407,7 @@ func TestHandler_GetSoldAmountInTimePeriodIncorrectDateOrder(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9?from=2024-01-01&to=2023-09-28", nil)
@@ -423,7 +422,7 @@ func TestHandler_GetSoldAmountInTimePeriodTimeout(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9?from=2022-01-01&to=2023-09-28", nil)
@@ -445,7 +444,7 @@ func TestHandler_GetSoldAmountInTimePeriodIncorrectFrom(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9?from=yesterday&to=2023-09-28", nil)
@@ -460,7 +459,7 @@ func TestHandler_GetSoldAmountInTimePeriodIncorrectTo(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9?from=2023-09-28&to=light-future", nil)
@@ -475,7 +474,7 @@ func TestHandler_GetSoldAmountWithoutFrom(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9?to=2022-01-01", nil)
@@ -490,7 +489,7 @@ func TestHandler_GetSoldAmountWithoutTo(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/sold/amount/9?from=2022-01-01", nil)
@@ -506,7 +505,7 @@ func TestHandler_CancelReservationSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/cancel",
@@ -527,7 +526,7 @@ func TestHandler_CancelReservationIncorrectOrder(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/cancel",
@@ -543,7 +542,7 @@ func TestHandler_CancelReservationNegativeOrder(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/cancel",
@@ -559,7 +558,7 @@ func TestHandler_MakeReservationSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
@@ -582,7 +581,7 @@ func TestHandler_MakeReservationNoProducts(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
@@ -600,7 +599,7 @@ func TestHandler_MakeReservationNoStatus(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
@@ -618,7 +617,7 @@ func TestHandler_MakeReservationIncorrectJSON(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
@@ -636,7 +635,7 @@ func TestHandler_MakeReservationNoOrder(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
@@ -654,7 +653,7 @@ func TestHandler_MakeReservationIncorrectOrderData(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
@@ -672,7 +671,7 @@ func TestHandler_MakeLocalSaleSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
@@ -691,7 +690,7 @@ func TestHandler_MakeLocalSaleNoProducts(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost, "/api/api_v1/sale/make", nil)
@@ -706,7 +705,7 @@ func TestHandler_MakeLocalSaleTimeout(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
@@ -725,7 +724,7 @@ func TestHandler_MakeLocalSaleErrorData(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
@@ -742,7 +741,7 @@ func TestHandler_FinishOrderSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish",
@@ -760,7 +759,7 @@ func TestHandler_FinishOrderNegativeOrder(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish",
@@ -776,7 +775,7 @@ func TestHandler_FinishOrderNotIntOrder(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish",
@@ -792,7 +791,7 @@ func TestHandler_FinishOrderTimeout(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
-	router.AddHandlers(mux, New(service, logger.Null(), time.Second))
+	router.AddHandlers(mux, New(service, time.Second))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/reservation/finish",
