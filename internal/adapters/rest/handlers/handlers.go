@@ -19,14 +19,13 @@ import (
 )
 
 type Handler struct {
-	logger       *slog.Logger
 	service      service.Interface
 	queryTimeout time.Duration
 }
 
 // New конструктор хендлеров. Возвращает созданный обработчик *Handler
-func New(service service.Interface, logger *slog.Logger, queryTimeout time.Duration) *Handler {
-	return &Handler{logger: logger, service: service, queryTimeout: queryTimeout}
+func New(service service.Interface, queryTimeout time.Duration) *Handler {
+	return &Handler{service: service, queryTimeout: queryTimeout}
 }
 
 // injectRequestIDToCtx возвращает контекст с внедренным идентификатором запроса, для дальнейшего использования логгером
@@ -47,7 +46,7 @@ func (h *Handler) GetStockRecord(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var art article.Article
 	var stock dto.NamedProductDTO
-	log := logger.AddPlaceAndRequestId(h.logger, "rest.handlers.GetStockRecord", r)
+	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.GetStockRecord", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
@@ -79,7 +78,7 @@ func (h *Handler) GetAmountInStock(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var art article.Article
 	var amount uint
-	log := logger.AddPlaceAndRequestId(h.logger, "rest.handlers.GetAmountInStock", r)
+	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.GetAmountInStock", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
@@ -110,7 +109,7 @@ func (h *Handler) UpdatePriceInStock(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var transferObject dto.ArticleWithPriceDTO
 
-	log := logger.AddPlaceAndRequestId(h.logger, "rest.handlers.UpdatePriceInStock", r)
+	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.UpdatePriceInStock", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
@@ -142,7 +141,7 @@ func (h *Handler) UpdatePriceInStock(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) UpdateAmountInStock(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var transferObject dto.ArticleWithAmountDTO
-	log := logger.AddPlaceAndRequestId(h.logger, "rest.handlers.UpdateAmountInStock", r)
+	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.UpdateAmountInStock", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
@@ -174,7 +173,7 @@ func (h *Handler) UpdateAmountInStock(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) AddToStock(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var transferObject dto.NamedProductDTO
-	log := logger.AddPlaceAndRequestId(h.logger, "rest.handlers.CreateStock", r)
+	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.CreateStock", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
@@ -210,7 +209,7 @@ func (h *Handler) GetSoldAmount(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var amount uint
 	var art article.Article
-	log := logger.AddPlaceAndRequestId(h.logger, "rest.handlers.GetSoldAmount", r)
+	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.GetSoldAmount", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
@@ -290,7 +289,7 @@ func (h *Handler) GetSoldAmount(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) MakeReservation(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var transferObject dto.ReservationDTO
-	log := logger.AddPlaceAndRequestId(h.logger, "rest.handlers.MakeReservation", r)
+	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.MakeReservation", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
@@ -322,7 +321,7 @@ func (h *Handler) MakeReservation(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) CancelReservation(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var transferObject dto.OrderNumberDTO
-	log := logger.AddPlaceAndRequestId(h.logger, "rest.handlers.CancelReservation", r)
+	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.CancelReservation", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
@@ -363,7 +362,7 @@ func (h *Handler) CancelReservation(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) MakeLocalSale(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var products []dto.ProductDTO
-	log := logger.AddPlaceAndRequestId(h.logger, "rest.handlers.MakeLocalSale", r)
+	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.MakeLocalSale", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
@@ -393,7 +392,7 @@ func (h *Handler) MakeLocalSale(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) FinishOrder(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var transferObject dto.OrderNumberDTO
-	log := logger.AddPlaceAndRequestId(h.logger, "rest.handlers.FinishOrder", r)
+	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.FinishOrder", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()

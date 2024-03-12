@@ -12,9 +12,9 @@ import (
 
 // MustRun предназначен для запуска консьюмеров/продюсеров Кафки. Если в конфигурации cfg не задано имя топика, то
 // соответствующий ему консьюмер/продюсер не будет запущен. Работа приложения будет продолжена
-func MustRun(service service.Interface, cfg *config.Kafka, logger *slog.Logger, instance string) {
+func MustRun(service service.Interface, cfg *config.Kafka, instance string) {
 	var topicsInService int
-	log := logger.With(slog.String(internalLogger.OPLabel, "kafka.MustRun"))
+	log := slog.With(slog.String(internalLogger.OPLabel, "kafka.MustRun"))
 
 	if len(cfg.Brokers) < 1 {
 		log.Error("empty kafka brokers list")
@@ -22,7 +22,7 @@ func MustRun(service service.Interface, cfg *config.Kafka, logger *slog.Logger, 
 	}
 
 	if len(cfg.UpdatePriceTopic) > 0 {
-		go update_price.UpdatePrice(service, logger, cfg.Brokers, cfg.UpdatePriceTopic, instance)
+		go update_price.UpdatePrice(service, cfg.Brokers, cfg.UpdatePriceTopic, instance)
 		topicsInService++
 	} else {
 		log.Error("not configured Kafka Update Price topic")

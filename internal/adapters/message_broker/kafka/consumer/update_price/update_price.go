@@ -20,7 +20,7 @@ const attemptsUntilAlarm = 6
 // Автокоммит не выполняется. При ошибке обновления цены смещение в Кафке не сохраняется, а производятся новые попытки
 // обновления. Каждая последующая попытка производится через период, на десять секунд дольше предыдущего. Через
 // attemptsUntilAlarm попыток, в лог выводится ошибка, а не предупреждение
-func UpdatePrice(service service.Interface, log *slog.Logger, brokers []string, topic, instance string) {
+func UpdatePrice(service service.Interface, brokers []string, topic, instance string) {
 	var err error
 	var m kafka.Message
 	var attempts int
@@ -33,7 +33,7 @@ func UpdatePrice(service service.Interface, log *slog.Logger, brokers []string, 
 		GroupID:  instance,
 	})
 
-	log = log.With(slog.String(logger.OPLabel, "kafka.consumer.UpdatePrice"))
+	log := slog.With(slog.String(logger.OPLabel, "kafka.consumer.UpdatePrice"))
 	canFetchMessage := true
 	for {
 		if canFetchMessage {

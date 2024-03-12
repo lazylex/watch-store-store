@@ -44,7 +44,7 @@ func WithMetrics(metrics *metrics.Metrics) Option {
 // New создаёт сервис. В качестве параметров передаются функции, инициализирующие в сервисе репозиторий с интерфейсом
 // repository.Interface и логгер *slog.Logger
 func New(options ...Option) *Service {
-	requiredOptions, initializedOptions := 3, 0
+	requiredOptions, initializedOptions := 2, 0
 
 	s := &Service{}
 	for _, opt := range options {

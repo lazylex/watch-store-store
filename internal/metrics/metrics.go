@@ -10,7 +10,6 @@ import (
 	"github.com/lazylex/watch-store/store/internal/ports/metrics/service"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	standartLog "log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -30,17 +29,13 @@ func metricsErr(text string) error {
 
 var (
 	ErrNilConfigPointer = metricsErr("nil config pointer")
-	ErrNilLoggerPointer = metricsErr("nil logger pointer")
 )
 
 // MustCreate возвращает метрики *Metrics или останавливает программу, если не удалось запустить http сервер для
 // работы с Prometheus или занести метрики в регистр
-func MustCreate(cfg *config.Prometheus, logger *slog.Logger) *Metrics {
-	if logger == nil {
-		standartLog.Fatal(ErrNilLoggerPointer.Error())
-	}
+func MustCreate(cfg *config.Prometheus) *Metrics {
 
-	log := logger.With(slog.String(internalLogger.OPLabel, "metrics.MustCreate"))
+	log := slog.With(slog.String(internalLogger.OPLabel, "metrics.MustCreate"))
 
 	if cfg == nil {
 		log.Error(ErrNilConfigPointer.Error())
@@ -58,7 +53,7 @@ func MustCreate(cfg *config.Prometheus, logger *slog.Logger) *Metrics {
 		url = cfg.PrometheusMetricsURL
 	}
 
-	startHTTP(url, port, logger)
+	startHTTP(url, port)
 
 	metrics, err := registerMetrics()
 	if err != nil {
@@ -113,15 +108,10 @@ func registerMetrics() (*Metrics, error) {
 
 // startHTTP запускает http сервер для связи с Prometheus на переданном в функцию порту и url. При неудаче выводит
 // ошибку в лог и останавливает программу
-func startHTTP(url, port string, log *slog.Logger) {
-
-	if log == nil {
-		standartLog.Fatal(ErrNilLoggerPointer.Error())
-	}
-
+func startHTTP(url, port string) {
 	go func() {
+		log := slog.With(internalLogger.OPLabel, "metrics.metrics.startHTTP")
 		mux := http.NewServeMux()
-
 		mux.Handle(url, promhttp.Handler())
 		log.Info(fmt.Sprintf(":%s%s ready for prometheus", port, url))
 		err := http.ListenAndServe(":"+port, mux)

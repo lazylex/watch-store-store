@@ -24,12 +24,11 @@ var (
 
 type MiddlewareJWT struct {
 	secret []byte
-	logger *slog.Logger
 }
 
 // New конструктор прослойки для проверки JSON Web Token
-func New(logger *slog.Logger, secret []byte) *MiddlewareJWT {
-	return &MiddlewareJWT{secret: secret, logger: logger}
+func New(secret []byte) *MiddlewareJWT {
+	return &MiddlewareJWT{secret: secret}
 }
 
 // CheckJWT проверяет JWT токен в запросе. В случае, если токен не валидный, функция прекращает дальнейшую обработку
@@ -41,7 +40,7 @@ func New(logger *slog.Logger, secret []byte) *MiddlewareJWT {
 func (m *MiddlewareJWT) CheckJWT(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		var notParsedToken string
-		log := logger.AddPlaceAndRequestId(m.logger, "middlewares.jwt.CheckJWT", r)
+		log := logger.AddPlaceAndRequestId(slog.Default(), "adapters.rest.middlewares.jwt.CheckJWT", r)
 
 		if len(r.Header.Get(header)) > len(requestHeaderPrefix) {
 			notParsedToken = r.Header.Get(header)[len(requestHeaderPrefix):]

@@ -10,23 +10,29 @@ import (
 	"github.com/lazylex/watch-store/store/internal/ports/repository"
 	"github.com/lazylex/watch-store/store/internal/repository/mysql"
 	"github.com/lazylex/watch-store/store/internal/service"
+	"log/slog"
 	"os"
+	"os/exec"
 	"os/signal"
 )
 
 func main() {
 	cfg := config.MustLoad()
-	log := logger.MustCreate(cfg.Env, cfg.Instance)
-	metrics := prometheusMetrics.MustCreate(&cfg.Prometheus, log)
-	domainService := service.New(mysql.WithRepository(&cfg.Storage, log), service.WithLogger(log),
+	slog.SetDefault(logger.MustCreate(cfg.Env, cfg.Instance))
+	if err := clearScreen(); err != nil {
+		slog.Error(err.Error())
+	}
+	metrics := prometheusMetrics.MustCreate(&cfg.Prometheus)
+	domainService := service.New(mysql.WithRepository(&cfg.Storage),
+		//service.WithLogger(log),
 		service.WithMetrics(metrics))
 
-	server := restServer.MustCreate(&cfg.HttpServer, cfg.QueryTimeout, domainService, log, metrics, cfg.Env,
+	server := restServer.MustCreate(&cfg.HttpServer, cfg.QueryTimeout, domainService, metrics, cfg.Env,
 		cfg.Signature)
 	server.MustRun()
 
 	if cfg.UseKafka {
-		kafka.MustRun(domainService, &cfg.Kafka, log, cfg.Instance)
+		kafka.MustRun(domainService, &cfg.Kafka, cfg.Instance)
 	}
 
 	defer func(repo repository.SQLDBInterface) {
@@ -41,7 +47,13 @@ func main() {
 
 	sig := <-c
 	fmt.Println() // так красивее, если вывод логов производится в стандартный терминал
-	log.Info(fmt.Sprintf("%s signal received. Shutdown started", sig))
+	slog.Info(fmt.Sprintf("%s signal received. Shutdown started", sig))
 
 	server.Shutdown()
+}
+
+func clearScreen() error {
+	cmd := exec.Command("clear")
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
 }

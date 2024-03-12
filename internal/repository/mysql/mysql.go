@@ -15,7 +15,6 @@ import (
 	"github.com/lazylex/watch-store/store/internal/logger"
 	"github.com/lazylex/watch-store/store/internal/ports/repository"
 	"github.com/lazylex/watch-store/store/internal/service"
-	standartLog "log"
 	"log/slog"
 	"os"
 	"strings"
@@ -25,8 +24,7 @@ import (
 const txIsolationLevel = sql.LevelSerializable
 
 type Repository struct {
-	db     *sql.DB
-	logger *slog.Logger
+	db *sql.DB
 }
 
 func mysqlErr(text string) error {
@@ -35,7 +33,6 @@ func mysqlErr(text string) error {
 
 var (
 	ErrNilConfigPointer = mysqlErr("nil config pointer")
-	ErrNilLoggerPointer = mysqlErr("nil logger pointer")
 )
 
 // GetDB возвращает структуру DB репозитория
@@ -45,7 +42,7 @@ func (r *Repository) GetDB() *sql.DB {
 
 // Close закрывает пул подключений к БД
 func (r *Repository) Close() error {
-	log := r.logger.With(slog.String(logger.OPLabel, "mysql.Close"))
+	log := slog.With(slog.String(logger.OPLabel, "mysql.Close"))
 	err := r.db.Close()
 	if err != nil {
 		log.Error("error close repository")
@@ -80,33 +77,29 @@ func generateTransactionNumber() string {
 }
 
 // WithRepository служит для инициализации репозитория и внедрение его в сервис, используя паттерн Options
-func WithRepository(cfg *config.Storage, log *slog.Logger) service.Option {
-
-	if log == nil {
-		standartLog.Fatal(ErrNilLoggerPointer.Error())
-	}
+func WithRepository(cfg *config.Storage) service.Option {
+	log := slog.With(logger.OPLabel, "repository.mysql.WithRepository")
 	if cfg == nil {
 		log.Error(ErrNilConfigPointer.Error())
 		os.Exit(1)
 	}
 
 	return func(s *service.Service) {
-		internalLogger := log.With(slog.String(logger.OPLabel, "mysql.WithRepository"))
 		db, err := sql.Open("mysql", createDSN(cfg))
 		if err != nil {
-			internalLogger.Error(err.Error())
+			log.Error(err.Error())
 			os.Exit(1)
 		}
 
 		db.SetMaxOpenConns(cfg.DatabaseMaxOpenConnections)
 
 		if err = db.Ping(); err != nil {
-			internalLogger.Error(err.Error())
+			log.Error(err.Error())
 			os.Exit(1)
 		}
 
-		internalLogger.Info("successfully ping db")
-		repo := &Repository{db: db, logger: log}
+		log.Info("successfully ping db")
+		repo := &Repository{db: db}
 		s.Repository = repo
 		s.SQLRepository = repo
 	}
@@ -161,7 +154,7 @@ func (r *Repository) WithinTransaction(ctx context.Context, tFunc func(ctx conte
 	if tx, internalCall = r.getExtractTx(ctx); !internalCall {
 		// начинаем транзакцию
 		ctx = context.WithValue(ctx, logger.TxId, generateTransactionNumber())
-		log = logger.LogWithCtxData(ctx, r.logger)
+		log = logger.LogWithCtxData(ctx, slog.Default())
 		log.Info("start transaction")
 
 		if tx, err = r.db.BeginTx(ctx, &sql.TxOptions{Isolation: txIsolationLevel}); err != nil {
@@ -169,7 +162,7 @@ func (r *Repository) WithinTransaction(ctx context.Context, tFunc func(ctx conte
 			return err
 		}
 	} else {
-		log = r.logger.With(logger.TxLabel, ctx.Value(logger.TxId))
+		log = slog.With(logger.TxLabel, ctx.Value(logger.TxId))
 	}
 
 	// запускаем callback
