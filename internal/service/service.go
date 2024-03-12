@@ -20,19 +20,10 @@ import (
 type Service struct {
 	Repository    repository.Interface
 	SQLRepository repository.SQLDBInterface
-	Logger        *slog.Logger
 	Metrics       *metrics.Metrics
 }
 
 type Option func(*Service)
-
-// WithLogger служит для подключения к сервису уже сконфигурированного логгера. Функция находится не в пакете logger,
-// чтобы избежать перекрестных ссылок
-func WithLogger(logger *slog.Logger) Option {
-	return func(s *Service) {
-		s.Logger = logger
-	}
-}
 
 // WithMetrics служит для внедрения в сервис уже инициализированных метрик для Prometheus
 func WithMetrics(metrics *metrics.Metrics) Option {
@@ -72,7 +63,7 @@ func (s *Service) ChangePriceInStock(ctx context.Context, data dto.ArticleWithPr
 
 	err = s.Repository.UpdateStockPrice(ctx, &data)
 	if err == nil {
-		logger.LogWithCtxData(ctx, s.Logger.With(logger.OPLabel, "service.ChangePriceInStock")).Info(
+		logger.LogWithCtxData(ctx, slog.With(logger.OPLabel, "service.ChangePriceInStock")).Info(
 			fmt.Sprintf("change price to %.2f in stock record with article %s", data.Price, data.Article))
 	}
 	return err
@@ -88,7 +79,7 @@ func (s *Service) GetStock(ctx context.Context, data dto.ArticleDTO) (dto.NamedP
 		return dto.NamedProductDTO{}, err
 	}
 
-	logger.LogWithCtxData(ctx, s.Logger.With(logger.OPLabel, "service.GetStock")).Info(
+	logger.LogWithCtxData(ctx, slog.With(logger.OPLabel, "service.GetStock")).Info(
 		fmt.Sprintf("requested stock record with article %s", data.Article))
 
 	return sale, nil
@@ -104,7 +95,7 @@ func (s *Service) AddProductToStock(ctx context.Context, data dto.NamedProductDT
 		return err
 	}
 
-	logger.LogWithCtxData(ctx, s.Logger.With(logger.OPLabel, "service.AddProductToStock")).Info(
+	logger.LogWithCtxData(ctx, slog.With(logger.OPLabel, "service.AddProductToStock")).Info(
 		fmt.Sprintf("add to stock record with article %s, price %.2f", data.Article, data.Price))
 	return nil
 }
@@ -119,7 +110,7 @@ func (s *Service) ChangeAmountInStock(ctx context.Context, data dto.ArticleWithA
 		return err
 	}
 
-	logger.LogWithCtxData(ctx, s.Logger.With(logger.OPLabel, "service.ChangeAmountInStock")).Info(
+	logger.LogWithCtxData(ctx, slog.With(logger.OPLabel, "service.ChangeAmountInStock")).Info(
 		fmt.Sprintf("amount udpaded to %d in stock record with article %s", data.Amount, data.Article))
 	return nil
 }
@@ -185,7 +176,7 @@ func (s *Service) MakeReservation(ctx context.Context, data dto.ReservationDTO) 
 			s.Metrics.Service.PlacedLocalOrdersInc()
 		}
 
-		logger.LogWithCtxData(txCtx, s.Logger.With(logger.OPLabel, "service.MakeReservation")).Info(
+		logger.LogWithCtxData(txCtx, slog.With(logger.OPLabel, "service.MakeReservation")).Info(
 			fmt.Sprintf("succesfully saved order %d", data.OrderNumber))
 		return nil
 	})
@@ -275,7 +266,7 @@ func (s *Service) MakeSale(ctx context.Context, data []dto.ProductDTO) error {
 			}
 		}
 
-		logger.LogWithCtxData(txCtx, s.Logger.With(logger.OPLabel, "service.MakeSale")).Info(
+		logger.LogWithCtxData(txCtx, slog.With(logger.OPLabel, "service.MakeSale")).Info(
 			"sale completed successfully")
 
 		return nil
@@ -336,7 +327,7 @@ func (s *Service) TotalSold(ctx context.Context, data dto.ArticleDTO) (uint, err
 		return 0, err
 	}
 
-	logger.LogWithCtxData(ctx, s.Logger.With(logger.OPLabel, "service.TotalSold")).Info(
+	logger.LogWithCtxData(ctx, slog.With(logger.OPLabel, "service.TotalSold")).Info(
 		fmt.Sprintf("readed amount of sold %d (article %s)", amount, data.Article))
 
 	return amount, nil
@@ -355,7 +346,7 @@ func (s *Service) TotalSoldInPeriod(ctx context.Context, data dto.ArticleWithPer
 		return 0, err
 	}
 
-	logger.LogWithCtxData(ctx, s.Logger.With(logger.OPLabel, "service.TotalSoldInPeriod")).Info(
+	logger.LogWithCtxData(ctx, slog.With(logger.OPLabel, "service.TotalSoldInPeriod")).Info(
 		fmt.Sprintf("readed amount of sold - %d (from %s to %s) (article %s)",
 			amount, data.From.Format(various.DateLayout), data.To.Format(various.DateLayout), data.Article))
 

@@ -6,7 +6,6 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/lazylex/watch-store/store/internal/domain/aggregates/reservation"
 	"github.com/lazylex/watch-store/store/internal/dto"
-	"github.com/lazylex/watch-store/store/internal/logger"
 	"github.com/lazylex/watch-store/store/internal/metrics"
 	mockService "github.com/lazylex/watch-store/store/internal/ports/metrics/service/mocks"
 	"github.com/lazylex/watch-store/store/internal/ports/repository"
@@ -46,7 +45,7 @@ func TestService_AddProductToStockCorrectDTO(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.NamedProductDTO{Name: "test_correct", Article: "test-9", Price: 110, Amount: 10}
-	s := New(WithLogger(logger.Null()), withMockRepo(mockRepo), WithMetrics(nil))
+	s := New(withMockRepo(mockRepo), WithMetrics(nil))
 
 	mockRepo.EXPECT().CreateStock(context.Background(), &data).Times(1).Return(nil)
 
@@ -61,7 +60,7 @@ func TestService_AddProductToStockIncorrectDTO(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.NamedProductDTO{Name: "test_incorrect", Article: "test-9.9999", Price: -110, Amount: 10}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().CreateStock(context.Background(), &data).Times(0)
 
@@ -76,7 +75,7 @@ func TestService_AddProductToStockDuplicateArticle(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.NamedProductDTO{Name: "test_correct", Article: "test-9", Price: 110, Amount: 10}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().CreateStock(context.Background(), &data).Times(1).Return(nil)
 
@@ -98,7 +97,7 @@ func TestService_ChangePriceInStockCorrectDTO(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.ArticleWithPriceDTO{Article: "test-9", Price: 10}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().ReadStock(gomock.Any(), gomock.Any()).Times(1)
 	mockRepo.EXPECT().UpdateStockPrice(context.Background(), &data).Times(1).Return(nil)
@@ -114,7 +113,7 @@ func TestService_ChangePriceInStockIncorrectDTO(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.ArticleWithPriceDTO{Article: "test-9", Price: -10}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().UpdateStockPrice(context.Background(), &data).Times(0)
 
@@ -129,7 +128,7 @@ func TestService_ChangePriceInStockNoInRepo(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.ArticleWithPriceDTO{Article: "test-9", Price: 100}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().ReadStock(context.Background(), &dto.ArticleDTO{Article: "test-9"}).Times(1).
 		Return(dto.NamedProductDTO{}, errors.New("no in stock"))
@@ -146,7 +145,7 @@ func TestService_GetStockCorrectDTO(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.ArticleDTO{Article: "test-9"}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().ReadStock(context.Background(), &data).Times(1).Return(dto.NamedProductDTO{
 		Name: "test-9", Article: "test-9", Price: 110, Amount: 10}, nil)
@@ -162,7 +161,7 @@ func TestService_GetStockIncorrectDTO(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.ArticleDTO{Article: "test-9.9999"}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().ReadStock(context.Background(), &data).Times(0)
 
@@ -177,7 +176,7 @@ func TestService_GetStockNoRecord(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.ArticleDTO{Article: "test-9"}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().ReadStock(context.Background(), &data).Times(1).Return(dto.NamedProductDTO{},
 		repository.ErrNoRecord)
@@ -193,7 +192,7 @@ func TestService_ChangeAmountInStockCorrectDTO(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.ArticleWithAmountDTO{Article: "test-9", Amount: 10}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().UpdateStockAmount(context.Background(), &data).Times(1).Return(nil)
 
@@ -208,7 +207,7 @@ func TestService_ChangeAmountInStockIncorrectDTO(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.ArticleWithAmountDTO{Article: "test-9.9999", Amount: 10}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().UpdateStockAmount(context.Background(), &data).Times(0)
 
@@ -223,7 +222,7 @@ func TestService_ChangeAmountInStockNoRecord(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.ArticleWithAmountDTO{Article: "test-9", Amount: 10}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().UpdateStockAmount(context.Background(), &data).Times(1).Return(repository.ErrNoRecord)
 
@@ -238,7 +237,7 @@ func TestService_GetAmountInStockCorrectDTO(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.ArticleDTO{Article: "test-9"}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().ReadStockAmount(context.Background(), &data).Times(1).Return(uint(5), nil)
 
@@ -253,7 +252,7 @@ func TestService_GetAmountInStockIncorrectDTO(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.ArticleDTO{Article: "test-9.9999"}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().ReadStockAmount(context.Background(), &data).Times(0)
 
@@ -268,7 +267,7 @@ func TestService_GetAmountInStockNoRecord(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.ArticleDTO{Article: "test-9"}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().ReadStockAmount(context.Background(), &data).Times(1).Return(uint(0), repository.ErrNoRecord)
 
@@ -283,7 +282,7 @@ func TestService_TotalSoldCorrectDTO(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.ArticleDTO{Article: "test-9"}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().ReadSoldAmount(context.Background(), &data).Times(1).Return(uint(5), nil)
 
@@ -298,7 +297,7 @@ func TestService_TotalSoldIncorrectDTO(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.ArticleDTO{Article: "test-9.9999"}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().ReadSoldAmount(context.Background(), &data).Times(0)
 
@@ -313,7 +312,7 @@ func TestService_TotalSoldTimeout(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.ArticleDTO{Article: "test-9"}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().ReadSoldAmount(context.Background(), &data).Times(1).Return(uint(0), repository.ErrTimeout)
 
@@ -332,7 +331,7 @@ func TestService_TotalSoldInPeriodCorrectDTO(t *testing.T) {
 		From:    time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC),
 		To:      time.Now(),
 	}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().ReadSoldAmountInPeriod(context.Background(), &data).Times(1).Return(uint(5), nil)
 
@@ -347,7 +346,7 @@ func TestService_TotalSoldInPeriodIncorrectDTO(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.ArticleWithPeriodDTO{Article: "test_9.9999", From: time.Now(), To: time.Now()}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().ReadSoldAmountInPeriod(context.Background(), &data).Times(0)
 
@@ -366,7 +365,7 @@ func TestService_TotalSoldInPeriodTimeout(t *testing.T) {
 		From:    time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC),
 		To:      time.Now(),
 	}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().ReadSoldAmountInPeriod(context.Background(), &data).Times(1).Return(
 		uint(0), repository.ErrTimeout)
@@ -387,7 +386,7 @@ func TestService_MakeReservationIncorrectDTO(t *testing.T) {
 		Date:        time.Now(),
 		State:       reservation.NewForCashRegister,
 	}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().WithinTransaction(context.Background(), gomock.Any()).Times(0)
 
@@ -407,7 +406,7 @@ func TestService_MakeReservationSuccess(t *testing.T) {
 		Date:        time.Now(),
 		State:       reservation.NewForCashRegister,
 	}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(5), nil)
@@ -432,7 +431,7 @@ func TestService_MakeReservationForInternetSuccess(t *testing.T) {
 		Date:        time.Now(),
 		State:       reservation.NewForInternetCustomer,
 	}
-	s := Service{Repository: mockRepo, Logger: logger.Null(),
+	s := Service{Repository: mockRepo,
 		Metrics: &metrics.Metrics{Service: mockServiceMetrics}}
 
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
@@ -459,7 +458,7 @@ func TestService_MakeReservationForLocalSuccess(t *testing.T) {
 		Date:        time.Now(),
 		State:       reservation.NewForLocalCustomer,
 	}
-	s := Service{Repository: mockRepo, Logger: logger.Null(),
+	s := Service{Repository: mockRepo,
 		Metrics: &metrics.Metrics{Service: mockServiceMetrics}}
 
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
@@ -485,7 +484,7 @@ func TestService_MakeReservationErrAmount(t *testing.T) {
 		Date:        time.Now(),
 		State:       reservation.NewForCashRegister,
 	}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(
@@ -507,7 +506,7 @@ func TestService_MakeReservationNoEnough(t *testing.T) {
 		Date:        time.Now(),
 		State:       reservation.NewForCashRegister,
 	}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(1), nil)
@@ -528,7 +527,7 @@ func TestService_MakeReservationErrUpdate(t *testing.T) {
 		Date:        time.Now(),
 		State:       reservation.NewForCashRegister,
 	}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(5), nil)
@@ -551,7 +550,7 @@ func TestService_MakeReservationErrCreate(t *testing.T) {
 		Date:        time.Now(),
 		State:       reservation.NewForCashRegister,
 	}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(5), nil)
@@ -570,7 +569,7 @@ func TestService_CancelReservationIncorrectDTO(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.OrderNumberDTO{OrderNumber: 0}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	mockRepo.EXPECT().WithinTransaction(context.Background(), gomock.Any()).Times(0)
 
@@ -585,7 +584,7 @@ func TestService_CancelReservationCashRegister(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.OrderNumberDTO{OrderNumber: 5}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 
@@ -612,7 +611,7 @@ func TestService_CancelReservationErrReadReservation(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.OrderNumberDTO{OrderNumber: 5}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 
@@ -629,7 +628,7 @@ func TestService_CancelReservationErrAlreadyFinished(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.OrderNumberDTO{OrderNumber: 5}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 
@@ -652,7 +651,7 @@ func TestService_CancelReservationErrReadStockAmount(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.OrderNumberDTO{OrderNumber: 5}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 
@@ -677,7 +676,7 @@ func TestService_CancelReservationErrUpdateAmount(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := dto.OrderNumberDTO{OrderNumber: 5}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 
@@ -704,7 +703,7 @@ func TestService_CancelReservationInternet(t *testing.T) {
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	mockServiceMetrics := mockService.NewMockMetricsInterface(ctrl)
 	data := dto.OrderNumberDTO{OrderNumber: 555}
-	s := Service{Repository: mockRepo, Logger: logger.Null(),
+	s := Service{Repository: mockRepo,
 		Metrics: &metrics.Metrics{HTTP: nil, Service: mockServiceMetrics}}
 
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
@@ -733,7 +732,7 @@ func TestService_MakeSaleErrDTO(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := []dto.ProductDTO{{Article: "test-9.9999", Price: 410, Amount: 10}}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 	err := s.MakeSale(context.Background(), data)
 	if err == nil {
 		t.Fail()
@@ -745,7 +744,7 @@ func TestService_MakeSaleSuccess(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := []dto.ProductDTO{{Article: "test-9", Price: 410, Amount: 10}}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 
 	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(12), nil)
@@ -763,7 +762,7 @@ func TestService_MakeSaleErrCreateSoldRecord(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := []dto.ProductDTO{{Article: "test-9", Price: 410, Amount: 10}}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 
 	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(12), nil)
@@ -781,7 +780,7 @@ func TestService_MakeSaleErrUpdateStock(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := []dto.ProductDTO{{Article: "test-9", Price: 410, Amount: 10}}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 
 	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(12), nil)
@@ -799,7 +798,7 @@ func TestService_MakeSaleErrNoEnoughItemsInStock(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := []dto.ProductDTO{{Article: "test-9", Price: 410, Amount: 10}}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 
 	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(2), nil)
@@ -815,7 +814,7 @@ func TestService_MakeSaleErrReadStock(t *testing.T) {
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
 	data := []dto.ProductDTO{{Article: "test-9", Price: 410, Amount: 10}}
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 
 	mockRepo.EXPECT().ReadStockAmount(ctx, &dto.ArticleDTO{Article: "test-9"}).Times(1).Return(uint(2),
@@ -831,7 +830,7 @@ func TestService_FinishOrderIncorrectDTO(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 
 	err := s.FinishOrder(context.Background(), dto.OrderNumberDTO{OrderNumber: 0})
 	if err == nil {
@@ -843,7 +842,7 @@ func TestService_FinishOrderLocal(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 	data := dto.OrderNumberDTO{OrderNumber: reservation.MaxCashRegisterNumber}
 	resData := dto.ReservationDTO{
@@ -867,7 +866,7 @@ func TestService_FinishOrderInternet(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 	data := dto.OrderNumberDTO{OrderNumber: reservation.MaxCashRegisterNumber + 1}
 	resData := dto.ReservationDTO{
@@ -891,7 +890,7 @@ func TestService_FinishOrderErrCreateSoldRecord(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 	data := dto.OrderNumberDTO{OrderNumber: reservation.MaxCashRegisterNumber + 1}
 	resData := dto.ReservationDTO{
@@ -914,7 +913,7 @@ func TestService_FinishOrderErrAlreadyProcessed(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 	data := dto.OrderNumberDTO{OrderNumber: reservation.MaxCashRegisterNumber + 1}
 	resData := dto.ReservationDTO{
@@ -936,7 +935,7 @@ func TestService_FinishOrderErrReadReservation(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
-	s := Service{Repository: mockRepo, Logger: logger.Null()}
+	s := Service{Repository: mockRepo}
 	ctx := context.WithValue(context.Background(), mockrepository.ExecuteKey{}, "✅")
 	data := dto.OrderNumberDTO{OrderNumber: reservation.MaxCashRegisterNumber + 1}
 	resData := dto.ReservationDTO{
