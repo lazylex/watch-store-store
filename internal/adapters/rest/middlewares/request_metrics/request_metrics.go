@@ -5,7 +5,6 @@ import (
 	"github.com/lazylex/watch-store/store/internal/helpers/constants/various"
 	"github.com/lazylex/watch-store/store/internal/metrics"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -40,18 +39,10 @@ func (m *MiddlewareRequests) AfterHandle(next http.Handler) http.Handler {
 }
 
 // requestsInc увеличивает счетчик http-запросов к приложению. Добавляется метка path, содержащая путь запроса.
-// Метка path для GET-запросов сохраняется без идентификатора. Если путь не существует, добавляется метка со значением
-// "non-existent path"
+// Если путь не существует, добавляется метка со значением "non-existent path".
 func (m *MiddlewareRequests) requestsInc(r *http.Request) {
-	var path string
-	if r.Method == http.MethodGet {
-		path = string([]rune(r.RequestURI)[0 : strings.LastIndex(r.RequestURI, "/")+1])
-	} else {
-		path = r.URL.Path
-	}
-
-	if router.IsExistPath(path) {
-		m.metrics.HTTP.RequestsTotalInc(map[string]string{metrics.PATH: path})
+	if router.IsExistPath(r.URL.Path) {
+		m.metrics.HTTP.RequestsTotalInc(map[string]string{metrics.PATH: r.URL.Path})
 	} else {
 		m.metrics.HTTP.RequestsTotalInc(map[string]string{metrics.PATH: various.NonExistentPath})
 	}
