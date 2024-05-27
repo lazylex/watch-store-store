@@ -30,12 +30,13 @@ var (
 
 // Article валидатор для артукула
 func Article(a article.Article) error {
-	if a == "" || len(a) > 50 {
+	r := []rune(a)
+	ln := len(r)
+
+	if a == "" || ln > 50 {
 		return ErrIncorrectArticle
 	}
 
-	r := []rune(a)
-	ln := len(r)
 	if ln > 5 && r[ln-5] == rune('.') {
 		switch {
 		case r[ln-4]-48 > article.CaseWithHeavyScratches || r[ln-4] < 48:
