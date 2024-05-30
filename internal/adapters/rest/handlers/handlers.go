@@ -33,7 +33,7 @@ func injectRequestIDToCtx(ctx context.Context, r *http.Request) context.Context 
 	return context.WithValue(ctx, logger.RequestId, middleware.GetReqID(r.Context()))
 }
 
-// GetStockRecord получение всех полей записи с переданным в пути запроса артикулом и возврат в
+// StockRecord получение всех полей записи с переданным в пути запроса артикулом и возврат в
 // формате JSON. Пример возвращаемых данных:
 //
 //	{
@@ -42,16 +42,16 @@ func injectRequestIDToCtx(ctx context.Context, r *http.Request) context.Context 
 //	   "price": 3490,
 //	   "amount": 60
 //	}
-func (h *Handler) GetStockRecord(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) StockRecord(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var art article.Article
 	var stock dto.NamedProductDTO
-	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.GetStockRecord", r)
+	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.StockRecord", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	art = request.GetArticleUsingChi(r)
+	art = request.ArticleUsingChi(r)
 
 	transferObject := dto.ArticleDTO{Article: art}
 	err = transferObject.Validate()
@@ -59,7 +59,7 @@ func (h *Handler) GetStockRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stock, err = h.service.GetStock(injectRequestIDToCtx(ctx, r), transferObject)
+	stock, err = h.service.Stock(injectRequestIDToCtx(ctx, r), transferObject)
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
 		return
 	}
@@ -69,21 +69,21 @@ func (h *Handler) GetStockRecord(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, stock)
 }
 
-// GetAmountInStock возвращает в формате JSON доступное для продажи количество товара с переданным в пути запроса
+// AmountInStock возвращает в формате JSON доступное для продажи количество товара с переданным в пути запроса
 // артикулом. Пример возвращаемого значения:
 // {
 // "amount": 13
 // }
-func (h *Handler) GetAmountInStock(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) AmountInStock(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var art article.Article
 	var amount uint
-	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.GetAmountInStock", r)
+	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.AmountInStock", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	art = request.GetArticleUsingChi(r)
+	art = request.ArticleUsingChi(r)
 
 	transferObject := dto.ArticleDTO{Article: art}
 	err = transferObject.Validate()
@@ -91,7 +91,7 @@ func (h *Handler) GetAmountInStock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	amount, err = h.service.GetAmountInStock(injectRequestIDToCtx(ctx, r), transferObject)
+	amount, err = h.service.AmountInStock(injectRequestIDToCtx(ctx, r), transferObject)
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
 		return
 	}
@@ -197,7 +197,7 @@ func (h *Handler) AddToStock(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetSoldAmount возвращает общее количество проданного товара. В пути запроса передается артикул. Параметрами запроса
+// SoldAmount возвращает общее количество проданного товара. В пути запроса передается артикул. Параметрами запроса
 // опционально передаются даты from и to для указания времено́го диапазона. Если передать только параметр from, то в
 // качестве параметра to будет текущая дата (определяется временем на сервере, где запущено приложение, а не БД). Если
 // передан только параметр to, то возвращается ответ http.StatusBadRequest
@@ -205,16 +205,16 @@ func (h *Handler) AddToStock(w http.ResponseWriter, r *http.Request) {
 // {
 // "amount": 13
 // }
-func (h *Handler) GetSoldAmount(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) SoldAmount(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var amount uint
 	var art article.Article
-	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.GetSoldAmount", r)
+	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.SoldAmount", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	art = request.GetArticleUsingChi(r)
+	art = request.ArticleUsingChi(r)
 	fromParam := r.URL.Query().Get(request.From)
 	toParam := r.URL.Query().Get(request.To)
 

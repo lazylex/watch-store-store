@@ -44,13 +44,13 @@ func IsExistPath(path string) bool {
 
 // AddHandlers возвращает роутер *chi.Mux с добавленными хендлерами REST запросов
 func AddHandlers(router *chi.Mux, handlers handlers.Interface) *chi.Mux {
-	router.Get(paths["/api/api_v1/stock/"], handlers.GetStockRecord)
-	router.Get(paths["/api/api_v1/stock/amount/"], handlers.GetAmountInStock)
+	router.Get(paths["/api/api_v1/stock/"], handlers.StockRecord)
+	router.Get(paths["/api/api_v1/stock/amount/"], handlers.AmountInStock)
 	router.Put(paths["/api/api_v1/stock/amount"], handlers.UpdateAmountInStock)
 	router.Put(paths["/api/api_v1/stock/price"], handlers.UpdatePriceInStock)
 	router.Post(paths["/api/api_v1/stock/add"], handlers.AddToStock)
 
-	router.Get(paths["/api/api_v1/sold/amount/"], handlers.GetSoldAmount)
+	router.Get(paths["/api/api_v1/sold/amount/"], handlers.SoldAmount)
 
 	router.Post(paths["/api/api_v1/sale/make"], handlers.MakeLocalSale)
 

@@ -46,6 +46,6 @@ type Interface interface {
 }
 
 type SQLDBInterface interface {
-	GetDB() *sql.DB
+	DB() *sql.DB
 	Close() error
 }

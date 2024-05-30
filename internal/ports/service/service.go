@@ -22,14 +22,14 @@ var (
 type Interface interface {
 	// ChangePriceInStock изменяет цену товара, находящегося в продаже
 	ChangePriceInStock(ctx context.Context, data dto.ArticleWithPriceDTO) error
-	// GetStock возвращает полную информацию о товаре, доступном для продажи, в виде dto.NamedProductDTO
-	GetStock(ctx context.Context, data dto.ArticleDTO) (dto.NamedProductDTO, error)
+	// Stock возвращает полную информацию о товаре, доступном для продажи, в виде dto.NamedProductDTO
+	Stock(ctx context.Context, data dto.ArticleDTO) (dto.NamedProductDTO, error)
 	// AddProductToStock добавляет новый товар в ассортимент магазина
 	AddProductToStock(ctx context.Context, data dto.NamedProductDTO) error
 	// ChangeAmountInStock изменяет доступное для продажи количество товара
 	ChangeAmountInStock(ctx context.Context, data dto.ArticleWithAmountDTO) error
-	// GetAmountInStock возвращает доступное для продажи количество товара
-	GetAmountInStock(ctx context.Context, data dto.ArticleDTO) (uint, error)
+	// AmountInStock возвращает доступное для продажи количество товара
+	AmountInStock(ctx context.Context, data dto.ArticleDTO) (uint, error)
 	// MakeReservation производит резервирование товара для покупателя. Резервирование проводится как для бронирования
 	// через интернет, так и во время нахождения товара на кассе (в ожидании оплаты локальным покупателем). В таком случае
 	// в качестве номера заказа передаётся номер кассы.

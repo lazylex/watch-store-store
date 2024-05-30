@@ -106,9 +106,9 @@ func (mr *MockInterfaceMockRecorder) FinishOrder(ctx, data interface{}) *gomock.
 }
 
 // GetAmountInStock mocks base method.
-func (m *MockInterface) GetAmountInStock(ctx context.Context, data dto.ArticleDTO) (uint, error) {
+func (m *MockInterface) AmountInStock(ctx context.Context, data dto.ArticleDTO) (uint, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAmountInStock", ctx, data)
+	ret := m.ctrl.Call(m, "AmountInStock", ctx, data)
 	ret0, _ := ret[0].(uint)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -117,13 +117,13 @@ func (m *MockInterface) GetAmountInStock(ctx context.Context, data dto.ArticleDT
 // GetAmountInStock indicates an expected call of GetAmountInStock.
 func (mr *MockInterfaceMockRecorder) GetAmountInStock(ctx, data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAmountInStock", reflect.TypeOf((*MockInterface)(nil).GetAmountInStock), ctx, data)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AmountInStock", reflect.TypeOf((*MockInterface)(nil).AmountInStock), ctx, data)
 }
 
 // GetStock mocks base method.
-func (m *MockInterface) GetStock(ctx context.Context, data dto.ArticleDTO) (dto.NamedProductDTO, error) {
+func (m *MockInterface) Stock(ctx context.Context, data dto.ArticleDTO) (dto.NamedProductDTO, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetStock", ctx, data)
+	ret := m.ctrl.Call(m, "Stock", ctx, data)
 	ret0, _ := ret[0].(dto.NamedProductDTO)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -132,7 +132,7 @@ func (m *MockInterface) GetStock(ctx context.Context, data dto.ArticleDTO) (dto.
 // GetStock indicates an expected call of GetStock.
 func (mr *MockInterfaceMockRecorder) GetStock(ctx, data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStock", reflect.TypeOf((*MockInterface)(nil).GetStock), ctx, data)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stock", reflect.TypeOf((*MockInterface)(nil).Stock), ctx, data)
 }
 
 // MakeReservation mocks base method.

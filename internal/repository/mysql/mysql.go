@@ -35,8 +35,8 @@ var (
 	ErrNilConfigPointer = mysqlErr("nil config pointer")
 )
 
-// GetDB возвращает структуру DB репозитория
-func (r *Repository) GetDB() *sql.DB {
+// DB возвращает структуру DB репозитория
+func (r *Repository) DB() *sql.DB {
 	return r.db
 }
 
@@ -116,9 +116,9 @@ type queryExecutorInterface interface {
 	QueryContext(context.Context, string, ...any) (*sql.Rows, error)
 }
 
-// getExtractTx если транзакция имеется в контексте, то возвращает объект транзакции *sql.Tx и true. В противном случае
+// extractTx если транзакция имеется в контексте, то возвращает объект транзакции *sql.Tx и true. В противном случае
 // возвращает nil и false
-func (r *Repository) getExtractTx(ctx context.Context) (*sql.Tx, bool) {
+func (r *Repository) extractTx(ctx context.Context) (*sql.Tx, bool) {
 	if tx, ok := ctx.Value(txKey{}).(*sql.Tx); ok {
 		return tx, true
 	}
@@ -131,7 +131,7 @@ func (r *Repository) getExtractTx(ctx context.Context) (*sql.Tx, bool) {
 func (r *Repository) executor(ctx context.Context) queryExecutorInterface {
 	var inOuterTX bool
 	var executor queryExecutorInterface
-	if executor, inOuterTX = r.getExtractTx(ctx); inOuterTX == true {
+	if executor, inOuterTX = r.extractTx(ctx); inOuterTX == true {
 		return executor
 	}
 	executor = r.db
@@ -151,7 +151,7 @@ func (r *Repository) WithinTransaction(ctx context.Context, tFunc func(ctx conte
 	var log *slog.Logger
 
 	// если это внешний (первый) вызов функции
-	if tx, internalCall = r.getExtractTx(ctx); !internalCall {
+	if tx, internalCall = r.extractTx(ctx); !internalCall {
 		// начинаем транзакцию
 		ctx = context.WithValue(ctx, logger.TxId, generateTransactionNumber())
 		log = logger.LogWithCtxData(ctx, slog.Default())

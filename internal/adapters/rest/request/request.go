@@ -23,7 +23,7 @@ func requestErr(text string) error {
 var ErrIncorrectDate = requestErr("invalid date passed")
 var ErrEmptyFromDate = requestErr("no 'from' date in request")
 
-// GetArticleUsingChi возвращает артукул продукта
-func GetArticleUsingChi(r *http.Request) article.Article {
+// ArticleUsingChi возвращает артукул продукта
+func ArticleUsingChi(r *http.Request) article.Article {
 	return article.Article(chi.URLParam(r, Article))
 }

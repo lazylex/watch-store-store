@@ -56,7 +56,7 @@ func (s *Service) ChangePriceInStock(ctx context.Context, data dto.ArticleWithPr
 	if err := data.Validate(); err != nil {
 		return err
 	}
-	_, err := s.GetStock(ctx, dto.ArticleDTO{Article: data.Article})
+	_, err := s.Stock(ctx, dto.ArticleDTO{Article: data.Article})
 	if err != nil {
 		return err
 	}
@@ -69,8 +69,8 @@ func (s *Service) ChangePriceInStock(ctx context.Context, data dto.ArticleWithPr
 	return err
 }
 
-// GetStock возвращает полную информацию о товаре, доступном для продажи, в виде dto.NamedProductDTO
-func (s *Service) GetStock(ctx context.Context, data dto.ArticleDTO) (dto.NamedProductDTO, error) {
+// Stock возвращает полную информацию о товаре, доступном для продажи, в виде dto.NamedProductDTO
+func (s *Service) Stock(ctx context.Context, data dto.ArticleDTO) (dto.NamedProductDTO, error) {
 	if err := data.Validate(); err != nil {
 		return dto.NamedProductDTO{}, err
 	}
@@ -79,7 +79,7 @@ func (s *Service) GetStock(ctx context.Context, data dto.ArticleDTO) (dto.NamedP
 		return dto.NamedProductDTO{}, err
 	}
 
-	logger.LogWithCtxData(ctx, slog.With(logger.OPLabel, "service.GetStock")).Info(
+	logger.LogWithCtxData(ctx, slog.With(logger.OPLabel, "service.Stock")).Info(
 		fmt.Sprintf("requested stock record with article %s", data.Article))
 
 	return sale, nil
@@ -115,8 +115,8 @@ func (s *Service) ChangeAmountInStock(ctx context.Context, data dto.ArticleWithA
 	return nil
 }
 
-// GetAmountInStock возвращает доступное для продажи количество товара
-func (s *Service) GetAmountInStock(ctx context.Context, data dto.ArticleDTO) (uint, error) {
+// AmountInStock возвращает доступное для продажи количество товара
+func (s *Service) AmountInStock(ctx context.Context, data dto.ArticleDTO) (uint, error) {
 	if err := data.Validate(); err != nil {
 		return 0, err
 	}

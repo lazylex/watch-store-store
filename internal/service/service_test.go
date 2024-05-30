@@ -150,7 +150,7 @@ func TestService_GetStockCorrectDTO(t *testing.T) {
 	mockRepo.EXPECT().ReadStock(context.Background(), &data).Times(1).Return(dto.NamedProductDTO{
 		Name: "test-9", Article: "test-9", Price: 110, Amount: 10}, nil)
 
-	_, err := s.GetStock(context.Background(), data)
+	_, err := s.Stock(context.Background(), data)
 	if err != nil {
 		t.Fail()
 	}
@@ -165,7 +165,7 @@ func TestService_GetStockIncorrectDTO(t *testing.T) {
 
 	mockRepo.EXPECT().ReadStock(context.Background(), &data).Times(0)
 
-	_, err := s.GetStock(context.Background(), data)
+	_, err := s.Stock(context.Background(), data)
 	if err == nil {
 		t.Fail()
 	}
@@ -181,7 +181,7 @@ func TestService_GetStockNoRecord(t *testing.T) {
 	mockRepo.EXPECT().ReadStock(context.Background(), &data).Times(1).Return(dto.NamedProductDTO{},
 		repository.ErrNoRecord)
 
-	_, err := s.GetStock(context.Background(), data)
+	_, err := s.Stock(context.Background(), data)
 	if !errors.Is(err, repository.ErrNoRecord) {
 		t.Fail()
 	}
@@ -241,7 +241,7 @@ func TestService_GetAmountInStockCorrectDTO(t *testing.T) {
 
 	mockRepo.EXPECT().ReadStockAmount(context.Background(), &data).Times(1).Return(uint(5), nil)
 
-	_, err := s.GetAmountInStock(context.Background(), data)
+	_, err := s.AmountInStock(context.Background(), data)
 	if err != nil {
 		t.Fail()
 	}
@@ -256,7 +256,7 @@ func TestService_GetAmountInStockIncorrectDTO(t *testing.T) {
 
 	mockRepo.EXPECT().ReadStockAmount(context.Background(), &data).Times(0)
 
-	_, err := s.GetAmountInStock(context.Background(), data)
+	_, err := s.AmountInStock(context.Background(), data)
 	if err == nil {
 		t.Fail()
 	}
@@ -271,7 +271,7 @@ func TestService_GetAmountInStockNoRecord(t *testing.T) {
 
 	mockRepo.EXPECT().ReadStockAmount(context.Background(), &data).Times(1).Return(uint(0), repository.ErrNoRecord)
 
-	_, err := s.GetAmountInStock(context.Background(), data)
+	_, err := s.AmountInStock(context.Background(), data)
 	if !errors.Is(err, repository.ErrNoRecord) {
 		t.Fail()
 	}
