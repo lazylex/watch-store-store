@@ -49,6 +49,21 @@ func (mr *MockInterfaceMockRecorder) AddProductToStock(ctx, data interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddProductToStock", reflect.TypeOf((*MockInterface)(nil).AddProductToStock), ctx, data)
 }
 
+// AmountInStock mocks base method.
+func (m *MockInterface) AmountInStock(ctx context.Context, data dto.ArticleDTO) (uint, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AmountInStock", ctx, data)
+	ret0, _ := ret[0].(uint)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AmountInStock indicates an expected call of AmountInStock.
+func (mr *MockInterfaceMockRecorder) AmountInStock(ctx, data interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AmountInStock", reflect.TypeOf((*MockInterface)(nil).AmountInStock), ctx, data)
+}
+
 // CancelReservation mocks base method.
 func (m *MockInterface) CancelReservation(ctx context.Context, data dto.OrderNumberDTO) error {
 	m.ctrl.T.Helper()
@@ -105,36 +120,6 @@ func (mr *MockInterfaceMockRecorder) FinishOrder(ctx, data interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FinishOrder", reflect.TypeOf((*MockInterface)(nil).FinishOrder), ctx, data)
 }
 
-// GetAmountInStock mocks base method.
-func (m *MockInterface) AmountInStock(ctx context.Context, data dto.ArticleDTO) (uint, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AmountInStock", ctx, data)
-	ret0, _ := ret[0].(uint)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAmountInStock indicates an expected call of GetAmountInStock.
-func (mr *MockInterfaceMockRecorder) GetAmountInStock(ctx, data interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AmountInStock", reflect.TypeOf((*MockInterface)(nil).AmountInStock), ctx, data)
-}
-
-// GetStock mocks base method.
-func (m *MockInterface) Stock(ctx context.Context, data dto.ArticleDTO) (dto.NamedProductDTO, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Stock", ctx, data)
-	ret0, _ := ret[0].(dto.NamedProductDTO)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetStock indicates an expected call of GetStock.
-func (mr *MockInterfaceMockRecorder) GetStock(ctx, data interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stock", reflect.TypeOf((*MockInterface)(nil).Stock), ctx, data)
-}
-
 // MakeReservation mocks base method.
 func (m *MockInterface) MakeReservation(ctx context.Context, data dto.ReservationDTO) error {
 	m.ctrl.T.Helper()
@@ -161,6 +146,21 @@ func (m *MockInterface) MakeSale(ctx context.Context, data []dto.ProductDTO) err
 func (mr *MockInterfaceMockRecorder) MakeSale(ctx, data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MakeSale", reflect.TypeOf((*MockInterface)(nil).MakeSale), ctx, data)
+}
+
+// Stock mocks base method.
+func (m *MockInterface) Stock(ctx context.Context, data dto.ArticleDTO) (dto.NamedProductDTO, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Stock", ctx, data)
+	ret0, _ := ret[0].(dto.NamedProductDTO)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Stock indicates an expected call of Stock.
+func (mr *MockInterfaceMockRecorder) Stock(ctx, data interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stock", reflect.TypeOf((*MockInterface)(nil).Stock), ctx, data)
 }
 
 // TotalSold mocks base method.

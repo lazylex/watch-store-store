@@ -6,14 +6,12 @@ package mock_repository
 
 import (
 	context "context"
+	sql "database/sql"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
 	dto "github.com/lazylex/watch-store/store/internal/dto"
 )
-
-// ключ для указания в контексте необходимости выполнения передаваемой функции, а не имитации её вызова
-type ExecuteKey struct{}
 
 // MockInterface is a mock of Interface interface.
 type MockInterface struct {
@@ -36,20 +34,6 @@ func NewMockInterface(ctrl *gomock.Controller) *MockInterface {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockInterface) EXPECT() *MockInterfaceMockRecorder {
 	return m.recorder
-}
-
-// Close mocks base method.
-func (m *MockInterface) Close() error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Close")
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Close indicates an expected call of Close.
-func (mr *MockInterfaceMockRecorder) Close() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockInterface)(nil).Close))
 }
 
 // ConvertToCommonErr mocks base method.
@@ -300,10 +284,6 @@ func (mr *MockInterfaceMockRecorder) UpdateStockPrice(arg0, arg1 interface{}) *g
 
 // WithinTransaction mocks base method.
 func (m *MockInterface) WithinTransaction(arg0 context.Context, arg1 func(context.Context) error) error {
-	// пришлось внести изменения в сгенерированный код, так как нужно тестировать логику, которую передают в функции arg1
-	if ok := arg0.Value(ExecuteKey{}); ok != nil {
-		return arg1(arg0)
-	}
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "WithinTransaction", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -314,4 +294,55 @@ func (m *MockInterface) WithinTransaction(arg0 context.Context, arg1 func(contex
 func (mr *MockInterfaceMockRecorder) WithinTransaction(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithinTransaction", reflect.TypeOf((*MockInterface)(nil).WithinTransaction), arg0, arg1)
+}
+
+// MockSQLDBInterface is a mock of SQLDBInterface interface.
+type MockSQLDBInterface struct {
+	ctrl     *gomock.Controller
+	recorder *MockSQLDBInterfaceMockRecorder
+}
+
+// MockSQLDBInterfaceMockRecorder is the mock recorder for MockSQLDBInterface.
+type MockSQLDBInterfaceMockRecorder struct {
+	mock *MockSQLDBInterface
+}
+
+// NewMockSQLDBInterface creates a new mock instance.
+func NewMockSQLDBInterface(ctrl *gomock.Controller) *MockSQLDBInterface {
+	mock := &MockSQLDBInterface{ctrl: ctrl}
+	mock.recorder = &MockSQLDBInterfaceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockSQLDBInterface) EXPECT() *MockSQLDBInterfaceMockRecorder {
+	return m.recorder
+}
+
+// Close mocks base method.
+func (m *MockSQLDBInterface) Close() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Close")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Close indicates an expected call of Close.
+func (mr *MockSQLDBInterfaceMockRecorder) Close() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockSQLDBInterface)(nil).Close))
+}
+
+// DB mocks base method.
+func (m *MockSQLDBInterface) DB() *sql.DB {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DB")
+	ret0, _ := ret[0].(*sql.DB)
+	return ret0
+}
+
+// DB indicates an expected call of DB.
+func (mr *MockSQLDBInterfaceMockRecorder) DB() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DB", reflect.TypeOf((*MockSQLDBInterface)(nil).DB))
 }
