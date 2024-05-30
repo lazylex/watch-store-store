@@ -18,6 +18,9 @@ import (
 	"testing"
 )
 
+// ключ для указания в контексте необходимости выполнения передаваемой функции, а не имитации её вызова
+type ExecuteKey struct{}
+
 // withMockRepo позволяет подключать мок репозитория в функции service.New, чтобы покрыть её тестами
 func withMockRepo(mr repository.Interface) Option {
 	return func(s *Service) {

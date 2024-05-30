@@ -18,6 +18,13 @@ var (
 	ErrAlreadyProcessed       = serviceError("already processed")
 )
 
+// После генерации mock-а добавь структуру
+// type ExecuteKey struct{}
+// и в начало функции WithinTransaction следующее условие, чтобы проходить тесты:
+// if ok := arg0.Value(ExecuteKey{}); ok != nil {
+//  	return arg1(arg0)
+// }
+
 //go:generate mockgen -source=service.go -destination=mocks/service.go
 type Interface interface {
 	// ChangePriceInStock изменяет цену товара, находящегося в продаже

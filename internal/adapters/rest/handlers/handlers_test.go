@@ -19,7 +19,7 @@ func TestHandler_GetStockSuccess(t *testing.T) {
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
 	router.AddHandlers(mux, New(service, time.Second))
-	service.EXPECT().GetStock(gomock.Any(), gomock.Any()).Times(1).Return(
+	service.EXPECT().Stock(gomock.Any(), gomock.Any()).Times(1).Return(
 		dto.NamedProductDTO{Name: "CASIO G-SHOCK DW-5600E-1V", Article: "1",
 			Price: 7950, Amount: 22,
 		}, nil)
@@ -52,7 +52,7 @@ func TestHandler_GetStockNoRecord(t *testing.T) {
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
 	router.AddHandlers(mux, New(service, time.Second))
-	service.EXPECT().GetStock(gomock.Any(), gomock.Any()).Times(1).Return(
+	service.EXPECT().Stock(gomock.Any(), gomock.Any()).Times(1).Return(
 		dto.NamedProductDTO{}, repository.ErrNoRecord)
 
 	response := httptest.NewRecorder()
@@ -69,7 +69,7 @@ func TestHandler_GetAmountInStockSuccess(t *testing.T) {
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
 	router.AddHandlers(mux, New(service, time.Second))
-	service.EXPECT().GetAmountInStock(gomock.Any(), gomock.Any()).Times(1).Return(
+	service.EXPECT().AmountInStock(gomock.Any(), gomock.Any()).Times(1).Return(
 		uint(15), nil)
 
 	response := httptest.NewRecorder()
@@ -105,7 +105,7 @@ func TestHandler_GetAmountInStockNoRecord(t *testing.T) {
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/api_v1/stock/amount/1", nil)
 
-	service.EXPECT().GetAmountInStock(gomock.Any(), gomock.Any()).Times(1).Return(
+	service.EXPECT().AmountInStock(gomock.Any(), gomock.Any()).Times(1).Return(
 		uint(0), repository.ErrNoRecord)
 
 	mux.ServeHTTP(response, request)

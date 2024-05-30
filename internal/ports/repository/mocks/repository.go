@@ -13,6 +13,9 @@ import (
 	dto "github.com/lazylex/watch-store/store/internal/dto"
 )
 
+// ключ для указания в контексте необходимости выполнения передаваемой функции, а не имитации её вызова
+type ExecuteKey struct{}
+
 // MockInterface is a mock of Interface interface.
 type MockInterface struct {
 	ctrl     *gomock.Controller
@@ -284,6 +287,10 @@ func (mr *MockInterfaceMockRecorder) UpdateStockPrice(arg0, arg1 interface{}) *g
 
 // WithinTransaction mocks base method.
 func (m *MockInterface) WithinTransaction(arg0 context.Context, arg1 func(context.Context) error) error {
+	// пришлось внести изменения в сгенерированный код, так как нужно тестировать логику, которую передают в функции arg1
+	if ok := arg0.Value(ExecuteKey{}); ok != nil {
+		return arg1(arg0)
+	}
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "WithinTransaction", arg0, arg1)
 	ret0, _ := ret[0].(error)
