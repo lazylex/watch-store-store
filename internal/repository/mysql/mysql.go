@@ -60,7 +60,7 @@ func createDSN(cfg *config.Storage) string {
 		cfg.DatabaseName)
 }
 
-// generateTransactionNumber генерирует строку с номером транзакции. Код повзаимствовал из функции, генерирующей номер
+// generateTransactionNumber генерирует строку с номером транзакции. Код позаимствовал из функции, генерирующей номер
 // http запроса в роутере chi
 func generateTransactionNumber() string {
 	var buf [12]byte
@@ -240,7 +240,7 @@ func (r *Repository) ReadStock(ctx context.Context, data *dto.ArticleDTO) (dto.N
 	return result, r.ConvertToCommonErr(err)
 }
 
-// ReadStockAmount возвращает количество товара с артикулом, переданным в dto.ArticleDTOб из находящегося в продаже
+// ReadStockAmount возвращает количество товара с артикулом, переданным в dto.ArticleDTO из находящегося в продаже
 func (r *Repository) ReadStockAmount(ctx context.Context, data *dto.ArticleDTO) (uint, error) {
 	var amount uint
 	stmt := `SELECT amount FROM stock WHERE article = ?`
@@ -396,6 +396,10 @@ func (r *Repository) ReadSoldRecords(ctx context.Context, data *dto.ArticleDTO) 
 	stmt := `SELECT article, price, amount, date_of_sale FROM stock WHERE article = ?`
 
 	rows, err := r.executor(ctx).QueryContext(ctx, stmt, data.Article)
+	if rows == nil || err != nil {
+		return result, r.ConvertToCommonErr(err)
+	}
+
 	for rows.Next() {
 		var record dto.SoldDTO
 		if err = rows.Scan(&record.Article, &record.Price, &record.Amount, &record.Date); err != nil {
@@ -433,6 +437,10 @@ func (r *Repository) ReadSoldRecordsInPeriod(ctx context.Context, data *dto.Arti
 			 WHERE article = ? AND date_of_sale >= ? AND date_of_sale <= ?`
 
 	rows, err := r.executor(ctx).QueryContext(ctx, stmt, data.Article, data.From, data.To)
+	if rows == nil || err != nil {
+		return result, r.ConvertToCommonErr(err)
+	}
+
 	for rows.Next() {
 		var record dto.SoldDTO
 		if err = rows.Scan(&record.Article, &record.Price, &record.Amount, &record.Date); err != nil {
