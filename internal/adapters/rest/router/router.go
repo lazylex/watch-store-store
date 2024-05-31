@@ -9,7 +9,7 @@ var paths map[string]string
 
 // init регистрирует адреса в структуре paths. Ключами и значениями служат шаблоны пути, кроме адресов для GET-запросов.
 // Для них ключом служит шаблон без передаваемого в фигурных скобках параметра. Регистрация адресов необходима для того,
-// чтобы в метриках сохранялись только используемые в приложении пути
+// чтобы в метриках сохранялись только используемые в приложении пути.
 func init() {
 	paths = make(map[string]string, 10)
 	paths["/api/api_v1/stock/"] = "/api/api_v1/stock/{article}"
@@ -24,17 +24,17 @@ func init() {
 	paths["/api/api_v1/reservation/finish"] = "/api/api_v1/reservation/finish"
 }
 
-// ExistentPaths возвращает слайс доступных в приложении путей
+// ExistentPaths возвращает слайс доступных в приложении путей.
 func ExistentPaths() []string {
 	var existentPaths []string
-	for k, _ := range paths {
+	for k := range paths {
 		existentPaths = append(existentPaths, k)
 	}
 
 	return existentPaths
 }
 
-// IsExistPath возвращает true, если в приложении используется передаваемый путь. Иначе - false
+// IsExistPath возвращает true, если в приложении используется передаваемый путь. Иначе - false.
 func IsExistPath(path string) bool {
 	if _, ok := paths[path]; ok {
 		return true
@@ -42,7 +42,7 @@ func IsExistPath(path string) bool {
 	return false
 }
 
-// AddHandlers возвращает роутер *chi.Mux с добавленными хендлерами REST запросов
+// AddHandlers возвращает роутер *chi.Mux с добавленными обработчиками REST запросов.
 func AddHandlers(router *chi.Mux, handlers handlers.Interface) *chi.Mux {
 	router.Get(paths["/api/api_v1/stock/"], handlers.StockRecord)
 	router.Get(paths["/api/api_v1/stock/amount/"], handlers.AmountInStock)

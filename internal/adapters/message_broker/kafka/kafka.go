@@ -10,8 +10,8 @@ import (
 	"os"
 )
 
-// MustRun предназначен для запуска консьюмеров/продюсеров Кафки. Если в конфигурации cfg не задано имя топика, то
-// соответствующий ему консьюмер/продюсер не будет запущен. Работа приложения будет продолжена
+// MustRun предназначен для запуска consumers/producers Кафки. Если в конфигурации cfg не задано имя топика, то
+// соответствующий ему consumer/producer не будет запущен. Работа приложения будет продолжена.
 func MustRun(service service.Interface, cfg *config.Kafka, instance string) {
 	var topicsInService int
 	log := slog.With(slog.String(internalLogger.OPLabel, "kafka.MustRun"))

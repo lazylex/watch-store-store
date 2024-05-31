@@ -9,7 +9,7 @@ type OrderNumberDTO struct {
 	OrderNumber reservation.OrderNumber `json:"order_number"`
 }
 
-// Validate валидация корректности сохраненных в DTO данных
+// Validate валидация корректности сохраненных в DTO данных.
 func (on *OrderNumberDTO) Validate() error {
 	return validators.OrderNumber(on.OrderNumber)
 }

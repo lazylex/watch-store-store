@@ -25,7 +25,7 @@ type Server struct {
 	shutdownTimeout time.Duration
 }
 
-// dtoErr добавляет к тексту ошибки префикс, указывающий на её принадлежность к DTO
+// serverErr добавляет к тексту ошибки префикс, указывающий на её принадлежность к DTO.
 func serverErr(text string) error {
 	return errors.New(prefixes.RestServerPrefix + text)
 }
@@ -38,7 +38,7 @@ var (
 
 // MustCreate возвращает REST-сервер, который является оберткой над http.Server с настроенными middlewares и ручками. В
 // качестве параметров передается адрес, таймауты, доменный сервис, метрики, окружение и строка безопасности для
-// JWT-токена, если передано не локальное окружение для запуска
+// JWT-токена, если передано не локальное окружение для запуска.
 func MustCreate(cfg *config.HttpServer, queryTimeout time.Duration,
 	domainService *service.Service,
 	metrics *metrics.Metrics,
@@ -81,7 +81,7 @@ func MustCreate(cfg *config.HttpServer, queryTimeout time.Duration,
 	}
 }
 
-// MustRun производит запуск сервера в отдельной горутине. В случае ошибки останавливает работу приложения
+// MustRun производит запуск сервера в отдельной go-рутине. В случае ошибки останавливает работу приложения.
 func (s *Server) MustRun() {
 	log := slog.With(logger.OPLabel, "adapters.rest.server.MustRun")
 	go func() {
@@ -94,7 +94,7 @@ func (s *Server) MustRun() {
 	}()
 }
 
-// Shutdown производит остановку сервера
+// Shutdown производит остановку сервера.
 func (s *Server) Shutdown() {
 	log := slog.With(logger.OPLabel, "adapters.rest.server.Shutdown")
 	ctx, cancel := context.WithTimeout(context.Background(), s.shutdownTimeout)

@@ -11,7 +11,7 @@ import (
 
 // WriteHeaderAndLogAboutErr записывает заголовок ответа сервера, соответствующий переданной ошибке. К примеру, при
 // отсутствующей записи, записывает заголовок ответа http.StatusNotFound. Также текст ошибки записывается в лог. При
-// отсутсвии ошибки, функция ничего не выполняет
+// отсутствии ошибки, функция ничего не выполняет.
 func WriteHeaderAndLogAboutErr(w http.ResponseWriter, logger *slog.Logger, err error) {
 	if err == nil {
 		return
@@ -32,7 +32,7 @@ func WriteHeaderAndLogAboutErr(w http.ResponseWriter, logger *slog.Logger, err e
 	logger.Warn(err.Error())
 }
 
-// WriteHeaderAndLogAboutBadRequest записывает заголовок ответа http.StatusBadRequest и переданную ошибку в лог
+// WriteHeaderAndLogAboutBadRequest записывает заголовок ответа http.StatusBadRequest и переданную ошибку в лог.
 func WriteHeaderAndLogAboutBadRequest(w http.ResponseWriter, logger *slog.Logger, err error) {
 	if err == nil {
 		return

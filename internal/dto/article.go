@@ -9,7 +9,7 @@ type ArticleDTO struct {
 	Article article.Article `json:"article"`
 }
 
-// Validate валидация корректности сохраненных в DTO данных
+// Validate валидация корректности сохраненных в DTO данных.
 func (a *ArticleDTO) Validate() error {
 	return validators.Article(a.Article)
 }

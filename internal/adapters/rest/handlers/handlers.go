@@ -23,12 +23,12 @@ type Handler struct {
 	queryTimeout time.Duration
 }
 
-// New конструктор хендлеров. Возвращает созданный обработчик *Handler
+// New конструктор обработчиков. Возвращает созданный обработчик *Handler.
 func New(service service.Interface, queryTimeout time.Duration) *Handler {
 	return &Handler{service: service, queryTimeout: queryTimeout}
 }
 
-// injectRequestIDToCtx возвращает контекст с внедренным идентификатором запроса, для дальнейшего использования логгером
+// injectRequestIDToCtx возвращает контекст с внедренным идентификатором запроса, для дальнейшей записи в лог.
 func injectRequestIDToCtx(ctx context.Context, r *http.Request) context.Context {
 	return context.WithValue(ctx, logger.RequestId, middleware.GetReqID(r.Context()))
 }
@@ -134,8 +134,8 @@ func (h *Handler) UpdatePriceInStock(w http.ResponseWriter, r *http.Request) {
 		transferObject.Price, transferObject.Article))
 }
 
-// UpdateAmountInStock обновляет количество единиц товара. В теле запроса передается передаются новое количество и
-// артикул товара в формате JSON. Пример передаваемых данных:
+// UpdateAmountInStock обновляет количество единиц товара. В теле запроса передается новое количество и артикул товара в
+// формате JSON. Пример передаваемых данных:
 //
 // {"article":"3", "amount":6759}
 func (h *Handler) UpdateAmountInStock(w http.ResponseWriter, r *http.Request) {
@@ -166,8 +166,8 @@ func (h *Handler) UpdateAmountInStock(w http.ResponseWriter, r *http.Request) {
 		transferObject.Amount, transferObject.Article))
 }
 
-// AddToStock добавляет новую запись о доступном товаре. В теле запроса передается передаются новое количество, артикул,
-// цена и название товара в формате JSON. Пример передаваемых данных:
+// AddToStock добавляет новую запись о доступном товаре. В теле запроса передается новое количество, артикул, цена и
+// название товара в формате JSON. Пример передаваемых данных:
 //
 // {"article":"3", "amount":6759, "price": 16000, "name": "plum-bus"}
 func (h *Handler) AddToStock(w http.ResponseWriter, r *http.Request) {
@@ -198,7 +198,7 @@ func (h *Handler) AddToStock(w http.ResponseWriter, r *http.Request) {
 }
 
 // SoldAmount возвращает общее количество проданного товара. В пути запроса передается артикул. Параметрами запроса
-// опционально передаются даты from и to для указания времено́го диапазона. Если передать только параметр from, то в
+// опционально передаются даты from и to для указания временного диапазона. Если передать только параметр from, то в
 // качестве параметра to будет текущая дата (определяется временем на сервере, где запущено приложение, а не БД). Если
 // передан только параметр to, то возвращается ответ http.StatusBadRequest
 // Пример возвращаемого значения:
@@ -384,7 +384,7 @@ func (h *Handler) MakeLocalSale(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// FinishOrder отмечает заказ выполненым (отданым локальному покупателю или отправленным интернет-покупателю)
+// FinishOrder отмечает заказ выполненным (отданным локальному покупателю или отправленным интернет-покупателю)
 // и заносит зарезервированные продукты в историю проданных товаров. Данные в запросе передаются в теле в виде JSON.
 // Например:
 //

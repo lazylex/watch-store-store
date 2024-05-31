@@ -45,7 +45,7 @@ func main() {
 	signal.Notify(c, os.Kill)
 
 	sig := <-c
-	fmt.Println() // так красивее, если вывод логов производится в стандартный терминал
+	fmt.Println() // Так красивее, если вывод логов производится в стандартный терминал
 	slog.Info(fmt.Sprintf("%s signal received. Shutdown started", sig))
 
 	server.Shutdown()

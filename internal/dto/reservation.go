@@ -14,12 +14,12 @@ type ReservationDTO struct {
 	State       uint           `json:"state"`
 }
 
-// IsNew возвращает true, если бронь еще не была снята (по причине отмены или завершения заказа)
+// IsNew возвращает true, если бронь еще не была снята (по причине отмены или завершения заказа).
 func (r *ReservationDTO) IsNew() bool {
 	return r.State == rs.NewForInternetCustomer || r.State == rs.NewForLocalCustomer || r.State == rs.NewForCashRegister
 }
 
-// Validate валидация корректности сохраненных в DTO данных
+// Validate валидация корректности сохраненных в DTO данных.
 func (r *ReservationDTO) Validate() error {
 	if err := validators.OrderNumber(r.OrderNumber); err != nil {
 		return err

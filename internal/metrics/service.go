@@ -8,23 +8,23 @@ type Service struct {
 	placedLocalOrders    *prometheus.CounterVec
 }
 
-// CancelOrdersInc увеличивает счетчик отмененных заказов
+// CancelOrdersInc увеличивает счетчик отмененных заказов.
 func (s *Service) CancelOrdersInc() {
 	s.canceledOrders.With(prometheus.Labels{}).Inc()
 }
 
-// PlacedInternetOrdersInc увеличивает счетчик размещенных заказов интернет-магазина с доставкой к покупателю
+// PlacedInternetOrdersInc увеличивает счетчик размещенных заказов интернет-магазина с доставкой к покупателю.
 func (s *Service) PlacedInternetOrdersInc() {
 	s.placedInternetOrders.With(prometheus.Labels{}).Inc()
 }
 
-// PlacedLocalOrdersInc увеличивает счетчик размещенных заказов для товаров, бронированных для самовывоза из магазина
+// PlacedLocalOrdersInc увеличивает счетчик размещенных заказов для товаров, бронированных для самовывоза из магазина.
 func (s *Service) PlacedLocalOrdersInc() {
 	s.placedLocalOrders.With(prometheus.Labels{}).Inc()
 }
 
 // createCanceledOrdersTotalMetric создает и регистрирует метрику canceled_orders_total, являющуюся счетчиком отмененных
-// заказов
+// заказов.
 func createCanceledOrdersTotalMetric() (*prometheus.CounterVec, error) {
 	var err error
 	orders := prometheus.NewCounterVec(prometheus.CounterOpts{
@@ -42,7 +42,7 @@ func createCanceledOrdersTotalMetric() (*prometheus.CounterVec, error) {
 }
 
 // createPlacedInternetOrdersTotalMetric создает и регистрирует метрику placed_internet_orders_total, являющуюся
-// счетчиком совершенных заказов интернет-магазина для доставки покупателю
+// счетчиком совершенных заказов интернет-магазина для доставки покупателю.
 func createPlacedInternetOrdersTotalMetric() (*prometheus.CounterVec, error) {
 	var err error
 	orders := prometheus.NewCounterVec(prometheus.CounterOpts{
@@ -60,7 +60,7 @@ func createPlacedInternetOrdersTotalMetric() (*prometheus.CounterVec, error) {
 }
 
 // createPlacedLocalOrdersTotalMetric создает и регистрирует метрику placed_local_orders_total, являющуюся
-// счетчиком совершенных заказов для самовывоза покупателем
+// счетчиком совершенных заказов для самовывоза покупателем.
 func createPlacedLocalOrdersTotalMetric() (*prometheus.CounterVec, error) {
 	var err error
 	orders := prometheus.NewCounterVec(prometheus.CounterOpts{

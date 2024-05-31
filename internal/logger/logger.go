@@ -23,7 +23,7 @@ const (
 	TxLabel                  = "tx_number"
 )
 
-// MustCreate возвращает экземпляр *slog.Logger или останавливает программу, если окружение environment указано неверно
+// MustCreate возвращает экземпляр *slog.Logger или останавливает программу, если окружение environment указано неверно.
 func MustCreate(environment, instance string) *slog.Logger {
 	var logger *slog.Logger
 	switch environment {
@@ -43,7 +43,7 @@ func MustCreate(environment, instance string) *slog.Logger {
 	return logger
 }
 
-// AddPlaceAndRequestId добавляет в логгер место запуска и идентификатор запроса
+// AddPlaceAndRequestId добавляет в logger место запуска и идентификатор запроса.
 func AddPlaceAndRequestId(log *slog.Logger, place string, r *http.Request) *slog.Logger {
 	return log.With(
 		slog.String(OPLabel, place), // operation place
@@ -51,7 +51,7 @@ func AddPlaceAndRequestId(log *slog.Logger, place string, r *http.Request) *slog
 	)
 }
 
-// LogWithCtxData извлекает, при наличии, из контекста идентификатор запроса и номер транзакции и добавляет в логгер
+// LogWithCtxData извлекает, при наличии, из контекста идентификатор запроса и номер транзакции и добавляет в logger.
 func LogWithCtxData(ctx context.Context, log *slog.Logger) *slog.Logger {
 	if ctx.Value(RequestId) != nil {
 		log = log.With(RequestLabel, ctx.Value(RequestId))
@@ -61,9 +61,4 @@ func LogWithCtxData(ctx context.Context, log *slog.Logger) *slog.Logger {
 	}
 
 	return log
-}
-
-// Null возвращает логгер, который пишет в никуда. Полезно для тестирования структур и функций, зависящих от логгера
-func Null() *slog.Logger {
-	return slog.New(slog.NewTextHandler(os.NewFile(0, os.DevNull), nil))
 }

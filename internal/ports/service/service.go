@@ -7,7 +7,7 @@ import (
 	"github.com/lazylex/watch-store/store/internal/helpers/constants/prefixes"
 )
 
-// serviceError добавляет к тексту ошибки префикс, указывающий на её принадлежность к сервису
+// serviceError добавляет к тексту ошибки префикс, указывающий на её принадлежность к сервису.
 func serviceError(text string) error {
 	return errors.New(prefixes.ServicePrefix + text)
 }

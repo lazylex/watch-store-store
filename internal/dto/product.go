@@ -11,7 +11,7 @@ type ProductDTO struct {
 	Amount  uint            `json:"amount"`
 }
 
-// Validate валидация корректности сохраненных в DTO данных
+// Validate валидация корректности сохраненных в DTO данных.
 func (p *ProductDTO) Validate() error {
 	if err := validators.Article(p.Article); err != nil {
 		return err

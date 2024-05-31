@@ -35,12 +35,12 @@ var (
 	ErrNilConfigPointer = mysqlErr("nil config pointer")
 )
 
-// DB возвращает структуру DB репозитория
+// DB возвращает структуру DB репозитория.
 func (r *Repository) DB() *sql.DB {
 	return r.db
 }
 
-// Close закрывает пул подключений к БД
+// Close закрывает пул подключений к БД.
 func (r *Repository) Close() error {
 	log := slog.With(slog.String(logger.OPLabel, "mysql.Close"))
 	err := r.db.Close()
@@ -51,7 +51,7 @@ func (r *Repository) Close() error {
 	return r.ConvertToCommonErr(err)
 }
 
-// createDSN создает строку подключения к БД из параметров, переданных в конфигурации
+// createDSN создает строку подключения к БД из параметров, переданных в конфигурации.
 func createDSN(cfg *config.Storage) string {
 	return fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true&interpolateParams=true",
 		cfg.DatabaseLogin,
@@ -61,7 +61,7 @@ func createDSN(cfg *config.Storage) string {
 }
 
 // generateTransactionNumber генерирует строку с номером транзакции. Код позаимствовал из функции, генерирующей номер
-// http запроса в роутере chi
+// http запроса в роутере chi.
 func generateTransactionNumber() string {
 	var buf [12]byte
 	var b64 string
@@ -76,7 +76,7 @@ func generateTransactionNumber() string {
 	return b64
 }
 
-// WithRepository служит для инициализации репозитория и внедрение его в сервис, используя паттерн Options
+// WithRepository служит для инициализации репозитория и внедрение его в сервис, используя паттерн Options.
 func WithRepository(cfg *config.Storage) service.Option {
 	log := slog.With(logger.OPLabel, "repository.mysql.WithRepository")
 	if cfg == nil {
@@ -109,7 +109,7 @@ type txKey struct{}
 
 // queryExecutorInterface интерфейс предоставления доступных методов для выполнения как одиночных, так и транзакционных
 // запросов. Используется для объявления переменных, которые в дальнейшем будут инициализироваться методом
-// Repository.executor
+// Repository.executor.
 type queryExecutorInterface interface {
 	QueryRowContext(context.Context, string, ...any) *sql.Row
 	ExecContext(context.Context, string, ...any) (sql.Result, error)
@@ -117,7 +117,7 @@ type queryExecutorInterface interface {
 }
 
 // extractTx если транзакция имеется в контексте, то возвращает объект транзакции *sql.Tx и true. В противном случае
-// возвращает nil и false
+// возвращает nil и false.
 func (r *Repository) extractTx(ctx context.Context) (*sql.Tx, bool) {
 	if tx, ok := ctx.Value(txKey{}).(*sql.Tx); ok {
 		return tx, true
@@ -127,7 +127,7 @@ func (r *Repository) extractTx(ctx context.Context) (*sql.Tx, bool) {
 
 // executor в зависимости от наличия в передаваемом контексте транзакции по ключу txKey{} либо возвращает эту
 // транзакцию, либо пул соединений для выполнения отдельного запроса к базе данных. В контекст транзакционный объект
-// внедряется в функции WithinTransaction
+// внедряется в функции WithinTransaction.
 func (r *Repository) executor(ctx context.Context) queryExecutorInterface {
 	var inOuterTX bool
 	var executor queryExecutorInterface
@@ -140,10 +140,10 @@ func (r *Repository) executor(ctx context.Context) queryExecutorInterface {
 }
 
 // WithinTransaction запускает функцию tFunc с контекстом, содержащим внутри транзакционный объект. Транзакция
-// коммитится, если функция завершается без ошибок. Взял идею такой работы с транзакциями в этой статье:
+// завершается, если функция завершается без ошибок. Взял идею такой работы с транзакциями в этой статье:
 // https://habr.com/ru/articles/651799/. Модифицировал предложенную в статье идею, добавив возможность внутри функции
 // tFunc использовать вызов WithinTransaction. При этом вложенный вызов WithinTransaction будет использовать ту же
-// транзакцию, что и внешний
+// транзакцию, что и внешний.
 func (r *Repository) WithinTransaction(ctx context.Context, tFunc func(ctx context.Context) error) error {
 	var tx *sql.Tx
 	var err error
@@ -184,7 +184,7 @@ func (r *Repository) WithinTransaction(ctx context.Context, tFunc func(ctx conte
 		return err
 	}
 
-	// если нет ошибок и мы не во вложенной транзакции, то выполняем коммит
+	// Если нет ошибок и мы не во вложенной транзакции, то выполняем коммит
 	if !internalCall {
 		if err = tx.Commit(); err != nil {
 			log.Error(err.Error())
@@ -197,7 +197,7 @@ func (r *Repository) WithinTransaction(ctx context.Context, tFunc func(ctx conte
 }
 
 // ConvertToCommonErr замещает ошибки конкретной реализации на подобные по смыслу ошибки из доступных в абстрактном
-// репозитории. К примеру, меняет sql.ErrNoRows на repository.ErrNoRecord
+// репозитории. К примеру, меняет sql.ErrNoRows на repository.ErrNoRecord.
 func (r *Repository) ConvertToCommonErr(err error) error {
 	if err == nil {
 		return nil
@@ -218,7 +218,7 @@ func (r *Repository) ConvertToCommonErr(err error) error {
 // Ниже по коду идёт CRUD //
 ////////////////////////////
 
-// CreateStock сохраняет в БД запись о товаре
+// CreateStock сохраняет в БД запись о товаре.
 func (r *Repository) CreateStock(ctx context.Context, data *dto.NamedProductDTO) error {
 	var err error
 	stmt := `INSERT INTO stock (article, name, price, amount) VALUES (?,?,?,?)`
@@ -228,7 +228,7 @@ func (r *Repository) CreateStock(ctx context.Context, data *dto.NamedProductDTO)
 	return r.ConvertToCommonErr(err)
 }
 
-// ReadStock возвращает запись из БД о товаре, находящемся в продаже в виде dto.NamedProductDTO
+// ReadStock возвращает запись из БД о товаре, находящемся в продаже в виде dto.NamedProductDTO.
 func (r *Repository) ReadStock(ctx context.Context, data *dto.ArticleDTO) (dto.NamedProductDTO, error) {
 	var result dto.NamedProductDTO
 	var err error
@@ -240,7 +240,7 @@ func (r *Repository) ReadStock(ctx context.Context, data *dto.ArticleDTO) (dto.N
 	return result, r.ConvertToCommonErr(err)
 }
 
-// ReadStockAmount возвращает количество товара с артикулом, переданным в dto.ArticleDTO из находящегося в продаже
+// ReadStockAmount возвращает количество товара с артикулом, переданным в dto.ArticleDTO из находящегося в продаже.
 func (r *Repository) ReadStockAmount(ctx context.Context, data *dto.ArticleDTO) (uint, error) {
 	var amount uint
 	stmt := `SELECT amount FROM stock WHERE article = ?`
@@ -253,7 +253,7 @@ func (r *Repository) ReadStockAmount(ctx context.Context, data *dto.ArticleDTO) 
 	return amount, nil
 }
 
-// ReadStockPrice возвращает цену товара с артикулом, переданным в dto.ArticleDTO, из находящегося в продаже
+// ReadStockPrice возвращает цену товара с артикулом, переданным в dto.ArticleDTO, из находящегося в продаже.
 func (r *Repository) ReadStockPrice(ctx context.Context, data *dto.ArticleDTO) (float64, error) {
 	var price float64
 	stmt := `SELECT amount FROM stock WHERE article = ?`
@@ -266,7 +266,7 @@ func (r *Repository) ReadStockPrice(ctx context.Context, data *dto.ArticleDTO) (
 	return price, nil
 }
 
-// UpdateStock обновляет запись о товаре в БД, в соответствии с переданными в dto.NamedProductDTO данными
+// UpdateStock обновляет запись о товаре в БД, в соответствии с переданными в dto.NamedProductDTO данными.
 func (r *Repository) UpdateStock(ctx context.Context, data *dto.NamedProductDTO) error {
 	var err error
 	stmt := `UPDATE stock SET name, price, amount = (?,?,?) WHERE article = ?`
@@ -277,7 +277,7 @@ func (r *Repository) UpdateStock(ctx context.Context, data *dto.NamedProductDTO)
 }
 
 // UpdateStockAmount обновляет количество доступного для продажи товара в соответствии с переданными в
-// dto.ArticleWithAmountDTO данными
+// dto.ArticleWithAmountDTO данными.
 func (r *Repository) UpdateStockAmount(ctx context.Context, data *dto.ArticleWithAmountDTO) error {
 	var err error
 	stmt := `UPDATE stock SET amount = ? WHERE article = ?`
@@ -288,7 +288,7 @@ func (r *Repository) UpdateStockAmount(ctx context.Context, data *dto.ArticleWit
 }
 
 // UpdateStockPrice обновляет цену доступного для продажи товара в соответствии с переданными в
-// dto.ArticleWithPriceDTO данными
+// dto.ArticleWithPriceDTO данными.
 func (r *Repository) UpdateStockPrice(ctx context.Context, data *dto.ArticleWithPriceDTO) error {
 	var err error
 	stmt := `UPDATE stock SET price = ? WHERE article = ?`
@@ -324,7 +324,7 @@ func (r *Repository) CreateReservation(ctx context.Context, data *dto.Reservatio
 }
 
 // ReadReservation возвращает в виде dto.ReservationDTO  данные о бронировании товаров с номером заказа, переданным в
-// dto.OrderNumberDTO
+// dto.OrderNumberDTO.
 func (r *Repository) ReadReservation(ctx context.Context, data *dto.OrderNumberDTO) (dto.ReservationDTO, error) {
 	stmt := `SELECT article, price, amount, date_of_reservation, order_number, status
     		 FROM on_processing 
@@ -353,7 +353,7 @@ func (r *Repository) ReadReservation(ctx context.Context, data *dto.OrderNumberD
 }
 
 // UpdateReservation обновляет в БД записи о бронировании, в соответствии с переданными в dto.ReservationDTO данными
-// (кроме идентификатора записи в таблицы и времени бронирования)
+// (кроме идентификатора записи в таблицы и времени бронирования).
 func (r *Repository) UpdateReservation(ctx context.Context, data *dto.ReservationDTO) error {
 	var err error
 	stmt := `UPDATE on_processing 
@@ -371,7 +371,7 @@ func (r *Repository) UpdateReservation(ctx context.Context, data *dto.Reservatio
 	return nil
 }
 
-// DeleteReservation удаляет из БД записи с номером заказа, переданным в dto.OrderNumberDTO
+// DeleteReservation удаляет из БД записи с номером заказа, переданным в dto.OrderNumberDTO.
 func (r *Repository) DeleteReservation(ctx context.Context, data *dto.OrderNumberDTO) error {
 	stmt := `DELETE FROM on_processing WHERE order_number = ?`
 
@@ -380,7 +380,7 @@ func (r *Repository) DeleteReservation(ctx context.Context, data *dto.OrderNumbe
 	return r.ConvertToCommonErr(err)
 }
 
-// CreateSoldRecord сохраняет в БД запись об проданном товаре
+// CreateSoldRecord сохраняет в БД запись об проданном товаре.
 func (r *Repository) CreateSoldRecord(ctx context.Context, data *dto.SoldDTO) error {
 	var err error
 	stmt := `INSERT INTO sold (article, price, amount, date_of_sale) VALUES (?,?,?,?)`
@@ -390,7 +390,7 @@ func (r *Repository) CreateSoldRecord(ctx context.Context, data *dto.SoldDTO) er
 	return r.ConvertToCommonErr(err)
 }
 
-// ReadSoldRecords возвращает все записи о продажах товара с переданным в dto.ArticleDTO артикулом
+// ReadSoldRecords возвращает все записи о продажах товара с переданным в dto.ArticleDTO артикулом.
 func (r *Repository) ReadSoldRecords(ctx context.Context, data *dto.ArticleDTO) ([]dto.SoldDTO, error) {
 	var result []dto.SoldDTO
 	stmt := `SELECT article, price, amount, date_of_sale FROM stock WHERE article = ?`
@@ -411,7 +411,7 @@ func (r *Repository) ReadSoldRecords(ctx context.Context, data *dto.ArticleDTO) 
 	return result, r.ConvertToCommonErr(err)
 }
 
-// ReadSoldAmount возвращает количество проданного товара с переданным в *dto.ArticleDTO артикулом (за весь период)
+// ReadSoldAmount возвращает количество проданного товара с переданным в *dto.ArticleDTO артикулом (за весь период).
 func (r *Repository) ReadSoldAmount(ctx context.Context, data *dto.ArticleDTO) (uint, error) {
 	var result sql.NullInt64
 
@@ -429,7 +429,7 @@ func (r *Repository) ReadSoldAmount(ctx context.Context, data *dto.ArticleDTO) (
 }
 
 // ReadSoldRecordsInPeriod возвращает все записи о продажах товара с переданным в dto.ArticleWithPeriodDTO артикулом
-// в период между датами From и To включительно
+// в период между датами From и To включительно.
 func (r *Repository) ReadSoldRecordsInPeriod(ctx context.Context, data *dto.ArticleWithPeriodDTO) ([]dto.SoldDTO, error) {
 	var result []dto.SoldDTO
 	stmt := `SELECT article, price, amount, date_of_sale 
@@ -452,7 +452,7 @@ func (r *Repository) ReadSoldRecordsInPeriod(ctx context.Context, data *dto.Arti
 	return result, r.ConvertToCommonErr(err)
 }
 
-// ReadSoldAmountInPeriod возвращает количество проданного товара за определенный период
+// ReadSoldAmountInPeriod возвращает количество проданного товара за определенный период.
 func (r *Repository) ReadSoldAmountInPeriod(ctx context.Context, data *dto.ArticleWithPeriodDTO) (uint, error) {
 	var result sql.NullInt64
 

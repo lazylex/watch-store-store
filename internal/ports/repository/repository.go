@@ -8,7 +8,7 @@ import (
 	"github.com/lazylex/watch-store/store/internal/helpers/constants/prefixes"
 )
 
-// repositoryError добавляет к тексту ошибки префикс, указывающий на её принадлежность к хранилищу
+// repositoryError добавляет к тексту ошибки префикс, указывающий на её принадлежность к хранилищу.
 func repositoryError(text string) error {
 	return errors.New(prefixes.RepositoryPrefix + text)
 }

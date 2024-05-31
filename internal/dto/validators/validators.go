@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// dtoErr добавляет к тексту ошибки префикс, указывающий на её принадлежность к DTO
+// dtoErr добавляет к тексту ошибки префикс, указывающий на её принадлежность к DTO.
 func dtoErr(text string) error {
 	return errors.New(prefixes.DTOErrorsPrefix + text)
 }
@@ -28,7 +28,7 @@ var (
 	ErrNoProductsInReservation        = dtoErr("no products in reservation")
 )
 
-// Article валидатор для артукула
+// Article функция валидации артикула.
 func Article(a article.Article) error {
 	r := []rune(a)
 	ln := len(r)
@@ -52,7 +52,7 @@ func Article(a article.Article) error {
 	return nil
 }
 
-// DateOrder валидатор порядка дат в периоде времени
+// DateOrder функция валидации порядка дат в периоде времени.
 func DateOrder(from, to time.Time) error {
 	if from.After(to) {
 		return ErrIncorrectDatesOrder
@@ -63,7 +63,7 @@ func DateOrder(from, to time.Time) error {
 	return nil
 }
 
-// Price валидатор цены
+// Price функция валидации цены.
 func Price(price float64) error {
 	if price < 0 {
 		return ErrNegativePrice
@@ -75,7 +75,7 @@ func Price(price float64) error {
 	return nil
 }
 
-// Name валидатор названия
+// Name функция валидации названия.
 func Name(name string) error {
 	if name == "" {
 		return ErrEmptyName
@@ -83,7 +83,7 @@ func Name(name string) error {
 	return nil
 }
 
-// OrderNumber валидатор номера заказа
+// OrderNumber функция валидации номера заказа.
 func OrderNumber(order reservation.OrderNumber) error {
 	if int(order) <= 0 {
 		return ErrIncorrectOrder

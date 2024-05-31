@@ -10,7 +10,7 @@ type ArticleWithAmountDTO struct {
 	Amount  uint            `json:"amount"`
 }
 
-// Validate валидация корректности сохраненных в DTO данных
+// Validate валидация корректности сохраненных в DTO данных.
 func (a *ArticleWithAmountDTO) Validate() error {
 	// Amount не валидируем, нулевое значение считаем валидным
 	return validators.Article(a.Article)

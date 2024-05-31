@@ -11,17 +11,17 @@ type HTTP struct {
 	duration *prometheus.HistogramVec
 }
 
-// RequestsTotalInc инкремент счетчика запросов
+// RequestsTotalInc инкремент счетчика запросов.
 func (h *HTTP) RequestsTotalInc(labels map[string]string) {
 	h.requests.With(labels).Inc()
 }
 
-// RequestsDurationObserve внесение данных о длительности запроса
+// RequestsDurationObserve внесение данных о длительности запроса.
 func (h *HTTP) RequestsDurationObserve(duration float64) {
 	h.duration.With(prometheus.Labels{}).Observe(duration)
 }
 
-// createHTTPRequestDurationSecondsBucketMetric создает и регистрирует метрику http_request_duration_seconds_bucket
+// createHTTPRequestDurationSecondsBucketMetric создает и регистрирует метрику http_request_duration_seconds_bucket.
 func createHTTPRequestDurationSecondsBucketMetric() (*prometheus.HistogramVec, error) {
 	var err error
 	requestDuration := prometheus.NewHistogramVec(prometheus.HistogramOpts{
@@ -38,7 +38,7 @@ func createHTTPRequestDurationSecondsBucketMetric() (*prometheus.HistogramVec, e
 	return requestDuration, nil
 }
 
-// createHTTPRequestsTotalMetric создает и регистрирует метрику http_requests_total, являющуюся счетчиком http-запросов
+// createHTTPRequestsTotalMetric создает и регистрирует метрику http_requests_total, являющуюся счетчиком http-запросов.
 func createHTTPRequestsTotalMetric() (*prometheus.CounterVec, error) {
 	var err error
 	requests := prometheus.NewCounterVec(prometheus.CounterOpts{

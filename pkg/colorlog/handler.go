@@ -1,7 +1,7 @@
 package colorlog
 
-// Базируется на пакете https://pkg.go.dev/github.com/lmittmann/tint
-// Опция NoColor не работает и уровень сообщения не выводится после внесённых мной изменений
+// Базируется на пакете https://pkg.go.dev/github.com/lmittmann/tint.
+// Опция NoColor не работает и уровень сообщения не выводится после внесённых мной изменений.
 
 import (
 	"context"
@@ -59,7 +59,7 @@ var (
 	currentBackColor = ansiBackgroundBlack
 )
 
-// textColor возвращает текущий цвет для текста
+// textColor возвращает текущий цвет для текста.
 func textColor(inverted bool) string {
 	if inverted {
 		return ansiTextBlack
@@ -67,7 +67,7 @@ func textColor(inverted bool) string {
 	return ansiTextWhite
 }
 
-// backColor возвращает текущий цвет для фона
+// backColor возвращает текущий цвет для фона.
 func backColor(inverted bool) string {
 	if inverted {
 		return ansiBackgroundDarkGray

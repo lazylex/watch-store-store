@@ -12,7 +12,7 @@ type ArticleWithPeriodDTO struct {
 	To      time.Time       `json:"to"`
 }
 
-// Validate валидация корректности сохраненных в DTO данных
+// Validate валидация корректности сохраненных в DTO данных.
 func (ap *ArticleWithPeriodDTO) Validate() error {
 	if err := validators.Article(ap.Article); err != nil {
 		return err

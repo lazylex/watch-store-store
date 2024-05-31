@@ -25,7 +25,7 @@ type Service struct {
 
 type Option func(*Service)
 
-// WithMetrics служит для внедрения в сервис уже инициализированных метрик для Prometheus
+// WithMetrics служит для внедрения в сервис уже инициализированных метрик для Prometheus.
 func WithMetrics(metrics *metrics.Metrics) Option {
 	return func(s *Service) {
 		s.Metrics = metrics
@@ -33,7 +33,7 @@ func WithMetrics(metrics *metrics.Metrics) Option {
 }
 
 // New создаёт сервис. В качестве параметров передаются функции, инициализирующие в сервисе репозиторий с интерфейсом
-// repository.Interface и логгер *slog.Logger
+// repository.Interface и структура работы с логами *slog.Logger.
 func New(options ...Option) *Service {
 	requiredOptions, initializedOptions := 2, 0
 
@@ -51,7 +51,7 @@ func New(options ...Option) *Service {
 	return s
 }
 
-// ChangePriceInStock изменяет цену товара, находящегося в продаже
+// ChangePriceInStock изменяет цену товара, находящегося в продаже.
 func (s *Service) ChangePriceInStock(ctx context.Context, data dto.ArticleWithPriceDTO) error {
 	if err := data.Validate(); err != nil {
 		return err
@@ -69,7 +69,7 @@ func (s *Service) ChangePriceInStock(ctx context.Context, data dto.ArticleWithPr
 	return err
 }
 
-// Stock возвращает полную информацию о товаре, доступном для продажи, в виде dto.NamedProductDTO
+// Stock возвращает полную информацию о товаре, доступном для продажи, в виде dto.NamedProductDTO.
 func (s *Service) Stock(ctx context.Context, data dto.ArticleDTO) (dto.NamedProductDTO, error) {
 	if err := data.Validate(); err != nil {
 		return dto.NamedProductDTO{}, err
@@ -85,7 +85,7 @@ func (s *Service) Stock(ctx context.Context, data dto.ArticleDTO) (dto.NamedProd
 	return sale, nil
 }
 
-// AddProductToStock добавляет новый товар в ассортимент магазина
+// AddProductToStock добавляет новый товар в ассортимент магазина.
 func (s *Service) AddProductToStock(ctx context.Context, data dto.NamedProductDTO) error {
 	if err := data.Validate(); err != nil {
 		return err
@@ -100,7 +100,7 @@ func (s *Service) AddProductToStock(ctx context.Context, data dto.NamedProductDT
 	return nil
 }
 
-// ChangeAmountInStock изменяет доступное для продажи количество товара
+// ChangeAmountInStock изменяет доступное для продажи количество товара.
 func (s *Service) ChangeAmountInStock(ctx context.Context, data dto.ArticleWithAmountDTO) error {
 	if err := data.Validate(); err != nil {
 		return err
@@ -115,7 +115,7 @@ func (s *Service) ChangeAmountInStock(ctx context.Context, data dto.ArticleWithA
 	return nil
 }
 
-// AmountInStock возвращает доступное для продажи количество товара
+// AmountInStock возвращает доступное для продажи количество товара.
 func (s *Service) AmountInStock(ctx context.Context, data dto.ArticleDTO) (uint, error) {
 	if err := data.Validate(); err != nil {
 		return 0, err
@@ -182,7 +182,7 @@ func (s *Service) MakeReservation(ctx context.Context, data dto.ReservationDTO) 
 	})
 }
 
-// CancelReservation снимает бронь с товара/ов
+// CancelReservation снимает бронь с товара/ов.
 func (s *Service) CancelReservation(ctx context.Context, data dto.OrderNumberDTO) error {
 	if err := data.Validate(); err != nil {
 		return err
@@ -229,7 +229,7 @@ func (s *Service) CancelReservation(ctx context.Context, data dto.OrderNumberDTO
 	})
 }
 
-// MakeSale уменьшает количества доступного для продажи товара и производит запись в статистику продаж
+// MakeSale уменьшает количества доступного для продажи товара и производит запись в статистику продаж.
 func (s *Service) MakeSale(ctx context.Context, data []dto.ProductDTO) error {
 	for _, p := range data {
 		if err := p.Validate(); err != nil {
@@ -273,7 +273,7 @@ func (s *Service) MakeSale(ctx context.Context, data []dto.ProductDTO) error {
 	})
 }
 
-// FinishOrder помечает заказ, как выполненный. Данные о содержащихся в заказе товарах переносятся в статистику продаж
+// FinishOrder помечает заказ, как выполненный. Данные о содержащихся в заказе товарах переносятся в статистику продаж.
 func (s *Service) FinishOrder(ctx context.Context, data dto.OrderNumberDTO) error {
 	if err := data.Validate(); err != nil {
 		return err
@@ -314,7 +314,7 @@ func (s *Service) FinishOrder(ctx context.Context, data dto.OrderNumberDTO) erro
 	})
 }
 
-// TotalSold возвращает количество проданного товара с переданным артикулом за весь период
+// TotalSold возвращает количество проданного товара с переданным артикулом за весь период.
 func (s *Service) TotalSold(ctx context.Context, data dto.ArticleDTO) (uint, error) {
 	var amount uint
 	var err error
@@ -333,7 +333,7 @@ func (s *Service) TotalSold(ctx context.Context, data dto.ArticleDTO) (uint, err
 	return amount, nil
 }
 
-// TotalSoldInPeriod возвращает количество проданного товара с переданным артикулом за указанный период
+// TotalSoldInPeriod возвращает количество проданного товара с переданным артикулом за указанный период.
 func (s *Service) TotalSoldInPeriod(ctx context.Context, data dto.ArticleWithPeriodDTO) (uint, error) {
 	var amount uint
 	var err error

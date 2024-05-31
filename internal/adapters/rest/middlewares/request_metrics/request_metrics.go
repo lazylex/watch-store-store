@@ -12,12 +12,12 @@ type MiddlewareRequests struct {
 	metrics *metrics.Metrics
 }
 
-// New конструктор прослойки для http-запросов
+// New конструктор прослойки для http-запросов.
 func New(metrics *metrics.Metrics) *MiddlewareRequests {
 	return &MiddlewareRequests{metrics: metrics}
 }
 
-// BeforeHandle - middleware для метрик, подсчитываемых до выполнения обработчика запроса
+// BeforeHandle - middleware для метрик, подсчитываемых до выполнения обработчика запроса.
 func (m *MiddlewareRequests) BeforeHandle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		m.requestsInc(r)
@@ -25,7 +25,7 @@ func (m *MiddlewareRequests) BeforeHandle(next http.Handler) http.Handler {
 	})
 }
 
-// AfterHandle - middleware для метрик, подсчитываемых после выполнения обработчика запроса
+// AfterHandle - middleware для метрик, подсчитываемых после выполнения обработчика запроса.
 func (m *MiddlewareRequests) AfterHandle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		start := time.Now()

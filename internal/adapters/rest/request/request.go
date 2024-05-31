@@ -15,7 +15,7 @@ const (
 	To      = "to"
 )
 
-// requestErr добавляет к тексту ошибки префикс, указывающий на её принадлежность к запросу
+// requestErr добавляет к тексту ошибки префикс, указывающий на её принадлежность к запросу.
 func requestErr(text string) error {
 	return errors.New(prefixes.RequestErrorsPrefix + text)
 }
@@ -23,7 +23,7 @@ func requestErr(text string) error {
 var ErrIncorrectDate = requestErr("invalid date passed")
 var ErrEmptyFromDate = requestErr("no 'from' date in request")
 
-// ArticleUsingChi возвращает артукул продукта
+// ArticleUsingChi возвращает артикул продукта.
 func ArticleUsingChi(r *http.Request) article.Article {
 	return article.Article(chi.URLParam(r, Article))
 }

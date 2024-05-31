@@ -10,7 +10,7 @@ type ArticleWithPriceDTO struct {
 	Price   float64         `json:"price"`
 }
 
-// Validate валидация корректности сохраненных в DTO данных
+// Validate валидация корректности сохраненных в DTO данных.
 func (a *ArticleWithPriceDTO) Validate() error {
 	if err := validators.Price(a.Price); err != nil {
 		return err

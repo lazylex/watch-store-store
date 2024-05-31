@@ -6,7 +6,7 @@ type PriceDTO struct {
 	Price float64 `json:"price"`
 }
 
-// Validate валидация корректности сохраненных в DTO данных
+// Validate валидация корректности сохраненных в DTO данных.
 func (p *PriceDTO) Validate() error {
 	return validators.Price(p.Price)
 }

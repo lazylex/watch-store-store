@@ -13,7 +13,7 @@ type SoldDTO struct {
 	Date    time.Time       `json:"date"`
 }
 
-// Validate валидация корректности сохраненных в DTO данных
+// Validate валидация корректности сохраненных в DTO данных.
 func (h *SoldDTO) Validate() error {
 	if err := validators.Article(h.Article); err != nil {
 		return err
