@@ -19,44 +19,39 @@ import (
 
 // ANSI modes
 const (
-	ansiReset                      = "\033[0m"
-	ansiTextBlack                  = "\033[30m"
-	ansiBackgroundBlack            = "\033[40m"
-	ansiTextDarkRed                = "\033[31m"
-	ansiBackgroundDarkRed          = "\033[41m"
-	ansiTextDarkGreen              = "\033[32m"
-	ansiBackgroundDarkGreen        = "\033[42m"
-	ansiTextDarkYellowOrange       = "\033[33m"
-	ansiBackgroundDarkYellowOrange = "\033[43m"
-	ansiTextDarkBlue               = "\033[34m"
-	ansiBackgroundDarkBlue         = "\033[44m"
-	ansiTextDarkPurple             = "\033[35m"
-	ansiBackgroundDarkPurple       = "\033[45m"
-	ansiTextDarkCyan               = "\033[36m"
-	ansiBackgroundDarkCyan         = "\033[46m"
-	ansiTextLightGray              = "\033[37m"
-	ansiBackgroundLightGray        = "\033[47m"
-	ansiTextDarkGray               = "\033[90m"
-	ansiBackgroundDarkGray         = "\033[100m"
-	ansiTextRed                    = "\033[91m"
-	ansiBackgroundRed              = "\033[101m"
-	ansiTextGreen                  = "\033[92m"
-	ansiBackgroundGreen            = "\033[102m"
-	ansiTextOrange                 = "\033[93m"
-	ansiBackgroundOrange           = "\033[103m"
-	ansiTextBlue                   = "\033[94m"
-	ansiBackgroundBlue             = "\033[104m"
-	ansiTextPurple                 = "\033[95m"
-	ansiBackgroundPurple           = "\033[105m"
-	ansiTextCyan                   = "\033[96m"
-	ansiBackgroundCyan             = "\033[106m"
-	ansiTextWhite                  = "\033[97m"
-	ansiBackgroundWhite            = "\033[107m"
-)
-
-var (
-	currentTextColor = ansiTextWhite
-	currentBackColor = ansiBackgroundBlack
+	ansiReset               = "\033[0m"
+	ansiTextBlack           = "\033[30m"
+	ansiBackgroundBlack     = "\033[40m"
+	ansiBackgroundDarkRed   = "\033[41m"
+	ansiBackgroundDarkGreen = "\033[42m"
+	ansiBackgroundDarkGray  = "\033[100m"
+	ansiTextOrange          = "\033[93m"
+	ansiBackgroundOrange    = "\033[103m"
+	ansiBackgroundCyan      = "\033[106m"
+	ansiTextWhite           = "\033[97m"
+	//ansiTextDarkRed                = "\033[31m"
+	//ansiTextDarkGreen              = "\033[32m"
+	//ansiTextDarkYellowOrange       = "\033[33m"
+	//ansiBackgroundDarkYellowOrange = "\033[43m"
+	//ansiTextDarkBlue               = "\033[34m"
+	//ansiBackgroundDarkBlue         = "\033[44m"
+	//ansiTextDarkPurple             = "\033[35m"
+	//ansiBackgroundDarkPurple       = "\033[45m"
+	//ansiTextDarkCyan               = "\033[36m"
+	//ansiBackgroundDarkCyan         = "\033[46m"
+	//ansiTextLightGray              = "\033[37m"
+	//ansiBackgroundLightGray        = "\033[47m"
+	//ansiTextDarkGray               = "\033[90m"
+	//ansiTextRed                    = "\033[91m"
+	//ansiBackgroundRed              = "\033[101m"
+	//ansiTextGreen                  = "\033[92m"
+	//ansiBackgroundGreen            = "\033[102m"
+	//ansiTextBlue                   = "\033[94m"
+	//ansiBackgroundBlue             = "\033[104m"
+	//ansiTextPurple                 = "\033[95m"
+	//ansiBackgroundPurple           = "\033[105m"
+	//ansiTextCyan                   = "\033[96m"
+	//ansiBackgroundWhite            = "\033[107m"
 )
 
 // textColor возвращает текущий цвет для текста.
@@ -175,39 +170,39 @@ func (h *handler) Handle(_ context.Context, r slog.Record) error {
 		val := r.Time.Round(0) // strip monotonic to match Attr behavior
 		if rep == nil {
 			h.appendTime(buf, r.Time)
-			buf.WriteByte(' ')
+			_ = buf.WriteByte(' ')
 		} else if a := rep(nil /* groups */, slog.Time(slog.TimeKey, val)); a.Key != "" {
 			if a.Value.Kind() == slog.KindTime {
 				h.appendTime(buf, a.Value.Time())
 			} else {
 				h.appendValue(buf, a.Value, false)
 			}
-			buf.WriteByte(' ')
+			_ = buf.WriteByte(' ')
 		}
 	}
 
 	switch r.Level {
 	case slog.LevelError:
-		buf.WriteString(ansiTextWhite)
-		buf.WriteString(ansiBackgroundDarkRed)
+		_, _ = buf.WriteString(ansiTextWhite)
+		_, _ = buf.WriteString(ansiBackgroundDarkRed)
 	case slog.LevelInfo:
-		buf.WriteString(ansiTextOrange)
-		buf.WriteString(ansiBackgroundDarkGreen)
+		_, _ = buf.WriteString(ansiTextOrange)
+		_, _ = buf.WriteString(ansiBackgroundDarkGreen)
 	case slog.LevelDebug:
-		buf.WriteString(ansiTextWhite)
-		buf.WriteString(ansiBackgroundCyan)
+		_, _ = buf.WriteString(ansiTextWhite)
+		_, _ = buf.WriteString(ansiBackgroundCyan)
 	case slog.LevelWarn:
-		buf.WriteString(ansiTextBlack)
-		buf.WriteString(ansiBackgroundOrange)
+		_, _ = buf.WriteString(ansiTextBlack)
+		_, _ = buf.WriteString(ansiBackgroundOrange)
 	}
 
 	// write level
 	if rep == nil {
 		//h.appendLevel(buf, r.Level)
-		buf.WriteByte(' ')
+		_ = buf.WriteByte(' ')
 	} else if a := rep(nil /* groups */, slog.Any(slog.LevelKey, r.Level)); a.Key != "" {
 		h.appendValue(buf, a.Value, false)
-		buf.WriteByte(' ')
+		_ = buf.WriteByte(' ')
 	}
 
 	// write source
@@ -223,26 +218,26 @@ func (h *handler) Handle(_ context.Context, r slog.Record) error {
 
 			if rep == nil {
 				h.appendSource(buf, src)
-				buf.WriteByte(' ')
+				_ = buf.WriteByte(' ')
 			} else if a := rep(nil /* groups */, slog.Any(slog.SourceKey, src)); a.Key != "" {
 				h.appendValue(buf, a.Value, false)
-				buf.WriteByte(' ')
+				_ = buf.WriteByte(' ')
 			}
 		}
 	}
 
 	// write message
 	if rep == nil {
-		buf.WriteString(fmt.Sprintf("💬 %s ", r.Message))
+		_, _ = buf.WriteString(fmt.Sprintf("💬 %s ", r.Message))
 
 	} else if a := rep(nil /* groups */, slog.String(slog.MessageKey, r.Message)); a.Key != "" {
 		h.appendValue(buf, a.Value, false)
-		buf.WriteByte(' ')
+		_ = buf.WriteByte(' ')
 	}
 
 	// write handler attributes
 	if len(h.attrsPrefix) > 0 {
-		buf.WriteString(h.attrsPrefix)
+		_, _ = buf.WriteString(h.attrsPrefix)
 	}
 
 	// write attributes
@@ -254,7 +249,7 @@ func (h *handler) Handle(_ context.Context, r slog.Record) error {
 	if len(buf.Text) == 0 {
 		return nil
 	}
-	buf.WriteString(ansiReset + " ")
+	_, _ = buf.WriteString(ansiReset + " ")
 	(buf.Text)[len(buf.Text)-1] = '\n' // replace last space with newline
 
 	h.mu.Lock()
@@ -298,16 +293,16 @@ func (h *handler) appendTime(buf *buffer, t time.Time) {
 func (h *handler) appendLevel(buf *buffer, level slog.Level) {
 	switch {
 	case level < slog.LevelInfo:
-		buf.WriteString("DBG")
+		_, _ = buf.WriteString("DBG")
 		appendLevelDelta(buf, level-slog.LevelDebug)
 	case level < slog.LevelWarn:
-		buf.WriteString("INF")
+		_, _ = buf.WriteString("INF")
 		appendLevelDelta(buf, level-slog.LevelInfo)
 	case level < slog.LevelError:
-		buf.WriteString("WRN")
+		_, _ = buf.WriteString("WRN")
 		appendLevelDelta(buf, level-slog.LevelWarn)
 	default:
-		buf.WriteString("ERR")
+		_, _ = buf.WriteString("ERR")
 		appendLevelDelta(buf, level-slog.LevelError)
 	}
 }
@@ -316,7 +311,7 @@ func appendLevelDelta(buf *buffer, delta slog.Level) {
 	if delta == 0 {
 		return
 	} else if delta > 0 {
-		buf.WriteByte('+')
+		_ = buf.WriteByte('+')
 	}
 	buf.Text = strconv.AppendInt(buf.Text, int64(delta), 10)
 }
@@ -324,10 +319,10 @@ func appendLevelDelta(buf *buffer, delta slog.Level) {
 func (h *handler) appendSource(buf *buffer, src *slog.Source) {
 	dir, file := filepath.Split(src.File)
 
-	buf.WriteStringIf(!h.noColor, ansiBackgroundDarkGray)
-	buf.WriteString(filepath.Join(filepath.Base(dir), file))
-	buf.WriteByte(':')
-	buf.WriteString(strconv.Itoa(src.Line))
+	_, _ = buf.WriteStringIf(!h.noColor, ansiBackgroundDarkGray)
+	_, _ = buf.WriteString(filepath.Join(filepath.Base(dir), file))
+	_ = buf.WriteByte(':')
+	_, _ = buf.WriteString(strconv.Itoa(src.Line))
 
 }
 
@@ -353,12 +348,12 @@ func (h *handler) appendAttr(buf *buffer, attr slog.Attr, groupsPrefix string, g
 	} else if err, ok := attr.Value.Any().(tintError); ok {
 		// append tintError
 		h.appendTintError(buf, err, groupsPrefix)
-		buf.WriteByte(' ')
+		_ = buf.WriteByte(' ')
 	} else {
-		buf.WriteString(backColor(buf.inverted))
+		_, _ = buf.WriteString(backColor(buf.inverted))
 		h.appendKey(buf, attr.Key, groupsPrefix)
 		h.appendValue(buf, attr.Value, true)
-		buf.WriteByte(' ')
+		_ = buf.WriteByte(' ')
 	}
 }
 
@@ -366,14 +361,14 @@ func (h *handler) appendKey(buf *buffer, key, groups string) {
 	if key == "op" {
 		appendString(buf, " 👀 ", false)
 	} else {
-		buf.WriteString(ansiTextOrange)
+		_, _ = buf.WriteString(ansiTextOrange)
 		appendString(buf, groups+key, true)
-		buf.WriteByte('=')
+		_ = buf.WriteByte('=')
 	}
 }
 
 func (h *handler) appendValue(buf *buffer, v slog.Value, quote bool) {
-	buf.WriteString(textColor(buf.Inverse()))
+	_, _ = buf.WriteString(textColor(buf.Inverse()))
 	switch v.Kind() {
 	case slog.KindString:
 		appendString(buf, v.String(), quote)
@@ -409,7 +404,7 @@ func (h *handler) appendValue(buf *buffer, v slog.Value, quote bool) {
 
 func (h *handler) appendTintError(buf *buffer, err error, groupsPrefix string) {
 	appendString(buf, groupsPrefix+errKey, true)
-	buf.WriteByte('=')
+	_ = buf.WriteByte('=')
 	appendString(buf, err.Error(), true)
 }
 
@@ -417,7 +412,7 @@ func appendString(buf *buffer, s string, quote bool) {
 	if quote && needsQuoting(s) {
 		buf.Text = strconv.AppendQuote(buf.Text, s)
 	} else {
-		buf.WriteString(s)
+		_, _ = buf.WriteString(s)
 	}
 }
 
@@ -434,14 +429,3 @@ func needsQuoting(s string) bool {
 }
 
 type tintError struct{ error }
-
-// Err returns a tinted (colorized) [slog.Attr] that will be written in red color
-// by the [tint.Handler]. When used with any other [slog.Handler], it behaves as
-//
-//	slog.Any("err", err)
-func Err(err error) slog.Attr {
-	if err != nil {
-		err = tintError{err}
-	}
-	return slog.Any(errKey, err)
-}
