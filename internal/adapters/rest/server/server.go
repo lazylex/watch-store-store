@@ -66,7 +66,9 @@ func MustCreate(cfg *config.HttpServer, queryTimeout time.Duration,
 	if environment == config.EnvironmentLocal {
 		mux.Use(middleware.Logger)
 	} else {
-		mux.Use(jwt.New([]byte(signature)).CheckJWT)
+		perm := make(map[string]int)
+		// TODO реализовать чтение карты путей/номеров разрешений
+		mux.Use(jwt.New([]byte(signature), perm).CheckJWT)
 	}
 
 	return &Server{
