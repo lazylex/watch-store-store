@@ -33,7 +33,7 @@ func injectRequestIDToCtx(ctx context.Context, r *http.Request) context.Context 
 	return context.WithValue(ctx, logger.RequestId, middleware.GetReqID(r.Context()))
 }
 
-// StockRecord получение всех полей записи с переданным в пути запроса артикулом и возврат в
+// StockRecord получение всех полей записи с переданным в параметре запроса (article) артикулом и возврат в
 // формате JSON. Пример возвращаемых данных:
 //
 //	{
@@ -51,7 +51,7 @@ func (h *Handler) StockRecord(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	art = request.ArticleUsingChi(r)
+	art = article.Article(r.FormValue(request.Article))
 
 	transferObject := dto.ArticleDTO{Article: art}
 	err = transferObject.Validate()

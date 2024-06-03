@@ -12,7 +12,7 @@ var paths map[string]string
 // чтобы в метриках сохранялись только используемые в приложении пути.
 func init() {
 	paths = make(map[string]string, 10)
-	paths["/api/api_v1/stock/"] = "/api/api_v1/stock/{article}"
+	paths["/api/api_v1/stock/"] = "/api/api_v1/stock/"
 	paths["/api/api_v1/stock/amount/"] = "/api/api_v1/stock/amount/{article}"
 	paths["/api/api_v1/stock/amount"] = "/api/api_v1/stock/amount"
 	paths["/api/api_v1/stock/price"] = "/api/api_v1/stock/price"
