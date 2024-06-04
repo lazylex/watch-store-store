@@ -17,7 +17,7 @@ func init() {
 	paths["/api/api_v1/stock/amount"] = "/api/api_v1/stock/amount"
 	paths["/api/api_v1/stock/price"] = "/api/api_v1/stock/price"
 	paths["/api/api_v1/stock/add"] = "/api/api_v1/stock/add"
-	paths["/api/api_v1/sold/amount/"] = "/api/api_v1/sold/amount/{article}"
+	paths["/api/api_v1/sold/amount/"] = "/api/api_v1/sold/amount/"
 	paths["/api/api_v1/sale/make"] = "/api/api_v1/sale/make"
 	paths["/api/api_v1/reservation/make"] = "/api/api_v1/reservation/make"
 	paths["/api/api_v1/reservation/cancel"] = "/api/api_v1/reservation/cancel"

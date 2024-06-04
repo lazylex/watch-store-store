@@ -197,10 +197,10 @@ func (h *Handler) AddToStock(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// SoldAmount возвращает общее количество проданного товара. В пути запроса передается артикул. Параметрами запроса
-// опционально передаются даты from и to для указания временного диапазона. Если передать только параметр from, то в
-// качестве параметра to будет текущая дата (определяется временем на сервере, где запущено приложение, а не БД). Если
-// передан только параметр to, то возвращается ответ http.StatusBadRequest
+// SoldAmount возвращает общее количество проданного товара. В параметре запроса (article) передается артикул.
+// Параметрами запроса опционально передаются даты from и to для указания временного диапазона. Если передать только
+// параметр from, то в качестве параметра to будет текущая дата (определяется временем на сервере, где запущено
+// приложение, а не БД). Если передан только параметр to, то возвращается ответ http.StatusBadRequest
 // Пример возвращаемого значения:
 // {
 // "amount": 13
@@ -214,9 +214,10 @@ func (h *Handler) SoldAmount(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	art = request.ArticleUsingChi(r)
-	fromParam := r.URL.Query().Get(request.From)
-	toParam := r.URL.Query().Get(request.To)
+	art = article.Article(r.FormValue(request.Article))
+
+	fromParam := r.FormValue(request.From)
+	toParam := r.FormValue(request.To)
 
 	if len(fromParam) == 0 && len(toParam) == 0 {
 		transferObject := dto.ArticleDTO{Article: art}
