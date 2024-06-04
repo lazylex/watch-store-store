@@ -2,10 +2,7 @@ package request
 
 import (
 	"errors"
-	"github.com/go-chi/chi"
-	"github.com/lazylex/watch-store/store/internal/domain/value_objects/article"
 	"github.com/lazylex/watch-store/store/internal/helpers/constants/prefixes"
-	"net/http"
 )
 
 const (
@@ -22,8 +19,3 @@ func requestErr(text string) error {
 
 var ErrIncorrectDate = requestErr("invalid date passed")
 var ErrEmptyFromDate = requestErr("no 'from' date in request")
-
-// ArticleUsingChi возвращает артикул продукта.
-func ArticleUsingChi(r *http.Request) article.Article {
-	return article.Article(chi.URLParam(r, Article))
-}
