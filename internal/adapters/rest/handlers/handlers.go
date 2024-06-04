@@ -69,8 +69,8 @@ func (h *Handler) StockRecord(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, stock)
 }
 
-// AmountInStock возвращает в формате JSON доступное для продажи количество товара с переданным в пути запроса
-// артикулом. Пример возвращаемого значения:
+// AmountInStock возвращает в формате JSON доступное для продажи количество товара с переданным параметром запроса
+// (article) артикулом. Пример возвращаемого значения:
 // {
 // "amount": 13
 // }
@@ -83,7 +83,7 @@ func (h *Handler) AmountInStock(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
 	defer cancel()
 
-	art = request.ArticleUsingChi(r)
+	art = article.Article(r.FormValue(request.Article))
 
 	transferObject := dto.ArticleDTO{Article: art}
 	err = transferObject.Validate()
