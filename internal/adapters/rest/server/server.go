@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"errors"
-	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	restHandlers "github.com/lazylex/watch-store/store/internal/adapters/rest/handlers"
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/middlewares/jwt"
@@ -45,8 +44,8 @@ func MustCreate(cfg *config.HttpServer, queryTimeout time.Duration,
 	environment,
 	signature string) *Server {
 	handlers := restHandlers.New(domainService, queryTimeout)
-	mux := chi.NewRouter()
 	rm := requestMetrics.New(metrics)
+	mux := router.Mux()
 	mux.Use(middleware.Recoverer, middleware.RequestID, rm.BeforeHandle, rm.AfterHandle)
 
 	log := slog.With(logger.OPLabel, "adapters.rest.server.MustCreate")
@@ -71,9 +70,23 @@ func MustCreate(cfg *config.HttpServer, queryTimeout time.Duration,
 		mux.Use(jwt.New([]byte(signature), perm).CheckJWT)
 	}
 
+	router.AssignPathToHandler("/api/api_v1/stock/", http.MethodGet, mux, handlers.StockRecord)
+	router.AssignPathToHandler("/api/api_v1/stock/amount/", http.MethodGet, mux, handlers.AmountInStock)
+	router.AssignPathToHandler("/api/api_v1/stock/amount", http.MethodPut, mux, handlers.UpdateAmountInStock)
+	router.AssignPathToHandler("/api/api_v1/stock/price", http.MethodPut, mux, handlers.UpdatePriceInStock)
+	router.AssignPathToHandler("/api/api_v1/stock/add", http.MethodPost, mux, handlers.AddToStock)
+
+	router.AssignPathToHandler("/api/api_v1/sold/amount/", http.MethodGet, mux, handlers.SoldAmount)
+
+	router.AssignPathToHandler("/api/api_v1/sale/make", http.MethodPost, mux, handlers.MakeLocalSale)
+
+	router.AssignPathToHandler("/api/api_v1/reservation/make", http.MethodPost, mux, handlers.MakeReservation)
+	router.AssignPathToHandler("/api/api_v1/reservation/cancel", http.MethodPut, mux, handlers.CancelReservation)
+	router.AssignPathToHandler("/api/api_v1/reservation/finish", http.MethodPut, mux, handlers.FinishOrder)
+
 	return &Server{
 		srv: &http.Server{
-			Handler:      router.AddHandlers(mux, handlers),
+			Handler:      mux,
 			Addr:         cfg.Address,
 			ReadTimeout:  cfg.ReadTimeout,
 			WriteTimeout: cfg.WriteTimeout,
