@@ -21,6 +21,19 @@ const (
 	apiApiV1ReservationFinish = "/api/api_v1/reservation/finish"
 )
 
+const (
+	receiveProductData                 = "получать данные о товаре"
+	getQuantityOfGoodsAvailableForSale = "получать доступное для продажи количество товара"
+	updateProductQuantity              = "обновлять количество товара"
+	updateProductPrice                 = "обновлять цену товара"
+	addProductEntry                    = "добавлять запись о товаре"
+	getTotalQuantityOfGoodsSold        = "получать общее количество проданного товара"
+	carryOutLocalSales                 = "осуществлять локальную продажу"
+	reserveGoods                       = "резервировать товар"
+	cancelReservation                  = "отменять резервирование"
+	completeSaleOrShipment             = "завершать продажу/отправку"
+)
+
 func init() {
 	paths = []string{
 		apiApiV1Stock,
@@ -69,61 +82,61 @@ func (r *Router) registerRoutes() {
 		{
 			Path:       apiApiV1Stock,
 			Method:     http.MethodGet,
-			Permission: "",
+			Permission: receiveProductData,
 			Handler:    r.handlers.StockRecord,
 		},
 		{
 			Path:       apiApiV1StockAmountGet,
 			Method:     http.MethodGet,
-			Permission: "",
+			Permission: getQuantityOfGoodsAvailableForSale,
 			Handler:    r.handlers.AmountInStock,
 		},
 		{
 			Path:       apiApiV1StockAmountUpdate,
 			Method:     http.MethodPut,
-			Permission: "",
+			Permission: updateProductQuantity,
 			Handler:    r.handlers.UpdateAmountInStock,
 		},
 		{
 			Path:       apiApiV1StockPrice,
 			Method:     http.MethodPut,
-			Permission: "",
+			Permission: updateProductPrice,
 			Handler:    r.handlers.UpdatePriceInStock,
 		},
 		{
 			Path:       apiApiV1StockAdd,
 			Method:     http.MethodPost,
-			Permission: "",
+			Permission: addProductEntry,
 			Handler:    r.handlers.AddToStock,
 		},
 		{
 			Path:       apiApiV1SoldAmount,
 			Method:     http.MethodGet,
-			Permission: "",
+			Permission: getTotalQuantityOfGoodsSold,
 			Handler:    r.handlers.SoldAmount,
 		},
 		{
 			Path:       apiApiV1SaleMake,
 			Method:     http.MethodPost,
-			Permission: "",
+			Permission: carryOutLocalSales,
 			Handler:    r.handlers.MakeLocalSale,
 		},
 		{
 			Path:       apiApiV1ReservationMake,
 			Method:     http.MethodPost,
-			Permission: "",
+			Permission: reserveGoods,
 			Handler:    r.handlers.MakeReservation,
 		},
 		{
 			Path:       apiApiV1ReservationCancel,
 			Method:     http.MethodPut,
-			Permission: "",
+			Permission: cancelReservation,
 			Handler:    r.handlers.CancelReservation,
 		},
 		{
 			Path:       apiApiV1ReservationFinish,
 			Method:     http.MethodPut,
-			Permission: "",
+			Permission: completeSaleOrShipment,
 			Handler:    r.handlers.FinishOrder,
 		},
 	}
