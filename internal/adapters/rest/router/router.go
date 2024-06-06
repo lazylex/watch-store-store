@@ -2,48 +2,152 @@ package router
 
 import (
 	"github.com/go-chi/chi"
+	"github.com/lazylex/watch-store/store/internal/adapters/rest/handlers"
 	"net/http"
 )
 
 var paths []string
-var mux *chi.Mux
+
+const (
+	apiApiV1Stock             = "/api/api_v1/stock/"
+	apiApiV1StockAmountGet    = "/api/api_v1/stock/amount/"
+	apiApiV1StockAmountUpdate = "/api/api_v1/stock/amount"
+	apiApiV1StockPrice        = "/api/api_v1/stock/price"
+	apiApiV1StockAdd          = "/api/api_v1/stock/add"
+	apiApiV1SoldAmount        = "/api/api_v1/sold/amount/"
+	apiApiV1SaleMake          = "/api/api_v1/sale/make"
+	apiApiV1ReservationMake   = "/api/api_v1/reservation/make"
+	apiApiV1ReservationCancel = "/api/api_v1/reservation/cancel"
+	apiApiV1ReservationFinish = "/api/api_v1/reservation/finish"
+)
 
 func init() {
-	mux = chi.NewRouter()
+	paths = []string{
+		apiApiV1Stock,
+		apiApiV1StockAmountGet,
+		apiApiV1StockAmountUpdate,
+		apiApiV1StockPrice,
+		apiApiV1StockAdd,
+		apiApiV1SoldAmount,
+		apiApiV1SaleMake,
+		apiApiV1ReservationMake,
+		apiApiV1ReservationCancel,
+		apiApiV1ReservationFinish,
+	}
+}
+
+type Router struct {
+	handlers *handlers.Handler
+	routes   []Route
+	mux      *chi.Mux
+}
+
+type Route struct {
+	Path       string
+	Method     string
+	Permission string
+	Handler    func(w http.ResponseWriter, r *http.Request)
 }
 
 // Mux возвращает мультиплексор.
-func Mux() *chi.Mux {
-	return mux
+func (r *Router) Mux() *chi.Mux {
+	return r.mux
 }
 
-// AssignPathToHandler добавляет пусть к списку используемых и прикрепляет его к переданному четвертым аргументом
-// обработчику.
-func AssignPathToHandler(path, method string, mux *chi.Mux, handler func(http.ResponseWriter, *http.Request)) {
-	switch method {
-	case http.MethodGet:
-		mux.Get(path, handler)
-	case http.MethodPost:
-		mux.Post(path, handler)
-	case http.MethodPut:
-		mux.Put(path, handler)
-	case http.MethodPatch:
-		mux.Patch(path, handler)
-	case http.MethodDelete:
-		mux.Delete(path, handler)
-	default:
-		return
+// MustCreate конструктор для маршрутизатора.
+func MustCreate(handlers *handlers.Handler) *Router {
+	r := Router{handlers: handlers}
+	r.mux = chi.NewRouter()
+	r.registerRoutes()
+	return &r
+}
+
+// registerRoutes сохраняет в памяти пути, обработчики, методы доступа и необходимые для выполнения обработчика пути.
+// Прикрепление путей к обработчикам в мультиплексоре осуществляется функцией AssignPathsToHandlers.
+func (r *Router) registerRoutes() {
+	r.routes = []Route{
+		{
+			Path:       apiApiV1Stock,
+			Method:     http.MethodGet,
+			Permission: "",
+			Handler:    r.handlers.StockRecord,
+		},
+		{
+			Path:       apiApiV1StockAmountGet,
+			Method:     http.MethodGet,
+			Permission: "",
+			Handler:    r.handlers.AmountInStock,
+		},
+		{
+			Path:       apiApiV1StockAmountUpdate,
+			Method:     http.MethodPut,
+			Permission: "",
+			Handler:    r.handlers.UpdateAmountInStock,
+		},
+		{
+			Path:       apiApiV1StockPrice,
+			Method:     http.MethodPut,
+			Permission: "",
+			Handler:    r.handlers.UpdatePriceInStock,
+		},
+		{
+			Path:       apiApiV1StockAdd,
+			Method:     http.MethodPost,
+			Permission: "",
+			Handler:    r.handlers.AddToStock,
+		},
+		{
+			Path:       apiApiV1SoldAmount,
+			Method:     http.MethodGet,
+			Permission: "",
+			Handler:    r.handlers.SoldAmount,
+		},
+		{
+			Path:       apiApiV1SaleMake,
+			Method:     http.MethodPost,
+			Permission: "",
+			Handler:    r.handlers.MakeLocalSale,
+		},
+		{
+			Path:       apiApiV1ReservationMake,
+			Method:     http.MethodPost,
+			Permission: "",
+			Handler:    r.handlers.MakeReservation,
+		},
+		{
+			Path:       apiApiV1ReservationCancel,
+			Method:     http.MethodPut,
+			Permission: "",
+			Handler:    r.handlers.CancelReservation,
+		},
+		{
+			Path:       apiApiV1ReservationFinish,
+			Method:     http.MethodPut,
+			Permission: "",
+			Handler:    r.handlers.FinishOrder,
+		},
 	}
-
-	paths = append(paths, path)
 }
 
-// ExistentPaths возвращает все зарегистрированные для обработчиков адреса.
-func ExistentPaths() []string {
-	return paths
+// AssignPathsToHandlers прикрепляет обработчики к зарегистрированным на них путям.
+func (r *Router) AssignPathsToHandlers() {
+	for _, route := range r.routes {
+		switch route.Method {
+		case http.MethodGet:
+			r.mux.Get(route.Path, route.Handler)
+		case http.MethodPost:
+			r.mux.Post(route.Path, route.Handler)
+		case http.MethodPut:
+			r.mux.Put(route.Path, route.Handler)
+		case http.MethodPatch:
+			r.mux.Patch(route.Path, route.Handler)
+		case http.MethodDelete:
+			r.mux.Delete(route.Path, route.Handler)
+		}
+	}
 }
 
-// IsExistPath возвращает true, если в приложении используется передаваемый путь. Иначе - false.
+// IsExistPath возвращает true, если в приложении существует передаваемый путь. Иначе - false.
 func IsExistPath(path string) bool {
 	for _, p := range ExistentPaths() {
 		if p == path {
@@ -52,4 +156,9 @@ func IsExistPath(path string) bool {
 	}
 
 	return false
+}
+
+// ExistentPaths возвращает список существующих путей.
+func ExistentPaths() []string {
+	return paths
 }

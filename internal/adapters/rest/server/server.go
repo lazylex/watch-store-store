@@ -7,7 +7,7 @@ import (
 	restHandlers "github.com/lazylex/watch-store/store/internal/adapters/rest/handlers"
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/middlewares/jwt"
 	requestMetrics "github.com/lazylex/watch-store/store/internal/adapters/rest/middlewares/request_metrics"
-	"github.com/lazylex/watch-store/store/internal/adapters/rest/router"
+	restRouter "github.com/lazylex/watch-store/store/internal/adapters/rest/router"
 	"github.com/lazylex/watch-store/store/internal/config"
 	"github.com/lazylex/watch-store/store/internal/helpers/constants/prefixes"
 	"github.com/lazylex/watch-store/store/internal/logger"
@@ -45,6 +45,8 @@ func MustCreate(cfg *config.HttpServer, queryTimeout time.Duration,
 	signature string) *Server {
 	handlers := restHandlers.New(domainService, queryTimeout)
 	rm := requestMetrics.New(metrics)
+	router := restRouter.MustCreate(handlers)
+	defer router.AssignPathsToHandlers()
 	mux := router.Mux()
 	mux.Use(middleware.Recoverer, middleware.RequestID, rm.BeforeHandle, rm.AfterHandle)
 
@@ -69,20 +71,6 @@ func MustCreate(cfg *config.HttpServer, queryTimeout time.Duration,
 		// TODO реализовать чтение карты путей/номеров разрешений
 		mux.Use(jwt.New([]byte(signature), perm).CheckJWT)
 	}
-
-	router.AssignPathToHandler("/api/api_v1/stock/", http.MethodGet, mux, handlers.StockRecord)
-	router.AssignPathToHandler("/api/api_v1/stock/amount/", http.MethodGet, mux, handlers.AmountInStock)
-	router.AssignPathToHandler("/api/api_v1/stock/amount", http.MethodPut, mux, handlers.UpdateAmountInStock)
-	router.AssignPathToHandler("/api/api_v1/stock/price", http.MethodPut, mux, handlers.UpdatePriceInStock)
-	router.AssignPathToHandler("/api/api_v1/stock/add", http.MethodPost, mux, handlers.AddToStock)
-
-	router.AssignPathToHandler("/api/api_v1/sold/amount/", http.MethodGet, mux, handlers.SoldAmount)
-
-	router.AssignPathToHandler("/api/api_v1/sale/make", http.MethodPost, mux, handlers.MakeLocalSale)
-
-	router.AssignPathToHandler("/api/api_v1/reservation/make", http.MethodPost, mux, handlers.MakeReservation)
-	router.AssignPathToHandler("/api/api_v1/reservation/cancel", http.MethodPut, mux, handlers.CancelReservation)
-	router.AssignPathToHandler("/api/api_v1/reservation/finish", http.MethodPut, mux, handlers.FinishOrder)
 
 	return &Server{
 		srv: &http.Server{
