@@ -26,8 +26,11 @@ type Config struct {
 }
 
 type Secure struct {
-	Signature string `yaml:"secure_signature" env:"SECURE_SIGNATURE" env-required:"true"`
-	Server    string `yaml:"secure_server" env:"SECURE_SERVER" env-required:"true"`
+	Signature      string        `yaml:"secure_signature" env:"SECURE_SIGNATURE" env-required:"true"`
+	Server         string        `yaml:"secure_server" env:"SECURE_SERVER" env-required:"true"`
+	RequestTimeout time.Duration `yaml:"secure_request_timeout" env:"SECURE_REQUEST_TIMEOUT" env-required:"true"`
+	Attempts       int           `yaml:"secure_attempts" env:"SECURE_ATTEMPTS"`
+	Protocol       string        `yaml:"secure_protocol" env:"SECURE_PROTOCOL"`
 }
 
 type HttpServer struct {
