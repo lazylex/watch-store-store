@@ -17,8 +17,10 @@ storage:
 secure:
   secure_signature: "it's just secure signature for debug"
   secure_server: "localhost:8159"
-  secure_request_timeout: 100ms
+  secure_request_timeout: 2s
   secure_protocol: "http"
+  secure_username: "store1"
+  secure_password: "Python_123"
 kafka:
   kafka_brokers: ["localhost:9092"]
   kafka_topic_update_price: "store.update-price"

@@ -26,11 +26,15 @@ type Config struct {
 }
 
 type Secure struct {
-	Signature      string        `yaml:"secure_signature" env:"SECURE_SIGNATURE" env-required:"true"`
-	Server         string        `yaml:"secure_server" env:"SECURE_SERVER" env-required:"true"`
+	Signature string `yaml:"secure_signature" env:"SECURE_SIGNATURE" env-required:"true"`
+	Server    string `yaml:"secure_server" env:"SECURE_SERVER" env-required:"true"`
+	// Проверка пароля занимает много времени. Не рекомендуется ставить таймаут меньше 1500ms
 	RequestTimeout time.Duration `yaml:"secure_request_timeout" env:"SECURE_REQUEST_TIMEOUT" env-required:"true"`
 	Attempts       int           `yaml:"secure_attempts" env:"SECURE_ATTEMPTS"`
 	Protocol       string        `yaml:"secure_protocol" env:"SECURE_PROTOCOL"`
+	Username       string        `yaml:"secure_username" env:"SECURE_USERNAME" env-required:"true"`
+	// Пароль опасно хранить в открытом виде !!!
+	Password string `yaml:"secure_password" env:"SECURE_PASSWORD" env-required:"true"`
 }
 
 type HttpServer struct {

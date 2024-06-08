@@ -22,7 +22,10 @@ var (
 type Secure struct {
 	tokens         Tokens        // Токены
 	attempts       int           // Количество попыток обращения к стороннему сервису
-	url            string        // Адрес сервиса безопасности
+	urlPermissions string        // Адрес сервиса безопасности для получения нумерованных разрешений
+	urlLogin       string        // Адрес сервиса безопасности для входа в учетную запись и получения токена
+	username       string        // Логин данного приложения в сервисе безопасности
+	password       string        // Пароль данного приложения в сервисе безопасности
 	requestTimeout time.Duration // Таймаут запроса
 }
 
@@ -43,16 +46,78 @@ func New(cfg *config.Secure) *Secure {
 		protocol = "http"
 	}
 
-	url := fmt.Sprintf("%s://%s/get-numbered-permissions?service=store", cfg.Protocol, cfg.Server)
+	urlPermissions := fmt.Sprintf("%s://%s/get-numbered-permissions?service=store", cfg.Protocol, cfg.Server)
+	urlLogin := fmt.Sprintf("%s://%s/login", cfg.Protocol, cfg.Server)
 
-	return &Secure{attempts: attempts, url: url, requestTimeout: cfg.RequestTimeout}
+	return &Secure{attempts: attempts,
+		urlPermissions: urlPermissions,
+		urlLogin:       urlLogin,
+		requestTimeout: cfg.RequestTimeout,
+		username:       cfg.Username,
+		password:       cfg.Password}
 }
 
 // login получает токен сессии в микросервисе secure.
-func login() (string, error) {
-	// TODO implement
-	slog.Debug("login not implemented")
-	return "", nil
+func (s *Secure) login() (string, error) {
+	type resultJSON struct {
+		Token string `json:"token"`
+	}
+
+	var response *http.Response
+	var result resultJSON
+
+	ctx, cancel := context.WithTimeout(context.Background(), s.requestTimeout)
+	defer cancel()
+
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, s.urlLogin, nil)
+	if err != nil {
+		return "", err
+	}
+
+	request.SetBasicAuth(s.username, s.password)
+
+	client := http.DefaultClient
+	response, err = client.Do(request)
+
+	if err != nil {
+		return "", err
+	}
+
+	if response.StatusCode == http.StatusUnauthorized {
+		return "", ErrUnauthorized
+	}
+
+	if response.StatusCode == http.StatusOK {
+		var bodyBytes []byte
+		var n int
+
+		defer func() {
+			_ = response.Body.Close()
+		}()
+
+		bytes := make([]byte, 36)
+
+		for {
+			bytes = bytes[:cap(bytes)]
+			n, err = response.Body.Read(bytes)
+
+			if err != nil {
+				if err == io.EOF {
+					bodyBytes = append(bodyBytes, bytes[:n]...)
+					break
+				}
+				return "", err
+			}
+			bodyBytes = append(bodyBytes, bytes[:n]...)
+		}
+
+		err = json.Unmarshal(bodyBytes, &result)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return result.Token, err
 }
 
 // MustGetPermissionsNumbers получение списка нумерованных разрешений. Если все попытки (количество указывается в
@@ -65,7 +130,7 @@ func (s *Secure) MustGetPermissionsNumbers() ([]dto.NameNumber, error) {
 	log := slog.Default().With(logger.OPLabel, "secure.MustGetPermissionsNumbers")
 
 	if s.tokens.secure == "" {
-		s.tokens.secure, err = login()
+		s.tokens.secure, err = s.login()
 	}
 
 	if err != nil {
@@ -74,10 +139,10 @@ func (s *Secure) MustGetPermissionsNumbers() ([]dto.NameNumber, error) {
 
 	for attempt := 0; attempt < s.attempts; attempt++ {
 		if errors.Is(err, ErrUnauthorized) {
-			s.tokens.secure, err = login()
+			s.tokens.secure, err = s.login()
 		}
 
-		result, err = s.getPermissionsNumbers(s.tokens.secure, s.url)
+		result, err = s.getPermissionsNumbers(s.tokens.secure, s.urlPermissions)
 
 		if err == nil {
 			return result, nil
@@ -100,7 +165,7 @@ func (s *Secure) getPermissionsNumbers(token, url string) ([]dto.NameNumber, err
 	var result []dto.NameNumber
 	var response *http.Response
 
-	log := slog.Default().With("op", "secure.getPermissionsNumbers")
+	log := slog.Default().With(logger.OPLabel, "secure.getPermissionsNumbers")
 
 	ctx, cancel := context.WithTimeout(context.Background(), s.requestTimeout)
 	defer cancel()
