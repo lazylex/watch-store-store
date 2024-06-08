@@ -87,31 +87,14 @@ func (s *Secure) login() (string, error) {
 		return "", ErrUnauthorized
 	}
 
+	var bytes []byte
 	if response.StatusCode == http.StatusOK {
-		var bodyBytes []byte
-		var n int
-
-		defer func() {
-			_ = response.Body.Close()
-		}()
-
-		bytes := make([]byte, 36)
-
-		for {
-			bytes = bytes[:cap(bytes)]
-			n, err = response.Body.Read(bytes)
-
-			if err != nil {
-				if err == io.EOF {
-					bodyBytes = append(bodyBytes, bytes[:n]...)
-					break
-				}
-				return "", err
-			}
-			bodyBytes = append(bodyBytes, bytes[:n]...)
+		bytes, err = responseBodyBytes(response, 36)
+		if err != nil {
+			return "", err
 		}
 
-		err = json.Unmarshal(bodyBytes, &result)
+		err = json.Unmarshal(bytes, &result)
 		if err != nil {
 			return "", err
 		}
@@ -188,35 +171,44 @@ func (s *Secure) getPermissionsNumbers(token, url string) ([]dto.NameNumber, err
 		return nil, ErrUnauthorized
 	}
 
+	var bytes []byte
 	if response.StatusCode == http.StatusOK {
-		var bodyBytes []byte
-		var n int
+		bytes, err = responseBodyBytes(response, 1024)
 
-		defer func() {
-			_ = response.Body.Close()
-		}()
-
-		bytes := make([]byte, 1024)
-
-		for {
-			bytes = bytes[:cap(bytes)]
-			n, err = response.Body.Read(bytes)
-
-			if err != nil {
-				if err == io.EOF {
-					bodyBytes = append(bodyBytes, bytes[:n]...)
-					break
-				}
-				return nil, err
-			}
-			bodyBytes = append(bodyBytes, bytes[:n]...)
-		}
-
-		err = json.Unmarshal(bodyBytes, &result)
+		err = json.Unmarshal(bytes, &result)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	return result, nil
+}
+
+// responseBodyBytes возвращает слайс байт из тела ответа.
+func responseBodyBytes(response *http.Response, allocateBytes int) ([]byte, error) {
+	var bodyBytes []byte
+	var err error
+	var n int
+
+	defer func() {
+		_ = response.Body.Close()
+	}()
+
+	bytes := make([]byte, allocateBytes)
+
+	for {
+		bytes = bytes[:cap(bytes)]
+		n, err = response.Body.Read(bytes)
+
+		if err != nil {
+			if err == io.EOF {
+				bodyBytes = append(bodyBytes, bytes[:n]...)
+				break
+			}
+			return nil, err
+		}
+		bodyBytes = append(bodyBytes, bytes[:n]...)
+	}
+
+	return bodyBytes, nil
 }
