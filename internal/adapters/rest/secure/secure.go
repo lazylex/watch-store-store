@@ -59,6 +59,8 @@ func New(cfg *config.Secure) *Secure {
 
 // login получает токен сессии в микросервисе secure.
 func (s *Secure) login() (string, error) {
+	log := slog.Default().With(logger.OPLabel, "secure.login")
+
 	type resultJSON struct {
 		Token string `json:"token"`
 	}
@@ -98,17 +100,19 @@ func (s *Secure) login() (string, error) {
 		if err != nil {
 			return "", err
 		}
+		log.Info("successfully login to secure service")
 	}
 
 	return result.Token, err
 }
 
-// MustGetPermissionsNumbers получение списка нумерованных разрешений. Если все попытки (количество указывается в
-// конфигурации) оказались неудачными, приложение завершает работу. Перед очередной попыткой выдерживается пауза,
-// которая каждый раз увеличивается на одну секунду.
-func (s *Secure) MustGetPermissionsNumbers() ([]dto.NameNumber, error) {
+// MustGetPermissionsNumbers получает список нумерованных разрешений и отправляет его в канал nameNumbersChan. Если все
+// попытки (количество указывается в конфигурации) оказались неудачными, приложение завершает работу. Перед очередной
+// попыткой выдерживается пауза, которая каждый раз увеличивается на одну секунду.
+func (s *Secure) MustGetPermissionsNumbers(nameNumbersChan chan dto.NameNumber) {
 	var result []dto.NameNumber
 	var err error
+	defer close(nameNumbersChan)
 
 	log := slog.Default().With(logger.OPLabel, "secure.MustGetPermissionsNumbers")
 
@@ -117,7 +121,8 @@ func (s *Secure) MustGetPermissionsNumbers() ([]dto.NameNumber, error) {
 	}
 
 	if err != nil {
-		return nil, err
+		log.Error(fmt.Errorf("failed to obtain permissions (reason: %w)", err).Error())
+		os.Exit(1)
 	}
 
 	for attempt := 0; attempt < s.attempts; attempt++ {
@@ -128,9 +133,11 @@ func (s *Secure) MustGetPermissionsNumbers() ([]dto.NameNumber, error) {
 		result, err = s.getPermissionsNumbers(s.tokens.secure, s.urlPermissions)
 
 		if err == nil {
-			return result, nil
+			for _, nameNumber := range result {
+				nameNumbersChan <- nameNumber
+			}
+			return
 		}
-
 		log.Warn(fmt.Sprintf("failed to obtain permissions (attempt %d)", attempt+1))
 		time.Sleep(time.Duration(attempt) * time.Second)
 	}
@@ -139,8 +146,6 @@ func (s *Secure) MustGetPermissionsNumbers() ([]dto.NameNumber, error) {
 		log.Error(fmt.Errorf("failed to obtain permissions (reason: %w)", err).Error())
 		os.Exit(1)
 	}
-
-	return result, err
 }
 
 // getPermissionsNumbers получение списка нумерованных разрешений.

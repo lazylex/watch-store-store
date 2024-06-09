@@ -9,6 +9,7 @@ import (
 	requestMetrics "github.com/lazylex/watch-store/store/internal/adapters/rest/middlewares/request_metrics"
 	restRouter "github.com/lazylex/watch-store/store/internal/adapters/rest/router"
 	"github.com/lazylex/watch-store/store/internal/config"
+	"github.com/lazylex/watch-store/store/internal/dto"
 	"github.com/lazylex/watch-store/store/internal/helpers/constants/prefixes"
 	"github.com/lazylex/watch-store/store/internal/logger"
 	"github.com/lazylex/watch-store/store/internal/metrics"
@@ -42,7 +43,8 @@ func MustCreate(cfg *config.HttpServer, queryTimeout time.Duration,
 	domainService *service.Service,
 	metrics *metrics.Metrics,
 	environment,
-	signature string) *Server {
+	signature string,
+	c chan dto.NameNumber) *Server {
 	handlers := restHandlers.New(domainService, queryTimeout)
 	rm := requestMetrics.New(metrics)
 	router := restRouter.MustCreate(handlers)
@@ -68,6 +70,10 @@ func MustCreate(cfg *config.HttpServer, queryTimeout time.Duration,
 		mux.Use(middleware.Logger)
 	} else {
 		perm := make(map[string]int)
+		for p := range c {
+			// TODO заменить чтение в отладочную консоль на передачу в middleware
+			slog.Debug("permission name and number", p.Name, p.Number)
+		}
 		// TODO реализовать чтение карты путей/номеров разрешений
 		mux.Use(jwt.New([]byte(signature), perm).CheckJWT)
 	}

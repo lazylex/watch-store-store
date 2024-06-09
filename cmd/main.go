@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"github.com/lazylex/watch-store/store/internal/adapters/message_broker/kafka"
+	"github.com/lazylex/watch-store/store/internal/adapters/rest/secure"
 	restServer "github.com/lazylex/watch-store/store/internal/adapters/rest/server"
 	"github.com/lazylex/watch-store/store/internal/config"
+	"github.com/lazylex/watch-store/store/internal/dto"
 	"github.com/lazylex/watch-store/store/internal/logger"
 	prometheusMetrics "github.com/lazylex/watch-store/store/internal/metrics"
 	"github.com/lazylex/watch-store/store/internal/ports/repository"
@@ -22,17 +24,25 @@ func main() {
 	if err := clearScreen(); err != nil {
 		slog.Error(err.Error())
 	}
+
+	var permissionsChan chan dto.NameNumber
+	if cfg.Env != config.EnvironmentLocal {
+		permissionsChan = make(chan dto.NameNumber)
+		appSecure := secure.New(&cfg.Secure)
+		go appSecure.MustGetPermissionsNumbers(permissionsChan)
+	}
+
 	metrics := prometheusMetrics.MustCreate(&cfg.Prometheus)
 	domainService := service.New(mysql.WithRepository(&cfg.Storage),
 		service.WithMetrics(metrics))
 
-	server := restServer.MustCreate(&cfg.HttpServer, cfg.QueryTimeout, domainService, metrics, cfg.Env,
-		cfg.Signature)
-	server.MustRun()
-
 	if cfg.UseKafka {
 		kafka.MustRun(domainService, &cfg.Kafka, cfg.Instance)
 	}
+
+	server := restServer.MustCreate(&cfg.HttpServer, cfg.QueryTimeout, domainService, metrics, cfg.Env,
+		cfg.Signature, permissionsChan)
+	server.MustRun()
 
 	defer func(repo repository.SQLDBInterface) {
 		if repo != nil {
