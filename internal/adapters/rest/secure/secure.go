@@ -109,7 +109,7 @@ func (s *Secure) login() (string, error) {
 // MustGetPermissionsNumbers получает список нумерованных разрешений и отправляет его в канал nameNumbersChan. Если все
 // попытки (количество указывается в конфигурации) оказались неудачными, приложение завершает работу. Перед очередной
 // попыткой выдерживается пауза, которая каждый раз увеличивается на одну секунду.
-func (s *Secure) MustGetPermissionsNumbers(nameNumbersChan chan dto.NameNumber) {
+func (s *Secure) MustGetPermissionsNumbers(nameNumbersChan chan<- dto.NameNumber) {
 	var result []dto.NameNumber
 	var err error
 	defer close(nameNumbersChan)

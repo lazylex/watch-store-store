@@ -44,7 +44,7 @@ func MustCreate(cfg *config.HttpServer, queryTimeout time.Duration,
 	metrics *metrics.Metrics,
 	environment,
 	signature string,
-	c chan dto.NameNumber) *Server {
+	c <-chan dto.NameNumber) *Server {
 	handlers := restHandlers.New(domainService, queryTimeout)
 	rm := requestMetrics.New(metrics)
 	router := restRouter.MustCreate(handlers)
