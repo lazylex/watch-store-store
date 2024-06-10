@@ -21,7 +21,7 @@ var (
 
 type MiddlewareJWT struct {
 	secret      []byte         // Секретный ключ, которым должны быть подписаны валидные token-ы
-	permissions map[string]int // Карта номеров разрешений для путей, где ключ - путь, а его значение - номер разрешения
+	permissions map[string]int // Ключ - строка, содержащая метод и путь через двоеточие, значение - номер разрешения
 }
 
 // New конструктор прослойки для проверки JSON Web Token
@@ -71,7 +71,7 @@ func (m *MiddlewareJWT) CheckJWT(next http.Handler) http.Handler {
 			return
 		}
 
-		if err = m.checkPermissions(token, r.URL.Path); err != nil {
+		if err = m.checkPermissions(token, r.Method, r.URL.Path); err != nil {
 			rw.WriteHeader(http.StatusForbidden)
 			log.Warn(err.Error())
 			return
@@ -81,12 +81,13 @@ func (m *MiddlewareJWT) CheckJWT(next http.Handler) http.Handler {
 	})
 }
 
-// checkPermissions проверяет наличие в token-е номера разрешения, соответствующего переданному url. При нахождении
-// такого номера возвращается nil, в любом другом случае - возвращается ошибка. Разрешения в token-е должны содержаться
-// по ключу perm в полезной нагрузке (claims).
-func (m *MiddlewareJWT) checkPermissions(token *jwt.Token, url string) error {
-	if _, ok := m.permissions[url]; !ok {
-		return fmt.Errorf("no such url: %v", url)
+// checkPermissions проверяет наличие в token-е номера разрешения, соответствующего переданному методу и пути. При
+// нахождении такого номера возвращается nil, в любом другом случае - возвращается ошибка. Разрешения в token-е должны
+// содержаться по ключу perm в полезной нагрузке (claims).
+func (m *MiddlewareJWT) checkPermissions(token *jwt.Token, method, url string) error {
+	key := fmt.Sprintf("%s:%s", method, url)
+	if _, ok := m.permissions[key]; !ok {
+		return fmt.Errorf("no such method and url: %v/%v", method, url)
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
@@ -117,11 +118,11 @@ func (m *MiddlewareJWT) checkPermissions(token *jwt.Token, url string) error {
 		}
 
 		for _, v := range permissions {
-			if v == m.permissions[url] {
+			if v == m.permissions[key] {
 				return nil
 			}
 		}
 	}
 
-	return fmt.Errorf("no permissions for this path")
+	return fmt.Errorf("no permissions for this method and url")
 }

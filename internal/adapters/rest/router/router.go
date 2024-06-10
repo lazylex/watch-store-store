@@ -75,6 +75,12 @@ func MustCreate(handlers *handlers.Handler) *Router {
 	return &r
 }
 
+// Routes возвращает данные о маршрутах (путь, метод, название необходимого для выполнения обработчика разрешения и
+// функцию обработчик).
+func (r *Router) Routes() *[]Route {
+	return &r.routes
+}
+
 // registerRoutes сохраняет в памяти пути, обработчики, методы доступа и необходимые для выполнения обработчика пути.
 // Прикрепление путей к обработчикам в мультиплексоре осуществляется функцией AssignPathsToHandlers.
 func (r *Router) registerRoutes() {

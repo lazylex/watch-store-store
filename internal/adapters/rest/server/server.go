@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/go-chi/chi/middleware"
 	restHandlers "github.com/lazylex/watch-store/store/internal/adapters/rest/handlers"
 	"github.com/lazylex/watch-store/store/internal/adapters/rest/middlewares/jwt"
@@ -69,13 +70,16 @@ func MustCreate(cfg *config.HttpServer, queryTimeout time.Duration,
 	if environment == config.EnvironmentLocal {
 		mux.Use(middleware.Logger)
 	} else {
-		perm := make(map[string]int)
-		for p := range c {
-			// TODO заменить чтение в отладочную консоль на передачу в middleware
-			slog.Debug("permission name and number", p.Name, p.Number)
+		permissions := make(map[string]int)
+		for permission := range c {
+			for _, route := range *router.Routes() {
+				if route.Permission == permission.Name {
+					permissions[fmt.Sprintf("%s:%s", route.Method, route.Path)] = permission.Number
+				}
+			}
 		}
-		// TODO реализовать чтение карты путей/номеров разрешений
-		mux.Use(jwt.New([]byte(signature), perm).CheckJWT)
+
+		mux.Use(jwt.New([]byte(signature), permissions).CheckJWT)
 	}
 
 	return &Server{
