@@ -66,22 +66,33 @@ func (s *Secure) login() (string, error) {
 	}
 
 	var response *http.Response
+	var request *http.Request
 	var result resultJSON
-
-	ctx, cancel := context.WithTimeout(context.Background(), s.requestTimeout)
-	defer cancel()
-
-	request, err := http.NewRequestWithContext(ctx, http.MethodPost, s.urlLogin, nil)
-	if err != nil {
-		return "", err
-	}
-
-	request.SetBasicAuth(s.username, s.password)
+	var err error
 
 	client := http.DefaultClient
-	response, err = client.Do(request)
 
-	if err != nil {
+	for attempt := 0; attempt < s.attempts; attempt++ {
+		func() {
+			ctx, cancel := context.WithTimeout(context.Background(), s.requestTimeout)
+			defer cancel()
+			request, err = http.NewRequestWithContext(ctx, http.MethodPost, s.urlLogin, nil)
+
+			if err != nil {
+				return
+			}
+
+			request.SetBasicAuth(s.username, s.password)
+
+			response, err = client.Do(request)
+			if err == nil {
+				return
+			}
+			time.Sleep(time.Duration(attempt+1) * time.Second)
+		}()
+	}
+
+	if err != nil || response == nil {
 		return "", err
 	}
 
@@ -139,7 +150,7 @@ func (s *Secure) MustGetPermissionsNumbers(nameNumbersChan chan<- dto.NameNumber
 			return
 		}
 		log.Warn(fmt.Sprintf("failed to obtain permissions (attempt %d)", attempt+1))
-		time.Sleep(time.Duration(attempt) * time.Second)
+		time.Sleep(time.Duration(attempt+1) * time.Second)
 	}
 
 	if err != nil {
