@@ -113,14 +113,14 @@ func (s *Secure) login() (string, error) {
 		return "", ErrUnauthorized
 	}
 
-	var bytes []byte
+	var bodyBytes []byte
 	if response.StatusCode == http.StatusOK {
-		bytes, err = responseBodyBytes(response, 36)
+		bodyBytes, err = responseBodyBytes(response, 36)
 		if err != nil {
 			return "", err
 		}
 
-		err = json.Unmarshal(bytes, &result)
+		err = json.Unmarshal(bodyBytes, &result)
 		if err != nil {
 			return "", err
 		}
@@ -221,11 +221,11 @@ func (s *Secure) getPermissionsNumbers(token, url string) ([]dto.NameNumber, err
 		return nil, ErrUnauthorized
 	}
 
-	var bytes []byte
+	var bodyBytes []byte
 	if response.StatusCode == http.StatusOK {
-		bytes, err = responseBodyBytes(response, 1024)
+		bodyBytes, err = responseBodyBytes(response, 1024)
 
-		err = json.Unmarshal(bytes, &result)
+		err = json.Unmarshal(bodyBytes, &result)
 		if err != nil {
 			return nil, err
 		}
@@ -244,20 +244,20 @@ func responseBodyBytes(response *http.Response, allocateBytes int) ([]byte, erro
 		_ = response.Body.Close()
 	}()
 
-	bytes := make([]byte, allocateBytes)
+	bufferBytes := make([]byte, allocateBytes)
 
 	for {
-		bytes = bytes[:cap(bytes)]
-		n, err = response.Body.Read(bytes)
+		bufferBytes = bufferBytes[:cap(bufferBytes)]
+		n, err = response.Body.Read(bufferBytes)
 
 		if err != nil {
 			if err == io.EOF {
-				bodyBytes = append(bodyBytes, bytes[:n]...)
+				bodyBytes = append(bodyBytes, bufferBytes[:n]...)
 				break
 			}
 			return nil, err
 		}
-		bodyBytes = append(bodyBytes, bytes[:n]...)
+		bodyBytes = append(bodyBytes, bufferBytes[:n]...)
 	}
 
 	return bodyBytes, nil
