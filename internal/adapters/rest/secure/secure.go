@@ -1,6 +1,8 @@
 package secure
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -84,17 +86,23 @@ func (s *Secure) login() (string, error) {
 			request, err = http.NewRequestWithContext(ctx, http.MethodPost, s.urlLogin, nil)
 
 			if err != nil {
+				time.Sleep(time.Duration(attempt+1) * time.Second)
 				return
 			}
 
 			request.SetBasicAuth(s.username, s.password)
 
 			response, err = client.Do(request)
+
 			if err == nil {
 				return
 			}
 			time.Sleep(time.Duration(attempt+1) * time.Second)
 		}()
+
+		if err == nil {
+			break
+		}
 	}
 
 	if err != nil || response == nil {
@@ -167,6 +175,12 @@ func (s *Secure) MustGetPermissionsNumbers(nameNumbersChan chan<- dto.NameNumber
 				go s.savePermissionsToFile(&result)
 			}
 
+			if readFromFile {
+				slog.Info(fmt.Sprintf("permissions read from %s successfully", s.permissionsFile))
+				return
+			}
+
+			slog.Info("permissions get from secure service successfully")
 			return
 		}
 		log.Warn(fmt.Sprintf("failed to obtain permissions (attempt %d)", attempt+1))
@@ -280,7 +294,32 @@ func (s *Secure) savePermissionsToFile(data *[]dto.NameNumber) {
 
 // readPermissionsFromFile возвращает разрешения и их номера, считанные из файла.
 func (s *Secure) readPermissionsFromFile() ([]dto.NameNumber, error) {
-	// TODO implement
-	slog.Debug("readPermissionsFromFile not implemented")
-	return []dto.NameNumber{}, fmt.Errorf("readPermissionsFromFile not implemented")
+	file, err := os.Open(s.permissionsFile)
+	if err != nil {
+		slog.Warn(fmt.Sprintf("can't read permissions from file %s, Reason: %v", s.permissionsFile, err))
+		return []dto.NameNumber{}, err
+	}
+
+	defer func(file *os.File) {
+		err = file.Close()
+		if err != nil {
+			slog.Warn(fmt.Sprintf("can't close file %s", s.permissionsFile))
+		}
+	}(file)
+
+	var result []dto.NameNumber
+
+	data := bytes.Buffer{}
+	sc := bufio.NewScanner(file)
+	for sc.Scan() {
+		data.WriteString(sc.Text())
+	}
+
+	err = json.Unmarshal(data.Bytes(), &result)
+	if err != nil {
+		slog.Warn(fmt.Sprintf("can't parse permissions from file %s, Reason: %v", s.permissionsFile, err))
+		return []dto.NameNumber{}, err
+	}
+
+	return result, nil
 }
