@@ -21,6 +21,8 @@ secure:
   secure_protocol: "http"
   secure_username: "store1"
   secure_password: "Python_123"
+  secure_use_permissions_file_cache: true
+  secure_permissions_file: "./cache/secure_permissions.json"
 kafka:
   kafka_brokers: ["localhost:9092"]
   kafka_topic_update_price: "store.update-price"
