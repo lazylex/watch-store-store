@@ -3,15 +3,14 @@ package main
 import (
 	"fmt"
 	"github.com/lazylex/watch-store/store/internal/adapters/message_broker/kafka"
-	"github.com/lazylex/watch-store/store/internal/adapters/rest/secure"
 	restServer "github.com/lazylex/watch-store/store/internal/adapters/rest/server"
 	"github.com/lazylex/watch-store/store/internal/config"
-	"github.com/lazylex/watch-store/store/internal/dto"
 	"github.com/lazylex/watch-store/store/internal/logger"
 	prometheusMetrics "github.com/lazylex/watch-store/store/internal/metrics"
 	"github.com/lazylex/watch-store/store/internal/ports/repository"
 	"github.com/lazylex/watch-store/store/internal/repository/mysql"
 	"github.com/lazylex/watch-store/store/internal/service"
+	"github.com/lazylex/watch-store/store/pkg/secure"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -25,10 +24,12 @@ func main() {
 		slog.Error(err.Error())
 	}
 
-	var permissionsChan chan dto.NameNumber
+	var permissionsChan chan secure.NameNumber
 	if cfg.Env != config.EnvironmentLocal {
-		permissionsChan = make(chan dto.NameNumber)
-		appSecure := secure.New(&cfg.Secure)
+		permissionsChan = make(chan secure.NameNumber)
+
+		apc := &cfg.Secure
+		appSecure := secure.New(apc.Username, apc.Password, apc.PermissionsFile, apc.Protocol, apc.Server, apc.Attempts, apc.RequestTimeout, apc.UsePermissionsFileCache)
 		go appSecure.MustGetPermissionsNumbers(permissionsChan)
 	}
 

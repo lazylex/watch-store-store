@@ -7,9 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/lazylex/watch-store/store/internal/config"
-	"github.com/lazylex/watch-store/store/internal/dto"
-	"github.com/lazylex/watch-store/store/internal/logger"
 	"io"
 	"log/slog"
 	"net/http"
@@ -17,9 +14,16 @@ import (
 	"time"
 )
 
+const opLabel = "op"
+
 var (
 	ErrUnauthorized = errors.New("unauthorized")
 )
+
+type NameNumber struct {
+	Number int    `json:"number"`
+	Name   string `json:"name"`
+}
 
 type Secure struct {
 	tokens                  Tokens        // Токены
@@ -39,34 +43,32 @@ type Tokens struct {
 }
 
 // New возвращает указатель на структуру, предназначенную для работы с токенами и разрешениями.
-func New(cfg *config.Secure) *Secure {
-	attempts := cfg.Attempts
+func New(username, password, permissionsFile, protocol, server string, attempts int, requestTimeout time.Duration, usePermissionsFileCache bool) *Secure {
 	if attempts == 0 {
 		attempts = 3
 	}
 
-	protocol := cfg.Protocol
 	if protocol == "" {
 		protocol = "http"
 	}
 
-	urlPermissions := fmt.Sprintf("%s://%s/get-numbered-permissions?service=store", cfg.Protocol, cfg.Server)
-	urlLogin := fmt.Sprintf("%s://%s/login", cfg.Protocol, cfg.Server)
+	urlPermissions := fmt.Sprintf("%s://%s/get-numbered-permissions?service=store", protocol, server)
+	urlLogin := fmt.Sprintf("%s://%s/login", protocol, server)
 
 	return &Secure{attempts: attempts,
 		urlPermissions:          urlPermissions,
 		urlLogin:                urlLogin,
-		requestTimeout:          cfg.RequestTimeout,
-		username:                cfg.Username,
-		password:                cfg.Password,
-		usePermissionsFileCache: cfg.UsePermissionsFileCache,
-		permissionsFile:         cfg.PermissionsFile,
+		username:                username,
+		password:                password,
+		permissionsFile:         permissionsFile,
+		requestTimeout:          requestTimeout,
+		usePermissionsFileCache: usePermissionsFileCache,
 	}
 }
 
 // login получает токен сессии в микросервисе secure.
 func (s *Secure) login() (string, error) {
-	log := slog.Default().With(logger.OPLabel, "secure.login")
+	log := slog.Default().With(opLabel, "secure.login")
 
 	type resultJSON struct {
 		Token string `json:"token"`
@@ -133,14 +135,14 @@ func (s *Secure) login() (string, error) {
 // MustGetPermissionsNumbers получает список нумерованных разрешений и отправляет его в канал nameNumbersChan. Если все
 // попытки (количество указывается в конфигурации) оказались неудачными, приложение завершает работу. Перед очередной
 // попыткой выдерживается пауза, которая каждый раз увеличивается на одну секунду.
-func (s *Secure) MustGetPermissionsNumbers(nameNumbersChan chan<- dto.NameNumber) {
-	var result []dto.NameNumber
+func (s *Secure) MustGetPermissionsNumbers(nameNumbersChan chan<- NameNumber) {
+	var result []NameNumber
 	var err error
 	var readFromFile = false
 
 	defer close(nameNumbersChan)
 
-	log := slog.Default().With(logger.OPLabel, "secure.MustGetPermissionsNumbers")
+	log := slog.Default().With(opLabel, "secure.MustGetPermissionsNumbers")
 
 	if s.usePermissionsFileCache {
 		if result, err = s.readPermissionsFromFile(); err == nil {
@@ -194,11 +196,11 @@ func (s *Secure) MustGetPermissionsNumbers(nameNumbersChan chan<- dto.NameNumber
 }
 
 // getPermissionsNumbers получение списка нумерованных разрешений.
-func (s *Secure) getPermissionsNumbers(token, url string) ([]dto.NameNumber, error) {
-	var result []dto.NameNumber
+func (s *Secure) getPermissionsNumbers(token, url string) ([]NameNumber, error) {
+	var result []NameNumber
 	var response *http.Response
 
-	log := slog.Default().With(logger.OPLabel, "secure.getPermissionsNumbers")
+	log := slog.Default().With(opLabel, "secure.getPermissionsNumbers")
 
 	ctx, cancel := context.WithTimeout(context.Background(), s.requestTimeout)
 	defer cancel()
@@ -264,7 +266,7 @@ func responseBodyBytes(response *http.Response, allocateBytes int) ([]byte, erro
 }
 
 // savePermissionsToFile сохраняет файл с разрешениями в формате JSON.
-func (s *Secure) savePermissionsToFile(data *[]dto.NameNumber) {
+func (s *Secure) savePermissionsToFile(data *[]NameNumber) {
 	if len(s.permissionsFile) == 0 {
 		slog.Warn("empty path to save permissions file")
 		return
@@ -293,11 +295,11 @@ func (s *Secure) savePermissionsToFile(data *[]dto.NameNumber) {
 }
 
 // readPermissionsFromFile возвращает разрешения и их номера, считанные из файла.
-func (s *Secure) readPermissionsFromFile() ([]dto.NameNumber, error) {
+func (s *Secure) readPermissionsFromFile() ([]NameNumber, error) {
 	file, err := os.Open(s.permissionsFile)
 	if err != nil {
 		slog.Warn(fmt.Sprintf("can't read permissions from file %s, Reason: %v", s.permissionsFile, err))
-		return []dto.NameNumber{}, err
+		return []NameNumber{}, err
 	}
 
 	defer func(file *os.File) {
@@ -307,7 +309,7 @@ func (s *Secure) readPermissionsFromFile() ([]dto.NameNumber, error) {
 		}
 	}(file)
 
-	var result []dto.NameNumber
+	var result []NameNumber
 
 	data := bytes.Buffer{}
 	sc := bufio.NewScanner(file)
@@ -318,7 +320,7 @@ func (s *Secure) readPermissionsFromFile() ([]dto.NameNumber, error) {
 	err = json.Unmarshal(data.Bytes(), &result)
 	if err != nil {
 		slog.Warn(fmt.Sprintf("can't parse permissions from file %s, Reason: %v", s.permissionsFile, err))
-		return []dto.NameNumber{}, err
+		return []NameNumber{}, err
 	}
 
 	return result, nil

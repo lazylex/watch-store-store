@@ -10,11 +10,11 @@ import (
 	requestMetrics "github.com/lazylex/watch-store/store/internal/adapters/rest/middlewares/request_metrics"
 	restRouter "github.com/lazylex/watch-store/store/internal/adapters/rest/router"
 	"github.com/lazylex/watch-store/store/internal/config"
-	"github.com/lazylex/watch-store/store/internal/dto"
 	"github.com/lazylex/watch-store/store/internal/helpers/constants/prefixes"
 	"github.com/lazylex/watch-store/store/internal/logger"
 	"github.com/lazylex/watch-store/store/internal/metrics"
 	"github.com/lazylex/watch-store/store/internal/service"
+	"github.com/lazylex/watch-store/store/pkg/secure"
 	"log/slog"
 	"net/http"
 	"os"
@@ -45,7 +45,7 @@ func MustCreate(cfg *config.HttpServer, queryTimeout time.Duration,
 	metrics *metrics.Metrics,
 	environment,
 	signature string,
-	c <-chan dto.NameNumber) *Server {
+	c <-chan secure.NameNumber) *Server {
 	handlers := restHandlers.New(domainService, queryTimeout)
 	rm := requestMetrics.New(metrics)
 	router := restRouter.MustCreate(handlers)
