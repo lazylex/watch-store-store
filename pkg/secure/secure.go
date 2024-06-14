@@ -25,6 +25,18 @@ type NameNumber struct {
 	Name   string `json:"name"`
 }
 
+type Config struct {
+	Signature               string        `yaml:"secure_signature" env:"SECURE_SIGNATURE" env-required:"true"`
+	Server                  string        `yaml:"secure_server" env:"SECURE_SERVER" env-required:"true"`
+	RequestTimeout          time.Duration `yaml:"secure_request_timeout" env:"SECURE_REQUEST_TIMEOUT" env-required:"true"` // Проверка пароля занимает много времени. Не рекомендуется ставить таймаут меньше 1500ms
+	Attempts                int           `yaml:"secure_attempts" env:"SECURE_ATTEMPTS"`
+	Protocol                string        `yaml:"secure_protocol" env:"SECURE_PROTOCOL"`
+	Username                string        `yaml:"secure_username" env:"SECURE_USERNAME" env-required:"true"`
+	Password                string        `yaml:"secure_password" env:"SECURE_PASSWORD" env-required:"true"` // Пароль опасно хранить в открытом виде !!!
+	UsePermissionsFileCache bool          `yaml:"secure_use_permissions_file_cache" env:"SECURE_USE_PERMISSIONS_FILE_CACHE"`
+	PermissionsFile         string        `yaml:"secure_permissions_file" env:"SECURE_PERMISSIONS_FILE"`
+}
+
 type Secure struct {
 	tokens                  Tokens        // Токены
 	attempts                int           // Количество попыток обращения к стороннему сервису
@@ -43,26 +55,27 @@ type Tokens struct {
 }
 
 // New возвращает указатель на структуру, предназначенную для работы с токенами и разрешениями.
-func New(username, password, permissionsFile, protocol, server string, attempts int, requestTimeout time.Duration, usePermissionsFileCache bool) *Secure {
-	if attempts == 0 {
-		attempts = 3
+func New(cfg Config) *Secure {
+
+	if cfg.Attempts == 0 {
+		cfg.Attempts = 3
 	}
 
-	if protocol == "" {
-		protocol = "http"
+	if cfg.Protocol == "" {
+		cfg.Protocol = "http"
 	}
 
-	urlPermissions := fmt.Sprintf("%s://%s/get-numbered-permissions?service=store", protocol, server)
-	urlLogin := fmt.Sprintf("%s://%s/login", protocol, server)
+	urlPermissions := fmt.Sprintf("%s://%s/get-numbered-permissions?service=store", cfg.Protocol, cfg.Server)
+	urlLogin := fmt.Sprintf("%s://%s/login", cfg.Protocol, cfg.Server)
 
-	return &Secure{attempts: attempts,
+	return &Secure{attempts: cfg.Attempts,
 		urlPermissions:          urlPermissions,
 		urlLogin:                urlLogin,
-		username:                username,
-		password:                password,
-		permissionsFile:         permissionsFile,
-		requestTimeout:          requestTimeout,
-		usePermissionsFileCache: usePermissionsFileCache,
+		username:                cfg.Username,
+		password:                cfg.Password,
+		permissionsFile:         cfg.PermissionsFile,
+		requestTimeout:          cfg.RequestTimeout,
+		usePermissionsFileCache: cfg.UsePermissionsFileCache,
 	}
 }
 

@@ -27,9 +27,7 @@ func main() {
 	var permissionsChan chan secure.NameNumber
 	if cfg.Env != config.EnvironmentLocal {
 		permissionsChan = make(chan secure.NameNumber)
-
-		apc := &cfg.Secure
-		appSecure := secure.New(apc.Username, apc.Password, apc.PermissionsFile, apc.Protocol, apc.Server, apc.Attempts, apc.RequestTimeout, apc.UsePermissionsFileCache)
+		appSecure := secure.New(secure.Config(cfg.Secure))
 		go appSecure.MustGetPermissionsNumbers(permissionsChan)
 	}
 
