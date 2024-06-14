@@ -41,13 +41,13 @@ func (r *ReservationDTO) Validate() error {
 		return validators.ErrNoProductsInReservation
 	}
 
-	articles := make(map[article.Article]bool)
+	articles := make(map[article.Article]struct{})
 	for _, product := range r.Products {
 		if err := product.Validate(); err != nil {
 			return err
 		}
 		if _, ok := articles[product.Article]; !ok {
-			articles[product.Article] = true
+			articles[product.Article] = struct{}{}
 		} else {
 			return validators.ErrDuplicateProductsInReservation
 		}
