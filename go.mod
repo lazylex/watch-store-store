@@ -1,6 +1,6 @@
 module github.com/lazylex/watch-store/store
 
-go 1.21.4
+go 1.22.4
 
 require (
 	github.com/go-chi/chi v1.5.4
