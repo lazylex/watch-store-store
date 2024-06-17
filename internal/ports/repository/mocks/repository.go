@@ -10,7 +10,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	dto "github.com/lazylex/watch-store/store/internal/dto"
+	dto "github.com/lazylex/watch-store-store/internal/dto"
 )
 
 // ключ для указания в контексте необходимости выполнения передаваемой функции, а не имитации её вызова

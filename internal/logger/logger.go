@@ -3,8 +3,8 @@ package logger
 import (
 	"context"
 	"github.com/go-chi/chi/middleware"
-	"github.com/lazylex/watch-store/store/internal/config"
-	"github.com/lazylex/watch-store/store/pkg/colorlog"
+	"github.com/lazylex/watch-store-store/internal/config"
+	"github.com/lazylex/watch-store-store/pkg/colorlog"
 	"log"
 	"log/slog"
 	"net/http"

@@ -2,8 +2,8 @@ package validators
 
 import (
 	"errors"
-	"github.com/lazylex/watch-store/store/internal/domain/aggregates/reservation"
-	"github.com/lazylex/watch-store/store/internal/domain/value_objects/article"
+	"github.com/lazylex/watch-store-store/internal/domain/aggregates/reservation"
+	"github.com/lazylex/watch-store-store/internal/domain/value_objects/article"
 	"testing"
 	"time"
 )

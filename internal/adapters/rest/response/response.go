@@ -2,8 +2,8 @@ package response
 
 import (
 	"errors"
-	"github.com/lazylex/watch-store/store/internal/helpers/constants/prefixes"
-	"github.com/lazylex/watch-store/store/internal/ports/repository"
+	"github.com/lazylex/watch-store-store/internal/helpers/constants/prefixes"
+	"github.com/lazylex/watch-store-store/internal/ports/repository"
 	"log/slog"
 	"net/http"
 	"strings"

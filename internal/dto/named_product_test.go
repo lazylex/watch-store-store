@@ -2,7 +2,7 @@ package dto
 
 import (
 	"errors"
-	"github.com/lazylex/watch-store/store/internal/dto/validators"
+	"github.com/lazylex/watch-store-store/internal/dto/validators"
 	"testing"
 )
 

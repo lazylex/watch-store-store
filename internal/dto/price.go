@@ -1,6 +1,6 @@
 package dto
 
-import "github.com/lazylex/watch-store/store/internal/dto/validators"
+import "github.com/lazylex/watch-store-store/internal/dto/validators"
 
 type PriceDTO struct {
 	Price float64 `json:"price"`

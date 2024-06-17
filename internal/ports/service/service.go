@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"errors"
-	"github.com/lazylex/watch-store/store/internal/dto"
-	"github.com/lazylex/watch-store/store/internal/helpers/constants/prefixes"
+	"github.com/lazylex/watch-store-store/internal/dto"
+	"github.com/lazylex/watch-store-store/internal/helpers/constants/prefixes"
 )
 
 // serviceError добавляет к тексту ошибки префикс, указывающий на её принадлежность к сервису.

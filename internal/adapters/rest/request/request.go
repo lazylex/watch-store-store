@@ -2,7 +2,7 @@ package request
 
 import (
 	"errors"
-	"github.com/lazylex/watch-store/store/internal/helpers/constants/prefixes"
+	"github.com/lazylex/watch-store-store/internal/helpers/constants/prefixes"
 )
 
 const (

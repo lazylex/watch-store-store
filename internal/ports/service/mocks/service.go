@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	dto "github.com/lazylex/watch-store/store/internal/dto"
+	dto "github.com/lazylex/watch-store-store/internal/dto"
 )
 
 // MockInterface is a mock of Interface interface.

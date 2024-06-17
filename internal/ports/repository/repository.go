@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/lazylex/watch-store/store/internal/dto"
-	"github.com/lazylex/watch-store/store/internal/helpers/constants/prefixes"
+	"github.com/lazylex/watch-store-store/internal/dto"
+	"github.com/lazylex/watch-store-store/internal/helpers/constants/prefixes"
 )
 
 // repositoryError добавляет к тексту ошибки префикс, указывающий на её принадлежность к хранилищу.

@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/go-chi/chi"
-	"github.com/lazylex/watch-store/store/internal/adapters/rest/handlers"
+	"github.com/lazylex/watch-store-store/internal/adapters/rest/handlers"
 	"net/http"
 )
 

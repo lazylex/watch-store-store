@@ -1,9 +1,9 @@
 package dto
 
 import (
-	rs "github.com/lazylex/watch-store/store/internal/domain/aggregates/reservation"
-	"github.com/lazylex/watch-store/store/internal/domain/value_objects/article"
-	"github.com/lazylex/watch-store/store/internal/dto/validators"
+	rs "github.com/lazylex/watch-store-store/internal/domain/aggregates/reservation"
+	"github.com/lazylex/watch-store-store/internal/domain/value_objects/article"
+	"github.com/lazylex/watch-store-store/internal/dto/validators"
 	"time"
 )
 

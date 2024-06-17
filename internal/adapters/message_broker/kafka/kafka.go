@@ -2,10 +2,10 @@ package kafka
 
 import (
 	"fmt"
-	"github.com/lazylex/watch-store/store/internal/adapters/message_broker/kafka/consumer/update_price"
-	"github.com/lazylex/watch-store/store/internal/config"
-	internalLogger "github.com/lazylex/watch-store/store/internal/logger"
-	"github.com/lazylex/watch-store/store/internal/ports/service"
+	"github.com/lazylex/watch-store-store/internal/adapters/message_broker/kafka/consumer/update_price"
+	"github.com/lazylex/watch-store-store/internal/config"
+	internalLogger "github.com/lazylex/watch-store-store/internal/logger"
+	"github.com/lazylex/watch-store-store/internal/ports/service"
 	"log/slog"
 	"os"
 )

@@ -1,8 +1,8 @@
 package dto
 
 import (
-	"github.com/lazylex/watch-store/store/internal/domain/value_objects/article"
-	"github.com/lazylex/watch-store/store/internal/dto/validators"
+	"github.com/lazylex/watch-store-store/internal/domain/value_objects/article"
+	"github.com/lazylex/watch-store-store/internal/dto/validators"
 )
 
 type ArticleWithAmountDTO struct {

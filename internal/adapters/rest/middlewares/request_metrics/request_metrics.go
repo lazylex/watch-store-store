@@ -1,9 +1,9 @@
 package request_metrics
 
 import (
-	"github.com/lazylex/watch-store/store/internal/adapters/rest/router"
-	"github.com/lazylex/watch-store/store/internal/helpers/constants/various"
-	"github.com/lazylex/watch-store/store/internal/metrics"
+	"github.com/lazylex/watch-store-store/internal/adapters/rest/router"
+	"github.com/lazylex/watch-store-store/internal/helpers/constants/various"
+	"github.com/lazylex/watch-store-store/internal/metrics"
 	"net/http"
 	"time"
 )

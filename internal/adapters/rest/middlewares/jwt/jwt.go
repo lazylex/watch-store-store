@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/lazylex/watch-store/store/internal/logger"
+	"github.com/lazylex/watch-store-store/internal/logger"
 	"log/slog"
 	"net/http"
 	"reflect"
