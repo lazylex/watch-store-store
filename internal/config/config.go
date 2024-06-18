@@ -69,10 +69,10 @@ type Prometheus struct {
 // содержится в переменной окружения STORE_CONFIG_PATH. Переопределение конфигурационных значений, при необходимости,
 // осуществляется посредством переменных окружения (описанных в структурах данных в этом файле).
 func MustLoad() *Config {
-	flag.Parse()
-
 	var configPath = flag.String("config", "", "путь к файлу конфигурации")
 	var cfg Config
+
+	flag.Parse()
 
 	if *configPath == "" {
 		*configPath = os.Getenv("STORE_CONFIG_PATH")
