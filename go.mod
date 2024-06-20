@@ -9,6 +9,8 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/golang/mock v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
+	github.com/lazylex/watch-store-store/pkg/colorlog v0.0.0-00010101000000-000000000000
+	github.com/lazylex/watch-store-store/pkg/db-viewer v0.0.0-00010101000000-000000000000
 	github.com/lazylex/watch-store-store/pkg/secure v0.0.0-00010101000000-000000000000
 	github.com/prometheus/client_golang v1.17.0
 	github.com/segmentio/kafka-go v0.4.47
@@ -35,5 +37,7 @@ require (
 )
 
 replace github.com/lazylex/watch-store-store/pkg/db-viewer => ./pkg/db-viewer
+
+replace github.com/lazylex/watch-store-store/pkg/colorlog => ./pkg/colorlog
 
 replace github.com/lazylex/watch-store-store/pkg/secure => ./pkg/secure
