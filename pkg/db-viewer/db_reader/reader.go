@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -19,8 +20,8 @@ type Reader struct {
 	tables map[string][]string
 }
 
-// Start выводит список таблиц БД по адресу localhost<:port>/tables с возможностью вывода их содержимого
-func Start(db *sql.DB, log *slog.Logger, port string) {
+// Start выводит список таблиц БД по адресу localhost<:port> с возможностью вывода их содержимого
+func Start(db *sql.DB, log *slog.Logger, port int) {
 	var err error
 	reader := &Reader{db: db, log: log}
 	reader.dbName = reader.readDBName()
@@ -33,9 +34,9 @@ func Start(db *sql.DB, log *slog.Logger, port string) {
 		return
 	}
 
-	http.HandleFunc("/tables", reader.displayTablesList)
+	http.HandleFunc("/", reader.displayTablesList)
 	http.HandleFunc("/table", reader.displayTable)
-	err = http.ListenAndServe(port, nil)
+	err = http.ListenAndServe("localhost:"+strconv.Itoa(port), nil)
 	if err != nil {
 		if errors.Is(err, http.ErrServerClosed) {
 			log.Error("server closed")
