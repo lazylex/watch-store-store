@@ -14,6 +14,7 @@ storage:
   database_max_open_connections: 10
   database_name: "store1"
   query_timeout: 5s
+  database_viewer_port: 9123
 secure:
   secure_signature: "it's just secure signature for debug"
   secure_server: "localhost:8159"

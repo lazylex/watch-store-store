@@ -53,6 +53,8 @@ type Storage struct {
 	DatabaseMaxOpenConnections int    `yaml:"database_max_open_connections" env:"DATABASE_MAX_OPEN_CONNECTIONS" env-required:"true"`
 
 	QueryTimeout time.Duration `yaml:"query_timeout" env:"QUERY_TIMEOUT" env-required:"true"`
+
+	ViewerPort int `yaml:"database_viewer_port" env:"DATABASE_VIEWER_PORT"`
 }
 
 type Kafka struct {

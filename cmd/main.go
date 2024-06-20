@@ -10,6 +10,7 @@ import (
 	"github.com/lazylex/watch-store-store/internal/ports/repository"
 	"github.com/lazylex/watch-store-store/internal/repository/mysql"
 	"github.com/lazylex/watch-store-store/internal/service"
+	"github.com/lazylex/watch-store-store/pkg/db-viewer/db_reader"
 	"github.com/lazylex/watch-store-store/pkg/secure"
 	"log/slog"
 	"os"
@@ -42,6 +43,10 @@ func main() {
 	server := restServer.MustCreate(&cfg.HttpServer, cfg.QueryTimeout, domainService, metrics, cfg.Env,
 		cfg.Signature, permissionsChan)
 	server.MustRun()
+
+	if cfg.Storage.ViewerPort != 0 && (cfg.Env == config.EnvironmentLocal || cfg.Env == config.EnvironmentDebug) {
+		db_reader.Start(domainService.SQLRepository.DB(), slog.Default(), cfg.Storage.ViewerPort)
+	}
 
 	defer func(repo repository.SQLDBInterface) {
 		if repo != nil {
