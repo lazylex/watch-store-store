@@ -1,6 +1,7 @@
 package db_reader
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -14,37 +15,53 @@ import (
 )
 
 type Reader struct {
+	srv    *http.Server
 	db     *sql.DB
 	log    *slog.Logger
 	dbName string
 	tables map[string][]string
 }
 
-// Start выводит список таблиц БД по адресу localhost<:port> с возможностью вывода их содержимого
-func Start(db *sql.DB, log *slog.Logger, port int) {
+// New возвращает указатель на новый Reader, отображающий на переданном порту (port) таблицы и их содержимое из БД (db).
+// Для запуска вывода таблиц необходимо вызвать Start.
+func New(db *sql.DB, port int) *Reader {
+	srv := &http.Server{Addr: "localhost:" + strconv.Itoa(port)}
+	return &Reader{db: db, srv: srv}
+}
+
+// Start запускает http-сервер для вывода таблиц и их содержимого.
+func (rd *Reader) Start() {
 	var err error
-	reader := &Reader{db: db, log: log}
-	reader.dbName = reader.readDBName()
-	if reader.dbName == "" {
-		log.Error("empty db name, so no tables will viewed")
+	rd.dbName = rd.readDBName()
+	if rd.dbName == "" {
+		slog.Error("empty db name, so no tables will viewed")
 		return
 	}
-	if reader.tables, err = reader.readTables(); err != nil {
-		log.Error("can't read tables info, so no tables will viewed")
+	if rd.tables, err = rd.readTables(); err != nil {
+		slog.Error("can't read tables info, so no tables will viewed")
 		return
 	}
 
-	http.HandleFunc("/", reader.displayTablesList)
-	http.HandleFunc("/table", reader.displayTable)
-	err = http.ListenAndServe("localhost:"+strconv.Itoa(port), nil)
-	if err != nil {
-		if errors.Is(err, http.ErrServerClosed) {
-			log.Error("server closed")
-		} else if err != nil {
-			log.Error("error starting server: %s", err)
+	http.HandleFunc("/", rd.displayTablesList)
+	http.HandleFunc("/table", rd.displayTable)
+	go func() {
+		slog.Info(fmt.Sprintf("start db-viewer http server on %s", rd.srv.Addr))
+		err = rd.srv.ListenAndServe()
+		if err != nil {
+			if errors.Is(err, http.ErrServerClosed) {
+				slog.Info(fmt.Sprintf("closed db-viewer http server on %s", rd.srv.Addr))
+			} else if err != nil {
+				slog.Error("error starting server: %s", err)
+			}
 		}
-	}
+	}()
+}
 
+// Shutdown завершает работу http-сервера.
+func (rd *Reader) Shutdown() {
+	if err := rd.srv.Shutdown(context.Background()); err != nil {
+		slog.Error(err.Error())
+	}
 }
 
 // readDBName возвращает название БД в СУБД

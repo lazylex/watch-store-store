@@ -44,8 +44,10 @@ func main() {
 		cfg.Signature, permissionsChan)
 	server.MustRun()
 
+	var viewer *db_reader.Reader
 	if cfg.Storage.ViewerPort != 0 && (cfg.Env == config.EnvironmentLocal || cfg.Env == config.EnvironmentDebug) {
-		db_reader.Start(domainService.SQLRepository.DB(), slog.Default(), cfg.Storage.ViewerPort)
+		viewer = db_reader.New(domainService.SQLRepository.DB(), cfg.Storage.ViewerPort)
+		viewer.Start()
 	}
 
 	defer func(repo repository.SQLDBInterface) {
@@ -63,6 +65,10 @@ func main() {
 	slog.Info(fmt.Sprintf("%s signal received. Shutdown started", sig))
 
 	server.Shutdown()
+
+	if viewer != nil {
+		viewer.Shutdown()
+	}
 }
 
 func clearScreen() error {
