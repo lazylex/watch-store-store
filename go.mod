@@ -10,7 +10,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/lazylex/watch-store-store/pkg/colorlog v0.0.0-00010101000000-000000000000
-	github.com/lazylex/watch-store-store/pkg/db-viewer v0.0.0-00010101000000-000000000000
+	github.com/lazylex/watch-store-store/pkg/mysql-db-viewer v0.0.1
 	github.com/lazylex/watch-store-store/pkg/secure v0.0.0-00010101000000-000000000000
 	github.com/prometheus/client_golang v1.17.0
 	github.com/segmentio/kafka-go v0.4.47
@@ -36,7 +36,7 @@ require (
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
 )
 
-replace github.com/lazylex/watch-store-store/pkg/db-viewer => ./pkg/db-viewer
+replace github.com/lazylex/watch-store-store/pkg/mysql-db-viewer => ./pkg/mysql-db-viewer
 
 replace github.com/lazylex/watch-store-store/pkg/colorlog => ./pkg/colorlog
 

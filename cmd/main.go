@@ -10,7 +10,7 @@ import (
 	"github.com/lazylex/watch-store-store/internal/ports/repository"
 	"github.com/lazylex/watch-store-store/internal/repository/mysql"
 	"github.com/lazylex/watch-store-store/internal/service"
-	"github.com/lazylex/watch-store-store/pkg/db-viewer/db_reader"
+	mysqldbviewer "github.com/lazylex/watch-store-store/pkg/mysql-db-viewer"
 	"github.com/lazylex/watch-store-store/pkg/secure"
 	"log/slog"
 	"os"
@@ -44,9 +44,9 @@ func main() {
 		cfg.Signature, permissionsChan)
 	server.MustRun()
 
-	var viewer *db_reader.Reader
+	var viewer *mysqldbviewer.Reader
 	if cfg.Storage.ViewerPort != 0 && (cfg.Env == config.EnvironmentLocal || cfg.Env == config.EnvironmentDebug) {
-		viewer = db_reader.New(domainService.SQLRepository.DB(), cfg.Storage.ViewerPort)
+		viewer = mysqldbviewer.New(domainService.SQLRepository.DB(), cfg.Storage.ViewerPort)
 		viewer.Start()
 	}
 
