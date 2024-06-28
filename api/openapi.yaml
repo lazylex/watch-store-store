@@ -1,0 +1,168 @@
+openapi: 3.0.0
+info:
+  title: Store - OpenAPI 3.0.0
+  description:
+    Сервис, содержащий функционал оффлайн-магазина
+  contact:
+    email: lazylex@mail.ru
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1
+servers:
+  - url: http://localhost:8091
+  
+tags:
+  - name: stock
+    description: Товары, находящиеся в продаже
+  - name: sales
+    description: Продажи
+  - name: reservation
+    description: Резервирование товара
+    
+paths:
+  /api/api_v1/stock/:
+    get:
+      tags:
+        - stock
+      summary: Получение всех полей записи о товаре
+      description: Получение всех полей записи о товаре по артикулу
+      operationId: StockRecord
+
+      parameters:
+        - in: query
+          name: article
+          schema:
+            type: string
+          required: true
+          description: Артикул товара
+          allowEmptyValue: false
+          example: CA-F91W.2211
+        
+      responses:
+        '200':
+          description: Успешное получение записи о товаре
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'          
+        '400':
+          description: Неверный артикул
+        '401':
+          description: Несанкционированный доступ
+        '404':
+          description: Товар не найден
+        '408':
+          description: Таймаут запроса
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /api/api_v1/stock/amount/:
+    get:
+      tags:
+        - stock
+      summary: Получение количества товара
+      description: Получение доступного для продажи количества товара по его артикулу
+      operationId: AmountInStock
+
+      parameters:
+        - in: query
+          name: article
+          schema:
+            type: string
+          required: true
+          description: Артикул товара
+          allowEmptyValue: false
+          example: CA-F91W.2211
+      responses:
+        '200':
+          description: Успешное получение количества товара
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductAmount'          
+        '400':
+          description: Неверный артикул
+        '404':
+          description: Товар не найден
+        '408':
+          description: Таймаут запроса
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /api/api_v1/stock/amount:
+    put:
+      tags:
+        - stock
+      summary: Обновление количества товара
+      description: Получение доступного для продажи количества товара по его артикулу
+      operationId: UpdateAmountInStock
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArticleAmount'
+      responses:
+        '200':
+          description: Успешное обновление количества товара
+        '400':
+          description: Неверный артикул или количество товара
+        '404':
+          description: Обновляемый товар не найден
+        '408':
+          description: Таймаут запроса
+        '500':
+          description: Внутренняя ошибка сервера
+
+components:
+  schemas:
+
+    ArticleAmount:
+      type: object
+      properties:
+        amount:
+          type: integer
+          minimum: 0
+          description: Количество товара
+          example: 60
+        article:
+          type: string
+          description: Артикул товара
+          minLength: 1
+          maxLength: 50
+          example: CA-F91W
+
+    ProductAmount:
+      type: object
+      properties:
+        amount:
+          type: integer
+          minimum: 0
+          description: Количество товара
+          example: 60
+
+    Product:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Название товара
+          example: CASIO F-91W-1YEG
+        article:
+          type: string
+          description: Артикул товара
+          minLength: 1
+          maxLength: 50
+          example: CA-F91W
+        price:
+          type: number
+          format: double
+          description: Цена товара
+          minimum: 0
+          example: 3490.99
+        amount:
+          type: integer
+          minimum: 0
+          description: Количество товара
+          example: 60
