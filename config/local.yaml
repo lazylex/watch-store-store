@@ -17,3 +17,9 @@ storage:
 secure:
   secure_signature: "don't need"
   secure_server: "localhost"
+  secure_request_timeout: 2s
+  secure_username: "store1"
+  secure_password: "Python_123"
+prometheus:
+  prometheus_port: "9099"
+  prometheus_metrics_url: "/metrics"
