@@ -115,8 +115,50 @@ paths:
         '500':
           description: Внутренняя ошибка сервера
 
+  /api/api_v1/stock/price:
+    put:
+      tags:
+        - stock
+      summary: Обновление цены товара
+      description: Обновление цены товара, находящегося в продаже
+      operationId: UpdatePriceInStock
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArticlePrice'
+      responses:
+        '200':
+          description: Успешное обновление цены товара
+        '400':
+          description: Неверный артикул или цена товара
+        '404':
+          description: Обновляемый товар не найден
+        '408':
+          description: Таймаут запроса
+        '500':
+          description: Внутренняя ошибка сервера
+
 components:
+
   schemas:
+
+    ArticlePrice:
+      type: object
+      properties:
+        article:
+          type: string
+          description: Артикул товара
+          minLength: 1
+          maxLength: 50
+          example: CA-F91W
+        price:
+          type: number
+          format: double
+          description: Цена товара
+          minimum: 0
+          example: 3490.99
 
     ArticleAmount:
       type: object
