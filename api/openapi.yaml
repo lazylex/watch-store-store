@@ -11,7 +11,7 @@ info:
   version: 0.0.1
 servers:
   - url: http://localhost:8091
-  
+
 tags:
   - name: stock
     description: Товары, находящиеся в продаже
@@ -19,7 +19,7 @@ tags:
     description: Продажи
   - name: reservation
     description: Резервирование товара
-    
+
 paths:
   /api/api_v1/stock/:
     get:
@@ -38,14 +38,14 @@ paths:
           description: Артикул товара
           allowEmptyValue: false
           example: CA-F91W.2211
-        
+
       responses:
         '200':
           description: Успешное получение записи о товаре
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Product'          
+                $ref: '#/components/schemas/NamedProduct'
         '400':
           description: Неверный артикул
         '401':
@@ -140,6 +140,176 @@ paths:
         '500':
           description: Внутренняя ошибка сервера
 
+  /api/api_v1/stock/add:
+    post:
+      tags:
+        - stock
+      summary: Добавление товара в ассортимент
+      description: Добавление информации о доступном для продажи товаре
+      operationId: AddToStock
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NamedProduct'
+      responses:
+        '201':
+          description: Успешное добавление товара в ассортимент
+        '400':
+          description: Неверные данные о товаре
+        '408':
+          description: Таймаут запроса
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /api/api_v1/sold/amount/:
+    get:
+      tags:
+        - sales
+      summary: Количество проданного товара
+      description: Количество проданного товара (по артикулу)
+      operationId: SoldAmount
+      parameters:
+        - in: query
+          name: article
+          schema:
+            type: string
+          required: true
+          description: Артикул товара
+          allowEmptyValue: false
+          example: CA-F91W.2211
+      responses:
+        '200':
+          description: Успешное получение количества проданного товара
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Amount'
+        '400':
+          description: Неверный артикул
+        '404':
+          description: Товар не найден
+        '408':
+          description: Таймаут запроса
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /api/api_v1/sale/make:
+    post:
+      tags:
+        - sales
+      summary: Локальная продажа товара
+      description: Перенос товара из доступного к продаже в проданные
+      operationId: MakeLocalSale
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+          description: Успешное осуществление продажи
+        '400':
+          description: Неверный артикул или цена товара
+        '404':
+          description: Обновляемый товар не найден
+        '408':
+          description: Таймаут запроса
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /api/api_v1/reservation/make:
+    post:
+      tags:
+        - reservation
+      summary: Резервирование группы товаров
+      description: Резервирует группу товаров под переданным номером заказа
+      operationId: MakeReservation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                order_number:
+                  type: integer
+                  minimum: 1
+                state:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                products:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+          description: Успешное резервирование
+        '400':
+          description: Неверные данные заказа
+        '408':
+          description: Таймаут запроса
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /api/api_v1/reservation/cancel:
+    put:
+      tags:
+        - reservation
+      summary: Отмена заказа
+      description: Отмена заказа. Возврат товаров из резерва в доступные для продажи
+      operationId: CancelReservation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                order_number:
+                  type: integer
+                  minimum: 1
+                  example: 687987
+      responses:
+        '200':
+          description: Успешная отмена заказа
+        '400':
+          description: Неверный номер заказа
+        '404':
+          description: Отменяемый заказ не найден
+        '408':
+          description: Таймаут запроса
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /api/api_v1/reservation/finish:
+    put:
+      tags:
+        - reservation
+      summary: Завершение заказа
+      description: Отмечает заказ выполненным (отданным локальному покупателю или отправленным интернет-покупателю) и
+        заносит зарезервированные продукты в историю проданных товаров
+      operationId: FinishOrder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                order_number:
+                  type: integer
+                  minimum: 1
+                  example: 13
+      responses:
+        '200':
+          description: Успешное завершение заказа
+        '400':
+          description: Неверный номер заказа
+        '404':
+          description: Завершаемый заказ не найден
+        '408':
+          description: Таймаут запроса
+        '500':
+          description: Внутренняя ошибка сервера
+
 components:
   schemas:
     Price:
@@ -191,7 +361,7 @@ components:
         - $ref: "#/components/schemas/Article"
         - $ref: "#/components/schemas/Amount"
 
-    Product:
+    NamedProduct:
       type: object
       allOf:
         - $ref: "#/components/schemas/Article"
@@ -202,3 +372,10 @@ components:
           type: string
           description: Название товара
           example: CASIO F-91W-1YEG
+
+    Product:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Article"
+        - $ref: "#/components/schemas/Amount"
+        - $ref: "#/components/schemas/Price"
