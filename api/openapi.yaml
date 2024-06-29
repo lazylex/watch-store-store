@@ -80,7 +80,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductAmount'          
+                $ref: '#/components/schemas/Amount'
         '400':
           description: Неверный артикул
         '404':
@@ -141,18 +141,10 @@ paths:
           description: Внутренняя ошибка сервера
 
 components:
-
   schemas:
-
-    ArticlePrice:
+    Price:
       type: object
       properties:
-        article:
-          type: string
-          description: Артикул товара
-          minLength: 1
-          maxLength: 50
-          example: CA-F91W
         price:
           type: number
           format: double
@@ -160,14 +152,9 @@ components:
           minimum: 0
           example: 3490.99
 
-    ArticleAmount:
+    Article:
       type: object
       properties:
-        amount:
-          type: integer
-          minimum: 0
-          description: Количество товара
-          example: 60
         article:
           type: string
           description: Артикул товара
@@ -175,7 +162,7 @@ components:
           maxLength: 50
           example: CA-F91W
 
-    ProductAmount:
+    Amount:
       type: object
       properties:
         amount:
@@ -184,27 +171,26 @@ components:
           description: Количество товара
           example: 60
 
+    ArticlePrice:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Price"
+        - $ref: "#/components/schemas/Article"
+
+    ArticleAmount:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Article"
+        - $ref: "#/components/schemas/Amount"
+
     Product:
       type: object
+      allOf:
+        - $ref: "#/components/schemas/Article"
+        - $ref: "#/components/schemas/Amount"
+        - $ref: "#/components/schemas/Price"
       properties:
         name:
           type: string
           description: Название товара
           example: CASIO F-91W-1YEG
-        article:
-          type: string
-          description: Артикул товара
-          minLength: 1
-          maxLength: 50
-          example: CA-F91W
-        price:
-          type: number
-          format: double
-          description: Цена товара
-          minimum: 0
-          example: 3490.99
-        amount:
-          type: integer
-          minimum: 0
-          description: Количество товара
-          example: 60
