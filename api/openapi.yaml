@@ -20,6 +20,9 @@ tags:
   - name: reservation
     description: Резервирование товара
 
+security:
+  - JWT: []
+
 paths:
   /api/api_v1/stock/:
     get:
@@ -311,6 +314,12 @@ paths:
           description: Внутренняя ошибка сервера
 
 components:
+  securitySchemes:
+    JWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     Price:
       type: object
