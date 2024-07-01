@@ -349,6 +349,10 @@ func (r *Repository) ReadReservation(ctx context.Context, data *dto.OrderNumberD
 		products = append(products, product)
 	}
 
+	if err = rows.Err(); err != nil {
+		return dto.ReservationDTO{}, r.ConvertToCommonErr(err)
+	}
+
 	return dto.ReservationDTO{OrderNumber: orderNumber, Date: date, State: state, Products: products}, nil
 }
 
@@ -408,6 +412,8 @@ func (r *Repository) ReadSoldRecords(ctx context.Context, data *dto.ArticleDTO) 
 		result = append(result, record)
 	}
 
+	err = rows.Err()
+
 	return result, r.ConvertToCommonErr(err)
 }
 
@@ -448,6 +454,8 @@ func (r *Repository) ReadSoldRecordsInPeriod(ctx context.Context, data *dto.Arti
 		}
 		result = append(result, record)
 	}
+
+	err = rows.Err()
 
 	return result, r.ConvertToCommonErr(err)
 }
