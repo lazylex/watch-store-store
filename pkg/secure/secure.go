@@ -112,6 +112,12 @@ func (s *Secure) login() (string, error) {
 			if err == nil {
 				return
 			}
+
+			err = response.Body.Close()
+			if err != nil {
+				slog.Warn(err.Error())
+			}
+
 			time.Sleep(time.Duration(attempt+1) * time.Second)
 		}()
 
@@ -140,6 +146,11 @@ func (s *Secure) login() (string, error) {
 			return "", err
 		}
 		log.Info("successfully login to secure service")
+	}
+
+	err = response.Body.Close()
+	if err != nil {
+		slog.Warn(err.Error())
 	}
 
 	return result.Token, err
