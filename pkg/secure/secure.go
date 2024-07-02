@@ -113,11 +113,6 @@ func (s *Secure) login() (string, error) {
 				return
 			}
 
-			err = response.Body.Close()
-			if err != nil {
-				slog.Warn(err.Error())
-			}
-
 			time.Sleep(time.Duration(attempt+1) * time.Second)
 		}()
 
