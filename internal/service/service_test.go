@@ -29,6 +29,7 @@ func withMockRepo(mr repository.Interface) Option {
 }
 
 func TestNew(t *testing.T) {
+	t.Parallel()
 	if os.Getenv("BE_CRASHER") == "1" {
 		New()
 		return
@@ -44,6 +45,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestService_AddProductToStockCorrectDTO(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -59,6 +61,7 @@ func TestService_AddProductToStockCorrectDTO(t *testing.T) {
 }
 
 func TestService_AddProductToStockIncorrectDTO(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -74,6 +77,7 @@ func TestService_AddProductToStockIncorrectDTO(t *testing.T) {
 }
 
 func TestService_AddProductToStockDuplicateArticle(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -96,6 +100,7 @@ func TestService_AddProductToStockDuplicateArticle(t *testing.T) {
 }
 
 func TestService_ChangePriceInStockCorrectDTO(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -112,6 +117,7 @@ func TestService_ChangePriceInStockCorrectDTO(t *testing.T) {
 }
 
 func TestService_ChangePriceInStockIncorrectDTO(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -127,6 +133,7 @@ func TestService_ChangePriceInStockIncorrectDTO(t *testing.T) {
 }
 
 func TestService_ChangePriceInStockNoInRepo(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -144,6 +151,7 @@ func TestService_ChangePriceInStockNoInRepo(t *testing.T) {
 }
 
 func TestService_GetStockCorrectDTO(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -160,6 +168,7 @@ func TestService_GetStockCorrectDTO(t *testing.T) {
 }
 
 func TestService_GetStockIncorrectDTO(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -175,6 +184,7 @@ func TestService_GetStockIncorrectDTO(t *testing.T) {
 }
 
 func TestService_GetStockNoRecord(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -191,6 +201,7 @@ func TestService_GetStockNoRecord(t *testing.T) {
 }
 
 func TestService_ChangeAmountInStockCorrectDTO(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -206,6 +217,7 @@ func TestService_ChangeAmountInStockCorrectDTO(t *testing.T) {
 }
 
 func TestService_ChangeAmountInStockIncorrectDTO(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -221,6 +233,7 @@ func TestService_ChangeAmountInStockIncorrectDTO(t *testing.T) {
 }
 
 func TestService_ChangeAmountInStockNoRecord(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -236,6 +249,7 @@ func TestService_ChangeAmountInStockNoRecord(t *testing.T) {
 }
 
 func TestService_GetAmountInStockCorrectDTO(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -251,6 +265,7 @@ func TestService_GetAmountInStockCorrectDTO(t *testing.T) {
 }
 
 func TestService_GetAmountInStockIncorrectDTO(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -266,6 +281,7 @@ func TestService_GetAmountInStockIncorrectDTO(t *testing.T) {
 }
 
 func TestService_GetAmountInStockNoRecord(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -281,6 +297,7 @@ func TestService_GetAmountInStockNoRecord(t *testing.T) {
 }
 
 func TestService_TotalSoldCorrectDTO(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -296,6 +313,7 @@ func TestService_TotalSoldCorrectDTO(t *testing.T) {
 }
 
 func TestService_TotalSoldIncorrectDTO(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -311,6 +329,7 @@ func TestService_TotalSoldIncorrectDTO(t *testing.T) {
 }
 
 func TestService_TotalSoldTimeout(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -326,6 +345,7 @@ func TestService_TotalSoldTimeout(t *testing.T) {
 }
 
 func TestService_TotalSoldInPeriodCorrectDTO(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -345,6 +365,7 @@ func TestService_TotalSoldInPeriodCorrectDTO(t *testing.T) {
 }
 
 func TestService_TotalSoldInPeriodIncorrectDTO(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -360,6 +381,7 @@ func TestService_TotalSoldInPeriodIncorrectDTO(t *testing.T) {
 }
 
 func TestService_TotalSoldInPeriodTimeout(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -380,6 +402,7 @@ func TestService_TotalSoldInPeriodTimeout(t *testing.T) {
 }
 
 func TestService_MakeReservationIncorrectDTO(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -400,6 +423,7 @@ func TestService_MakeReservationIncorrectDTO(t *testing.T) {
 }
 
 func TestService_MakeReservationSuccess(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -424,6 +448,7 @@ func TestService_MakeReservationSuccess(t *testing.T) {
 }
 
 func TestService_MakeReservationForInternetSuccess(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -451,6 +476,7 @@ func TestService_MakeReservationForInternetSuccess(t *testing.T) {
 }
 
 func TestService_MakeReservationForLocalSuccess(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -478,6 +504,7 @@ func TestService_MakeReservationForLocalSuccess(t *testing.T) {
 }
 
 func TestService_MakeReservationErrAmount(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -500,6 +527,7 @@ func TestService_MakeReservationErrAmount(t *testing.T) {
 }
 
 func TestService_MakeReservationNoEnough(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -521,6 +549,7 @@ func TestService_MakeReservationNoEnough(t *testing.T) {
 }
 
 func TestService_MakeReservationErrUpdate(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -544,6 +573,7 @@ func TestService_MakeReservationErrUpdate(t *testing.T) {
 }
 
 func TestService_MakeReservationErrCreate(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -568,6 +598,7 @@ func TestService_MakeReservationErrCreate(t *testing.T) {
 }
 
 func TestService_CancelReservationIncorrectDTO(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -583,6 +614,7 @@ func TestService_CancelReservationIncorrectDTO(t *testing.T) {
 }
 
 func TestService_CancelReservationCashRegister(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -610,6 +642,7 @@ func TestService_CancelReservationCashRegister(t *testing.T) {
 }
 
 func TestService_CancelReservationErrReadReservation(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -627,6 +660,7 @@ func TestService_CancelReservationErrReadReservation(t *testing.T) {
 }
 
 func TestService_CancelReservationErrAlreadyFinished(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -650,6 +684,7 @@ func TestService_CancelReservationErrAlreadyFinished(t *testing.T) {
 }
 
 func TestService_CancelReservationErrReadStockAmount(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -675,6 +710,7 @@ func TestService_CancelReservationErrReadStockAmount(t *testing.T) {
 }
 
 func TestService_CancelReservationErrUpdateAmount(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -701,6 +737,7 @@ func TestService_CancelReservationErrUpdateAmount(t *testing.T) {
 }
 
 func TestService_CancelReservationInternet(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -731,6 +768,7 @@ func TestService_CancelReservationInternet(t *testing.T) {
 }
 
 func TestService_MakeSaleErrDTO(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -743,6 +781,7 @@ func TestService_MakeSaleErrDTO(t *testing.T) {
 }
 
 func TestService_MakeSaleSuccess(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -761,6 +800,7 @@ func TestService_MakeSaleSuccess(t *testing.T) {
 }
 
 func TestService_MakeSaleErrCreateSoldRecord(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -779,6 +819,7 @@ func TestService_MakeSaleErrCreateSoldRecord(t *testing.T) {
 }
 
 func TestService_MakeSaleErrUpdateStock(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -797,6 +838,7 @@ func TestService_MakeSaleErrUpdateStock(t *testing.T) {
 }
 
 func TestService_MakeSaleErrNoEnoughItemsInStock(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -813,6 +855,7 @@ func TestService_MakeSaleErrNoEnoughItemsInStock(t *testing.T) {
 }
 
 func TestService_MakeSaleErrReadStock(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -830,6 +873,7 @@ func TestService_MakeSaleErrReadStock(t *testing.T) {
 }
 
 func TestService_FinishOrderIncorrectDTO(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -842,6 +886,7 @@ func TestService_FinishOrderIncorrectDTO(t *testing.T) {
 }
 
 func TestService_FinishOrderLocal(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -866,6 +911,7 @@ func TestService_FinishOrderLocal(t *testing.T) {
 }
 
 func TestService_FinishOrderInternet(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -890,6 +936,7 @@ func TestService_FinishOrderInternet(t *testing.T) {
 }
 
 func TestService_FinishOrderErrCreateSoldRecord(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -913,6 +960,7 @@ func TestService_FinishOrderErrCreateSoldRecord(t *testing.T) {
 }
 
 func TestService_FinishOrderErrAlreadyProcessed(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)
@@ -935,6 +983,7 @@ func TestService_FinishOrderErrAlreadyProcessed(t *testing.T) {
 }
 
 func TestService_FinishOrderErrReadReservation(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mockrepository.NewMockInterface(ctrl)

@@ -17,6 +17,7 @@ import (
 )
 
 func TestHandler_GetStockSuccess(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 
@@ -39,6 +40,7 @@ func TestHandler_GetStockSuccess(t *testing.T) {
 }
 
 func TestHandler_GetStockBadArticle(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -55,6 +57,7 @@ func TestHandler_GetStockBadArticle(t *testing.T) {
 }
 
 func TestHandler_GetStockNoRecord(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -74,6 +77,7 @@ func TestHandler_GetStockNoRecord(t *testing.T) {
 }
 
 func TestHandler_GetAmountInStockSuccess(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -93,6 +97,7 @@ func TestHandler_GetAmountInStockSuccess(t *testing.T) {
 }
 
 func TestHandler_GetAmountInStockIncorrectArticle(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -110,6 +115,7 @@ func TestHandler_GetAmountInStockIncorrectArticle(t *testing.T) {
 }
 
 func TestHandler_GetAmountInStockNoRecord(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -130,6 +136,7 @@ func TestHandler_GetAmountInStockNoRecord(t *testing.T) {
 }
 
 func TestHandler_UpdatePriceInStockSuccess(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	service := mockService.NewMockInterface(ctrl)
 	mux := chi.NewRouter()
@@ -146,6 +153,7 @@ func TestHandler_UpdatePriceInStockSuccess(t *testing.T) {
 }
 
 func TestHandler_UpdatePriceInStockIncorrectArticle(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -161,6 +169,7 @@ func TestHandler_UpdatePriceInStockIncorrectArticle(t *testing.T) {
 }
 
 func TestHandler_UpdatePriceInStockNegativePrice(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -176,6 +185,7 @@ func TestHandler_UpdatePriceInStockNegativePrice(t *testing.T) {
 }
 
 func TestHandler_UpdatePriceInStockIncorrectPrice(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -191,6 +201,7 @@ func TestHandler_UpdatePriceInStockIncorrectPrice(t *testing.T) {
 }
 
 func TestHandler_UpdatePriceInStockTimeout(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -210,6 +221,7 @@ func TestHandler_UpdatePriceInStockTimeout(t *testing.T) {
 }
 
 func TestHandler_UpdateAmountInStockSuccess(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -228,6 +240,7 @@ func TestHandler_UpdateAmountInStockSuccess(t *testing.T) {
 }
 
 func TestHandler_UpdateAmountInStockIncorrectAmount(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -243,6 +256,7 @@ func TestHandler_UpdateAmountInStockIncorrectAmount(t *testing.T) {
 }
 
 func TestHandler_UpdateAmountInStockIncorrectArticle(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -258,6 +272,7 @@ func TestHandler_UpdateAmountInStockIncorrectArticle(t *testing.T) {
 }
 
 func TestHandler_UpdateAmountInStockTimeout(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -276,6 +291,7 @@ func TestHandler_UpdateAmountInStockTimeout(t *testing.T) {
 }
 
 func TestHandler_AddToStockSuccess(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -297,6 +313,7 @@ func TestHandler_AddToStockSuccess(t *testing.T) {
 }
 
 func TestHandler_AddToStockIncorrectArticle(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -314,6 +331,7 @@ func TestHandler_AddToStockIncorrectArticle(t *testing.T) {
 }
 
 func TestHandler_AddToStockIncorrectPrice(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -331,6 +349,7 @@ func TestHandler_AddToStockIncorrectPrice(t *testing.T) {
 }
 
 func TestHandler_AddToStockIncorrectAmount(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -348,6 +367,7 @@ func TestHandler_AddToStockIncorrectAmount(t *testing.T) {
 }
 
 func TestHandler_GetSoldAmountSuccess(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -367,6 +387,7 @@ func TestHandler_GetSoldAmountSuccess(t *testing.T) {
 }
 
 func TestHandler_GetSoldAmountIncorrectArticle(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -384,6 +405,7 @@ func TestHandler_GetSoldAmountIncorrectArticle(t *testing.T) {
 }
 
 func TestHandler_GetSoldAmountTimeout(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -403,6 +425,7 @@ func TestHandler_GetSoldAmountTimeout(t *testing.T) {
 }
 
 func TestHandler_GetSoldAmountInTimePeriodSuccess(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -429,6 +452,7 @@ func TestHandler_GetSoldAmountInTimePeriodSuccess(t *testing.T) {
 }
 
 func TestHandler_GetSoldAmountInTimePeriodIncorrectDateOrder(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -448,6 +472,7 @@ func TestHandler_GetSoldAmountInTimePeriodIncorrectDateOrder(t *testing.T) {
 }
 
 func TestHandler_GetSoldAmountInTimePeriodTimeout(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -474,6 +499,7 @@ func TestHandler_GetSoldAmountInTimePeriodTimeout(t *testing.T) {
 }
 
 func TestHandler_GetSoldAmountInTimePeriodIncorrectFrom(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -493,6 +519,7 @@ func TestHandler_GetSoldAmountInTimePeriodIncorrectFrom(t *testing.T) {
 }
 
 func TestHandler_GetSoldAmountInTimePeriodIncorrectTo(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -512,6 +539,7 @@ func TestHandler_GetSoldAmountInTimePeriodIncorrectTo(t *testing.T) {
 }
 
 func TestHandler_GetSoldAmountWithoutFrom(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -530,6 +558,7 @@ func TestHandler_GetSoldAmountWithoutFrom(t *testing.T) {
 }
 
 func TestHandler_GetSoldAmountWithoutTo(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -549,6 +578,7 @@ func TestHandler_GetSoldAmountWithoutTo(t *testing.T) {
 }
 
 func TestHandler_CancelReservationSuccess(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -570,6 +600,7 @@ func TestHandler_CancelReservationSuccess(t *testing.T) {
 }
 
 func TestHandler_CancelReservationIncorrectOrder(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -586,6 +617,7 @@ func TestHandler_CancelReservationIncorrectOrder(t *testing.T) {
 }
 
 func TestHandler_CancelReservationNegativeOrder(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -602,6 +634,7 @@ func TestHandler_CancelReservationNegativeOrder(t *testing.T) {
 }
 
 func TestHandler_MakeReservationSuccess(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -625,6 +658,7 @@ func TestHandler_MakeReservationSuccess(t *testing.T) {
 }
 
 func TestHandler_MakeReservationNoProducts(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -643,6 +677,7 @@ func TestHandler_MakeReservationNoProducts(t *testing.T) {
 }
 
 func TestHandler_MakeReservationNoStatus(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -661,6 +696,7 @@ func TestHandler_MakeReservationNoStatus(t *testing.T) {
 }
 
 func TestHandler_MakeReservationIncorrectJSON(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -679,6 +715,7 @@ func TestHandler_MakeReservationIncorrectJSON(t *testing.T) {
 }
 
 func TestHandler_MakeReservationNoOrder(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -697,6 +734,7 @@ func TestHandler_MakeReservationNoOrder(t *testing.T) {
 }
 
 func TestHandler_MakeReservationIncorrectOrderData(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -715,6 +753,7 @@ func TestHandler_MakeReservationIncorrectOrderData(t *testing.T) {
 }
 
 func TestHandler_MakeLocalSaleSuccess(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -734,6 +773,7 @@ func TestHandler_MakeLocalSaleSuccess(t *testing.T) {
 }
 
 func TestHandler_MakeLocalSaleNoProducts(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -749,6 +789,7 @@ func TestHandler_MakeLocalSaleNoProducts(t *testing.T) {
 }
 
 func TestHandler_MakeLocalSaleTimeout(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -768,6 +809,7 @@ func TestHandler_MakeLocalSaleTimeout(t *testing.T) {
 }
 
 func TestHandler_MakeLocalSaleErrorData(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -785,6 +827,7 @@ func TestHandler_MakeLocalSaleErrorData(t *testing.T) {
 }
 
 func TestHandler_FinishOrderSuccess(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -803,6 +846,7 @@ func TestHandler_FinishOrderSuccess(t *testing.T) {
 }
 
 func TestHandler_FinishOrderNegativeOrder(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -819,6 +863,7 @@ func TestHandler_FinishOrderNegativeOrder(t *testing.T) {
 }
 
 func TestHandler_FinishOrderNotIntOrder(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)
@@ -835,6 +880,7 @@ func TestHandler_FinishOrderNotIntOrder(t *testing.T) {
 }
 
 func TestHandler_FinishOrderTimeout(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mux := chi.NewRouter()
 	service := mockService.NewMockInterface(ctrl)

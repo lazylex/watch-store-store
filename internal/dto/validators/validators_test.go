@@ -9,6 +9,7 @@ import (
 )
 
 func TestOrderNumber(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		testName    string
 		order       reservation.OrderNumber
@@ -41,6 +42,7 @@ func TestOrderNumber(t *testing.T) {
 }
 
 func TestArticleDTO_Validate(t *testing.T) {
+	t.Parallel()
 	type testCase struct {
 		testName    string
 		article     article.Article
@@ -89,36 +91,6 @@ func TestArticleDTO_Validate(t *testing.T) {
 		},
 	}
 
-	//for c := 0; c <= article.CaseWithHeavyScratches; c++ {
-	//	for d := 0; d <= article.DisplayWithHeavyScratches; d++ {
-	//		for p := 0; p <= article.PackageOpened; p++ {
-	//			for pn := 0; pn <= article.PackagingWithDamage; pn++ {
-	//				correctArt := fmt.Sprintf("correct article .%d%d%d%d", c, d, p, pn)
-	//				testCases = append(testCases, testCase{
-	//					testName:    correctArt,
-	//					article:     article.Article(correctArt),
-	//					expectedErr: nil,
-	//				})
-	//			}
-	//		}
-	//	}
-	//}
-	//
-	//for c := article.CaseWithHeavyScratches + 1; c < 10; c++ {
-	//	for d := article.DisplayWithHeavyScratches + 1; d < 10; d++ {
-	//		for p := article.PackageOpened + 1; p < 10; p++ {
-	//			for pn := article.PackagingWithDamage; pn < 10; pn++ {
-	//				incorrectArt := fmt.Sprintf("incorrect article .%d%d%d%d", c, d, p, pn)
-	//				testCases = append(testCases, testCase{
-	//					testName:    incorrectArt,
-	//					article:     article.Article(incorrectArt),
-	//					expectedErr: ErrIncorrectArticle,
-	//				})
-	//			}
-	//		}
-	//	}
-	//}
-
 	for _, tc := range testCases {
 		t.Run(tc.testName, func(t *testing.T) {
 			if !errors.Is(Article(tc.article), tc.expectedErr) {
@@ -129,6 +101,7 @@ func TestArticleDTO_Validate(t *testing.T) {
 }
 
 func TestDateOrder(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		testName    string
 		from        time.Time
@@ -165,6 +138,7 @@ func TestDateOrder(t *testing.T) {
 }
 
 func TestPrice(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		testName    string
 		price       float64
@@ -196,6 +170,7 @@ func TestPrice(t *testing.T) {
 }
 
 func TestName(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		testName    string
 		name        string

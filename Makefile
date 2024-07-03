@@ -7,10 +7,16 @@ help:
 	@echo "\t${bold}make cover${normal}\t\t - вывод покрытия кода тестами в браузер"
 
 test:
-	@go test ./internal/service
-	@go test ./internal/dto/validators
-	@go test ./internal/dto
-	@go test ./internal/adapters/rest/handlers
+	@go test -shuffle=on ./internal/service
+	@go test -shuffle=on ./internal/dto/validators
+	@go test -shuffle=on ./internal/dto
+	@go test -shuffle=on ./internal/adapters/rest/handlers
+
+test-race :
+	@go test -race -shuffle=on ./internal/service
+	@go test -race -shuffle=on ./internal/dto/validators
+	@go test -race -shuffle=on ./internal/dto
+	@go test -race -shuffle=on ./internal/adapters/rest/handlers
 
 cover:
 	@go test -coverprofile cover.out ./... -covermode atomic
