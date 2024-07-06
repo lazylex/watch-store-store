@@ -8,4 +8,5 @@ const (
 	MetricsPrefix       = "metrics: "
 	RestServerPrefix    = "rest server: "
 	MySQLPrefix         = "mysql: "
+	PPROFPrefix         = "/debug/pprof/"
 )

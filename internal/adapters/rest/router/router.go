@@ -3,7 +3,9 @@ package router
 import (
 	"github.com/go-chi/chi"
 	"github.com/lazylex/watch-store-store/internal/adapters/rest/handlers"
+	"github.com/lazylex/watch-store-store/internal/helpers/constants/prefixes"
 	"net/http"
+	"net/http/pprof"
 )
 
 var paths []string
@@ -164,6 +166,12 @@ func (r *Router) AssignPathsToHandlers() {
 			r.mux.Delete(route.Path, route.Handler)
 		}
 	}
+
+	r.mux.HandleFunc(prefixes.PPROFPrefix, pprof.Index)
+	r.mux.HandleFunc(prefixes.PPROFPrefix+"cmdline", pprof.Cmdline)
+	r.mux.HandleFunc(prefixes.PPROFPrefix+"profile", pprof.Profile)
+	r.mux.HandleFunc(prefixes.PPROFPrefix+"symbol", pprof.Symbol)
+	r.mux.HandleFunc(prefixes.PPROFPrefix+"trace", pprof.Trace)
 }
 
 // IsExistPath возвращает true, если в приложении существует передаваемый путь. Иначе - false.

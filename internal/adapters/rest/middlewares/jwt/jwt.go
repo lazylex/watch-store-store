@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/lazylex/watch-store-store/internal/helpers/constants/prefixes"
 	"github.com/lazylex/watch-store-store/internal/logger"
 	"log/slog"
 	"net/http"
 	"reflect"
+	"strings"
 )
 
 const (
@@ -33,6 +35,12 @@ func New(secret []byte, permissions map[string]int) *MiddlewareJWT {
 // запроса сервисом. Ошибка заносится в лог, отправителю возвращается ответ с кодом http.StatusUnauthorized.
 func (m *MiddlewareJWT) CheckJWT(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		uri := r.URL.RequestURI()
+		if strings.HasPrefix(uri, prefixes.PPROFPrefix) || strings.HasPrefix(uri, "/favicon.ico") {
+			next.ServeHTTP(rw, r)
+			return
+		}
+
 		var notParsedToken string
 		log := logger.AddPlaceAndRequestId(slog.Default(), "adapters.rest.middlewares.jwt.CheckJWT", r)
 
