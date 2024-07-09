@@ -3,9 +3,10 @@ instance: "store1"
 http_server:
   address: "localhost:8091"
   read_timeout: 5s
-  write_timeout: 10s
+  write_timeout: 35s
   idle_timeout: 60s
   shutdown_timeout: 15s
+  enable_profiler: true
 storage:
   database_login: "store1"
   database_password: "python"

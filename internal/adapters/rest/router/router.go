@@ -4,8 +4,10 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/lazylex/watch-store-store/internal/adapters/rest/handlers"
 	"github.com/lazylex/watch-store-store/internal/helpers/constants/prefixes"
+	"log/slog"
 	"net/http"
 	"net/http/pprof"
+	"time"
 )
 
 var paths []string
@@ -150,8 +152,9 @@ func (r *Router) registerRoutes() {
 	}
 }
 
-// AssignPathsToHandlers прикрепляет обработчики к зарегистрированным на них путям.
-func (r *Router) AssignPathsToHandlers() {
+// AssignPathsToHandlers прикрепляет обработчики к зарегистрированным на них путям. При необходимости регистрирует пути
+// для профилировщика.
+func (r *Router) AssignPathsToHandlers(enableProfiler bool, timeout time.Duration) {
 	for _, route := range r.routes {
 		switch route.Method {
 		case http.MethodGet:
@@ -166,12 +169,16 @@ func (r *Router) AssignPathsToHandlers() {
 			r.mux.Delete(route.Path, route.Handler)
 		}
 	}
-
-	r.mux.HandleFunc(prefixes.PPROFPrefix, pprof.Index)
-	r.mux.HandleFunc(prefixes.PPROFPrefix+"cmdline", pprof.Cmdline)
-	r.mux.HandleFunc(prefixes.PPROFPrefix+"profile", pprof.Profile)
-	r.mux.HandleFunc(prefixes.PPROFPrefix+"symbol", pprof.Symbol)
-	r.mux.HandleFunc(prefixes.PPROFPrefix+"trace", pprof.Trace)
+	if enableProfiler {
+		if timeout <= time.Second*30 {
+			slog.Warn("standard profile duration exceeds server's WriteTimeout")
+		}
+		r.mux.HandleFunc(prefixes.PPROFPrefix, pprof.Index)
+		r.mux.HandleFunc(prefixes.PPROFPrefix+"cmdline", pprof.Cmdline)
+		r.mux.HandleFunc(prefixes.PPROFPrefix+"profile", pprof.Profile)
+		r.mux.HandleFunc(prefixes.PPROFPrefix+"symbol", pprof.Symbol)
+		r.mux.HandleFunc(prefixes.PPROFPrefix+"trace", pprof.Trace)
+	}
 }
 
 // IsExistPath возвращает true, если в приложении существует передаваемый путь. Иначе - false.

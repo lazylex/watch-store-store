@@ -49,7 +49,7 @@ func MustCreate(cfg *config.HttpServer, queryTimeout time.Duration,
 	handlers := restHandlers.New(domainService, queryTimeout)
 	rm := requestMetrics.New(metrics)
 	router := restRouter.MustCreate(handlers)
-	defer router.AssignPathsToHandlers()
+	defer router.AssignPathsToHandlers(cfg.EnableProfiler, cfg.WriteTimeout)
 	mux := router.Mux()
 	mux.Use(middleware.Recoverer, middleware.RequestID, rm.BeforeHandle, rm.AfterHandle)
 
