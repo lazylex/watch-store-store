@@ -16,6 +16,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"runtime"
 )
 
 func main() {
@@ -72,7 +73,18 @@ func main() {
 }
 
 func clearScreen() error {
-	cmd := exec.Command("clear")
-	cmd.Stdout = os.Stdout
-	return cmd.Run()
+	var cmd *exec.Cmd
+	if runtime.GOOS == "linux" {
+		cmd = exec.Command("clear")
+	}
+	if runtime.GOOS == "windows" {
+		cmd = exec.Command("cmd", "/c", "cls")
+	}
+
+	if cmd != nil {
+		cmd.Stdout = os.Stdout
+		return cmd.Run()
+	}
+
+	return nil
 }
