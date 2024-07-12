@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/lazylex/watch-store-store/internal/adapters/message_broker/kafka/consumer/update_price"
 	"github.com/lazylex/watch-store-store/internal/config"
+	"github.com/lazylex/watch-store-store/internal/domain/value_objects/article"
 	internalLogger "github.com/lazylex/watch-store-store/internal/logger"
 	"github.com/lazylex/watch-store-store/internal/ports/service"
 	"log/slog"
@@ -26,6 +27,17 @@ func MustRun(service service.Interface, cfg *config.Kafka, instance string) {
 		topicsInService++
 	} else {
 		log.Error("not configured Kafka Update Price topic")
+	}
+
+	if len(cfg.RequestCountTopic) > 0 && len(cfg.ResponseCountTopic) > 0 {
+		_ = make(chan article.Article, 1)
+		// TODO вставить обработку топиков:
+		// 1. для получения запроса количества товара с определенным артикулом
+		// 2. для отправки количества товара с определенным артикулом
+		// Взаимодействие между consumer/producer осуществлять через канал, объявленный выше
+		topicsInService += 2
+	} else {
+		log.Error("not configured Kafka count topics")
 	}
 
 	if topicsInService > 0 {

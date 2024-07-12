@@ -59,8 +59,10 @@ type Storage struct {
 }
 
 type Kafka struct {
-	Brokers          []string `yaml:"kafka_brokers" env:"KAFKA_BROKERS"`
-	UpdatePriceTopic string   `yaml:"kafka_topic_update_price" env:"KAFKA_TOPIC_UPDATE_PRICE"`
+	Brokers            []string `yaml:"kafka_brokers" env:"KAFKA_BROKERS"`
+	UpdatePriceTopic   string   `yaml:"kafka_topic_update_price" env:"KAFKA_TOPIC_UPDATE_PRICE"`
+	RequestCountTopic  string   `yaml:"kafka_request_count_topic" env:"KAFKA_TOPIC_REQUEST_COUNT"`
+	ResponseCountTopic string   `yaml:"kafka_response_count_topic" env:"KAFKA_TOPIC_RESPONSE_COUNT"`
 }
 
 type Prometheus struct {
