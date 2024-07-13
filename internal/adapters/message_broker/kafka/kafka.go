@@ -2,9 +2,9 @@ package kafka
 
 import (
 	"fmt"
+	"github.com/lazylex/watch-store-store/internal/adapters/message_broker/kafka/consumer/request_count"
 	"github.com/lazylex/watch-store-store/internal/adapters/message_broker/kafka/consumer/update_price"
 	"github.com/lazylex/watch-store-store/internal/config"
-	"github.com/lazylex/watch-store-store/internal/domain/value_objects/article"
 	internalLogger "github.com/lazylex/watch-store-store/internal/logger"
 	"github.com/lazylex/watch-store-store/internal/ports/service"
 	"log/slog"
@@ -30,11 +30,16 @@ func MustRun(service service.Interface, cfg *config.Kafka, instance string) {
 	}
 
 	if len(cfg.RequestCountTopic) > 0 && len(cfg.ResponseCountTopic) > 0 {
-		_ = make(chan article.Article, 1)
-		// TODO вставить обработку топиков:
-		// 1. для получения запроса количества товара с определенным артикулом
-		// 2. для отправки количества товара с определенным артикулом
-		// Взаимодействие между consumer/producer осуществлять через канал, объявленный выше
+		countCh := make(chan uint, 1)
+		go request_count.ListenTopic(service, cfg.Brokers, cfg.RequestCountTopic, instance, countCh)
+		// TODO заменить заглушку на код для отправки количества товара в топик
+		go func() {
+			for {
+				count := <-countCh
+				log.Debug(fmt.Sprintf("Request count received: %d", count))
+			}
+		}()
+
 		topicsInService += 2
 	} else {
 		log.Error("not configured Kafka count topics")
