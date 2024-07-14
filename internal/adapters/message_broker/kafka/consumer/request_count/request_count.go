@@ -18,7 +18,7 @@ const attemptsUntilAlarm = 6
 
 // ListenTopic ожидает сообщение в топике с запросом количества товара (строка с артикулом), получает это количество из
 // сервисного слоя и отправляет в канал countChan.
-func ListenTopic(service service.Interface, brokers []string, topic, instance string, countChan chan<- uint) {
+func ListenTopic(service service.Interface, brokers []string, topic, instance string, countChan chan<- dto.ArticleWithAmountDTO) {
 	var err error
 	var m kafka.Message
 	var attempts int
@@ -74,7 +74,7 @@ func ListenTopic(service service.Interface, brokers []string, topic, instance st
 				if err != nil {
 					log.Warn(err.Error())
 				}
-				countChan <- amount
+				countChan <- dto.ArticleWithAmountDTO{Article: data.Article, Amount: amount}
 			}
 		}
 

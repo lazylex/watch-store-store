@@ -4,12 +4,16 @@ import (
 	"fmt"
 	"github.com/lazylex/watch-store-store/internal/adapters/message_broker/kafka/consumer/request_count"
 	"github.com/lazylex/watch-store-store/internal/adapters/message_broker/kafka/consumer/update_price"
+	"github.com/lazylex/watch-store-store/internal/adapters/message_broker/kafka/producer/response_count"
 	"github.com/lazylex/watch-store-store/internal/config"
+	"github.com/lazylex/watch-store-store/internal/dto"
 	internalLogger "github.com/lazylex/watch-store-store/internal/logger"
 	"github.com/lazylex/watch-store-store/internal/ports/service"
 	"log/slog"
 	"os"
 )
+
+const countChannelBufferSize = 10
 
 // MustRun предназначен для запуска consumers/producers Кафки. Если в конфигурации cfg не задано имя топика, то
 // соответствующий ему consumer/producer не будет запущен. Работа приложения будет продолжена.
@@ -30,15 +34,9 @@ func MustRun(service service.Interface, cfg *config.Kafka, instance string) {
 	}
 
 	if len(cfg.RequestCountTopic) > 0 && len(cfg.ResponseCountTopic) > 0 {
-		countCh := make(chan uint, 1)
+		countCh := make(chan dto.ArticleWithAmountDTO, countChannelBufferSize)
 		go request_count.ListenTopic(service, cfg.Brokers, cfg.RequestCountTopic, instance, countCh)
-		// TODO заменить заглушку на код для отправки количества товара в топик
-		go func() {
-			for {
-				count := <-countCh
-				log.Debug(fmt.Sprintf("Request count received: %d", count))
-			}
-		}()
+		go response_count.Serve(cfg.Brokers, cfg.ResponseCountTopic, instance, countCh)
 
 		topicsInService += 2
 	} else {
