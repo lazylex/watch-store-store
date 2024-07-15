@@ -8,10 +8,10 @@ import (
 )
 
 type ReservationDTO struct {
-	Products    []ProductDTO   `json:"products"`
-	OrderNumber rs.OrderNumber `json:"order_number"`
-	Date        time.Time      `json:"date"`
-	State       uint           `json:"state"`
+	Products    []ArticlePriceAmount `json:"products"`
+	OrderNumber rs.OrderNumber       `json:"order_number"`
+	Date        time.Time            `json:"date"`
+	State       uint                 `json:"state"`
 }
 
 // IsNew возвращает true, если бронь еще не была снята (по причине отмены или завершения заказа).

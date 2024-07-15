@@ -36,7 +36,7 @@ func (m *MockInterface) EXPECT() *MockInterfaceMockRecorder {
 }
 
 // AddProductToStock mocks base method.
-func (m *MockInterface) AddProductToStock(ctx context.Context, data dto.NamedProductDTO) error {
+func (m *MockInterface) AddProductToStock(ctx context.Context, data dto.ArticlePriceNameAmount) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddProductToStock", ctx, data)
 	ret0, _ := ret[0].(error)
@@ -50,7 +50,7 @@ func (mr *MockInterfaceMockRecorder) AddProductToStock(ctx, data interface{}) *g
 }
 
 // AmountInStock mocks base method.
-func (m *MockInterface) AmountInStock(ctx context.Context, data dto.ArticleDTO) (uint, error) {
+func (m *MockInterface) AmountInStock(ctx context.Context, data dto.Article) (uint, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AmountInStock", ctx, data)
 	ret0, _ := ret[0].(uint)
@@ -65,7 +65,7 @@ func (mr *MockInterfaceMockRecorder) AmountInStock(ctx, data interface{}) *gomoc
 }
 
 // CancelReservation mocks base method.
-func (m *MockInterface) CancelReservation(ctx context.Context, data dto.OrderNumberDTO) error {
+func (m *MockInterface) CancelReservation(ctx context.Context, data dto.Number) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CancelReservation", ctx, data)
 	ret0, _ := ret[0].(error)
@@ -79,7 +79,7 @@ func (mr *MockInterfaceMockRecorder) CancelReservation(ctx, data interface{}) *g
 }
 
 // ChangeAmountInStock mocks base method.
-func (m *MockInterface) ChangeAmountInStock(ctx context.Context, data dto.ArticleWithAmountDTO) error {
+func (m *MockInterface) ChangeAmountInStock(ctx context.Context, data dto.ArticleAmount) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ChangeAmountInStock", ctx, data)
 	ret0, _ := ret[0].(error)
@@ -107,7 +107,7 @@ func (mr *MockInterfaceMockRecorder) ChangePriceInStock(ctx, data interface{}) *
 }
 
 // FinishOrder mocks base method.
-func (m *MockInterface) FinishOrder(ctx context.Context, data dto.OrderNumberDTO) error {
+func (m *MockInterface) FinishOrder(ctx context.Context, data dto.Number) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FinishOrder", ctx, data)
 	ret0, _ := ret[0].(error)
@@ -135,7 +135,7 @@ func (mr *MockInterfaceMockRecorder) MakeReservation(ctx, data interface{}) *gom
 }
 
 // MakeSale mocks base method.
-func (m *MockInterface) MakeSale(ctx context.Context, data []dto.ProductDTO) error {
+func (m *MockInterface) MakeSale(ctx context.Context, data []dto.ArticlePriceAmount) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "MakeSale", ctx, data)
 	ret0, _ := ret[0].(error)
@@ -149,10 +149,10 @@ func (mr *MockInterfaceMockRecorder) MakeSale(ctx, data interface{}) *gomock.Cal
 }
 
 // Stock mocks base method.
-func (m *MockInterface) Stock(ctx context.Context, data dto.ArticleDTO) (dto.NamedProductDTO, error) {
+func (m *MockInterface) Stock(ctx context.Context, data dto.Article) (dto.ArticlePriceNameAmount, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Stock", ctx, data)
-	ret0, _ := ret[0].(dto.NamedProductDTO)
+	ret0, _ := ret[0].(dto.ArticlePriceNameAmount)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -164,7 +164,7 @@ func (mr *MockInterfaceMockRecorder) Stock(ctx, data interface{}) *gomock.Call {
 }
 
 // TotalSold mocks base method.
-func (m *MockInterface) TotalSold(ctx context.Context, data dto.ArticleDTO) (uint, error) {
+func (m *MockInterface) TotalSold(ctx context.Context, data dto.Article) (uint, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TotalSold", ctx, data)
 	ret0, _ := ret[0].(uint)
@@ -179,7 +179,7 @@ func (mr *MockInterfaceMockRecorder) TotalSold(ctx, data interface{}) *gomock.Ca
 }
 
 // TotalSoldInPeriod mocks base method.
-func (m *MockInterface) TotalSoldInPeriod(ctx context.Context, data dto.ArticleWithPeriodDTO) (uint, error) {
+func (m *MockInterface) TotalSoldInPeriod(ctx context.Context, data dto.ArticlePeriod) (uint, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TotalSoldInPeriod", ctx, data)
 	ret0, _ := ret[0].(uint)

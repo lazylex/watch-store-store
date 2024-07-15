@@ -8,7 +8,7 @@ import (
 
 func TestPriceDTO(t *testing.T) {
 	t.Run("zero price", func(t *testing.T) {
-		p := PriceDTO{Price: 0}
+		p := Price{Price: 0}
 		err := p.Validate()
 		if !errors.Is(err, validators.ErrZeroPrice) {
 			t.Fail()
@@ -16,7 +16,7 @@ func TestPriceDTO(t *testing.T) {
 	})
 
 	t.Run("negative price", func(t *testing.T) {
-		p := PriceDTO{Price: -5}
+		p := Price{Price: -5}
 		err := p.Validate()
 		if !errors.Is(err, validators.ErrNegativePrice) {
 			t.Fail()

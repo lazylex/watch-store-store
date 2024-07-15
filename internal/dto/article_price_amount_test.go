@@ -8,7 +8,7 @@ import (
 
 func TestProduct(t *testing.T) {
 	t.Run("error price", func(t *testing.T) {
-		p := ProductDTO{Article: "test-9", Price: 0, Amount: 10}
+		p := ArticlePriceAmount{Article: "test-9", Price: 0, Amount: 10}
 		err := p.Validate()
 		if !errors.Is(err, validators.ErrZeroPrice) {
 			t.Fail()

@@ -68,7 +68,7 @@ func (mr *MockInterfaceMockRecorder) CreateReservation(arg0, arg1 interface{}) *
 }
 
 // CreateSoldRecord mocks base method.
-func (m *MockInterface) CreateSoldRecord(arg0 context.Context, arg1 *dto.SoldDTO) error {
+func (m *MockInterface) CreateSoldRecord(arg0 context.Context, arg1 *dto.ArticlePriceAmountDate) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateSoldRecord", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -82,7 +82,7 @@ func (mr *MockInterfaceMockRecorder) CreateSoldRecord(arg0, arg1 interface{}) *g
 }
 
 // CreateStock mocks base method.
-func (m *MockInterface) CreateStock(arg0 context.Context, arg1 *dto.NamedProductDTO) error {
+func (m *MockInterface) CreateStock(arg0 context.Context, arg1 *dto.ArticlePriceNameAmount) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateStock", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -96,7 +96,7 @@ func (mr *MockInterfaceMockRecorder) CreateStock(arg0, arg1 interface{}) *gomock
 }
 
 // DeleteReservation mocks base method.
-func (m *MockInterface) DeleteReservation(arg0 context.Context, arg1 *dto.OrderNumberDTO) error {
+func (m *MockInterface) DeleteReservation(arg0 context.Context, arg1 *dto.Number) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteReservation", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -110,7 +110,7 @@ func (mr *MockInterfaceMockRecorder) DeleteReservation(arg0, arg1 interface{}) *
 }
 
 // ReadReservation mocks base method.
-func (m *MockInterface) ReadReservation(arg0 context.Context, arg1 *dto.OrderNumberDTO) (dto.ReservationDTO, error) {
+func (m *MockInterface) ReadReservation(arg0 context.Context, arg1 *dto.Number) (dto.ReservationDTO, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReadReservation", arg0, arg1)
 	ret0, _ := ret[0].(dto.ReservationDTO)
@@ -125,7 +125,7 @@ func (mr *MockInterfaceMockRecorder) ReadReservation(arg0, arg1 interface{}) *go
 }
 
 // ReadSoldAmount mocks base method.
-func (m *MockInterface) ReadSoldAmount(arg0 context.Context, arg1 *dto.ArticleDTO) (uint, error) {
+func (m *MockInterface) ReadSoldAmount(arg0 context.Context, arg1 *dto.Article) (uint, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReadSoldAmount", arg0, arg1)
 	ret0, _ := ret[0].(uint)
@@ -140,7 +140,7 @@ func (mr *MockInterfaceMockRecorder) ReadSoldAmount(arg0, arg1 interface{}) *gom
 }
 
 // ReadSoldAmountInPeriod mocks base method.
-func (m *MockInterface) ReadSoldAmountInPeriod(arg0 context.Context, arg1 *dto.ArticleWithPeriodDTO) (uint, error) {
+func (m *MockInterface) ReadSoldAmountInPeriod(arg0 context.Context, arg1 *dto.ArticlePeriod) (uint, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReadSoldAmountInPeriod", arg0, arg1)
 	ret0, _ := ret[0].(uint)
@@ -155,10 +155,10 @@ func (mr *MockInterfaceMockRecorder) ReadSoldAmountInPeriod(arg0, arg1 interface
 }
 
 // ReadSoldRecords mocks base method.
-func (m *MockInterface) ReadSoldRecords(arg0 context.Context, arg1 *dto.ArticleDTO) ([]dto.SoldDTO, error) {
+func (m *MockInterface) ReadSoldRecords(arg0 context.Context, arg1 *dto.Article) ([]dto.ArticlePriceAmountDate, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReadSoldRecords", arg0, arg1)
-	ret0, _ := ret[0].([]dto.SoldDTO)
+	ret0, _ := ret[0].([]dto.ArticlePriceAmountDate)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -170,10 +170,10 @@ func (mr *MockInterfaceMockRecorder) ReadSoldRecords(arg0, arg1 interface{}) *go
 }
 
 // ReadSoldRecordsInPeriod mocks base method.
-func (m *MockInterface) ReadSoldRecordsInPeriod(arg0 context.Context, arg1 *dto.ArticleWithPeriodDTO) ([]dto.SoldDTO, error) {
+func (m *MockInterface) ReadSoldRecordsInPeriod(arg0 context.Context, arg1 *dto.ArticlePeriod) ([]dto.ArticlePriceAmountDate, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReadSoldRecordsInPeriod", arg0, arg1)
-	ret0, _ := ret[0].([]dto.SoldDTO)
+	ret0, _ := ret[0].([]dto.ArticlePriceAmountDate)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -185,10 +185,10 @@ func (mr *MockInterfaceMockRecorder) ReadSoldRecordsInPeriod(arg0, arg1 interfac
 }
 
 // ReadStock mocks base method.
-func (m *MockInterface) ReadStock(arg0 context.Context, arg1 *dto.ArticleDTO) (dto.NamedProductDTO, error) {
+func (m *MockInterface) ReadStock(arg0 context.Context, arg1 *dto.Article) (dto.ArticlePriceNameAmount, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReadStock", arg0, arg1)
-	ret0, _ := ret[0].(dto.NamedProductDTO)
+	ret0, _ := ret[0].(dto.ArticlePriceNameAmount)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -200,7 +200,7 @@ func (mr *MockInterfaceMockRecorder) ReadStock(arg0, arg1 interface{}) *gomock.C
 }
 
 // ReadStockAmount mocks base method.
-func (m *MockInterface) ReadStockAmount(arg0 context.Context, arg1 *dto.ArticleDTO) (uint, error) {
+func (m *MockInterface) ReadStockAmount(arg0 context.Context, arg1 *dto.Article) (uint, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReadStockAmount", arg0, arg1)
 	ret0, _ := ret[0].(uint)
@@ -215,7 +215,7 @@ func (mr *MockInterfaceMockRecorder) ReadStockAmount(arg0, arg1 interface{}) *go
 }
 
 // ReadStockPrice mocks base method.
-func (m *MockInterface) ReadStockPrice(arg0 context.Context, arg1 *dto.ArticleDTO) (float64, error) {
+func (m *MockInterface) ReadStockPrice(arg0 context.Context, arg1 *dto.Article) (float64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReadStockPrice", arg0, arg1)
 	ret0, _ := ret[0].(float64)
@@ -244,7 +244,7 @@ func (mr *MockInterfaceMockRecorder) UpdateReservation(arg0, arg1 interface{}) *
 }
 
 // UpdateStock mocks base method.
-func (m *MockInterface) UpdateStock(arg0 context.Context, arg1 *dto.NamedProductDTO) error {
+func (m *MockInterface) UpdateStock(arg0 context.Context, arg1 *dto.ArticlePriceNameAmount) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateStock", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -258,7 +258,7 @@ func (mr *MockInterfaceMockRecorder) UpdateStock(arg0, arg1 interface{}) *gomock
 }
 
 // UpdateStockAmount mocks base method.
-func (m *MockInterface) UpdateStockAmount(arg0 context.Context, arg1 *dto.ArticleWithAmountDTO) error {
+func (m *MockInterface) UpdateStockAmount(arg0 context.Context, arg1 *dto.ArticleAmount) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateStockAmount", arg0, arg1)
 	ret0, _ := ret[0].(error)

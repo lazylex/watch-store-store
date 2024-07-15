@@ -13,7 +13,7 @@ const attemptsUntilAlarm = 6
 
 // Serve прослушивает канал countChan и отправляет его содержимое в формате JSON в топик topic. При этом к данным из
 // канала добавляется поле с названием экземпляра приложения instance.
-func Serve(brokers []string, topic, instance string, countChan <-chan dto.ArticleWithAmountDTO) {
+func Serve(brokers []string, topic, instance string, countChan <-chan dto.ArticleAmount) {
 	log := slog.With(slog.String(logger.OPLabel, "kafka.consumer.response_count.Serve"))
 	w := &kafka.Writer{
 		Addr:                   kafka.TCP(brokers...),

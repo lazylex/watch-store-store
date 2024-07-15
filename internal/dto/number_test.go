@@ -8,7 +8,7 @@ import (
 
 func TestOrderNumberDTO(t *testing.T) {
 	t.Run("negative order number", func(t *testing.T) {
-		on := OrderNumberDTO{OrderNumber: -1}
+		on := Number{OrderNumber: -1}
 		err := on.Validate()
 		if !errors.Is(err, validators.ErrIncorrectOrder) {
 			t.Fail()

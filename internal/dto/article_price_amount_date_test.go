@@ -8,28 +8,28 @@ import (
 
 func TestSoldDTO(t *testing.T) {
 	t.Run("incorrect article", func(t *testing.T) {
-		a := SoldDTO{Article: "test-9.---9", Price: 1000}
+		a := ArticlePriceAmountDate{Article: "test-9.---9", Price: 1000}
 		if !errors.Is(a.Validate(), validators.ErrIncorrectArticle) {
 			t.Fail()
 		}
 	})
 
 	t.Run("zero price", func(t *testing.T) {
-		a := SoldDTO{Article: "test-9", Price: 0}
+		a := ArticlePriceAmountDate{Article: "test-9", Price: 0}
 		if !errors.Is(a.Validate(), validators.ErrZeroPrice) {
 			t.Fail()
 		}
 	})
 
 	t.Run("negative price", func(t *testing.T) {
-		a := SoldDTO{Article: "test-9", Price: -10}
+		a := ArticlePriceAmountDate{Article: "test-9", Price: -10}
 		if !errors.Is(a.Validate(), validators.ErrNegativePrice) {
 			t.Fail()
 		}
 	})
 
 	t.Run("correct article with price", func(t *testing.T) {
-		a := SoldDTO{Article: "test-9", Price: 1000}
+		a := ArticlePriceAmountDate{Article: "test-9", Price: 1000}
 		if a.Validate() != nil {
 			t.Fail()
 		}

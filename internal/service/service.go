@@ -56,7 +56,7 @@ func (s *Service) ChangePriceInStock(ctx context.Context, data dto.ArticleWithPr
 	if err := data.Validate(); err != nil {
 		return err
 	}
-	_, err := s.Stock(ctx, dto.ArticleDTO{Article: data.Article})
+	_, err := s.Stock(ctx, dto.Article{Article: data.Article})
 	if err != nil {
 		return err
 	}
@@ -69,14 +69,14 @@ func (s *Service) ChangePriceInStock(ctx context.Context, data dto.ArticleWithPr
 	return err
 }
 
-// Stock возвращает полную информацию о товаре, доступном для продажи, в виде dto.NamedProductDTO.
-func (s *Service) Stock(ctx context.Context, data dto.ArticleDTO) (dto.NamedProductDTO, error) {
+// Stock возвращает полную информацию о товаре, доступном для продажи, в виде dto.ArticlePriceNameAmount.
+func (s *Service) Stock(ctx context.Context, data dto.Article) (dto.ArticlePriceNameAmount, error) {
 	if err := data.Validate(); err != nil {
-		return dto.NamedProductDTO{}, err
+		return dto.ArticlePriceNameAmount{}, err
 	}
 	sale, err := s.Repository.ReadStock(ctx, &data)
 	if err != nil {
-		return dto.NamedProductDTO{}, err
+		return dto.ArticlePriceNameAmount{}, err
 	}
 
 	logger.LogWithCtxData(ctx, slog.With(logger.OPLabel, "service.Stock")).Info(
@@ -86,7 +86,7 @@ func (s *Service) Stock(ctx context.Context, data dto.ArticleDTO) (dto.NamedProd
 }
 
 // AddProductToStock добавляет новый товар в ассортимент магазина.
-func (s *Service) AddProductToStock(ctx context.Context, data dto.NamedProductDTO) error {
+func (s *Service) AddProductToStock(ctx context.Context, data dto.ArticlePriceNameAmount) error {
 	if err := data.Validate(); err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func (s *Service) AddProductToStock(ctx context.Context, data dto.NamedProductDT
 }
 
 // ChangeAmountInStock изменяет доступное для продажи количество товара.
-func (s *Service) ChangeAmountInStock(ctx context.Context, data dto.ArticleWithAmountDTO) error {
+func (s *Service) ChangeAmountInStock(ctx context.Context, data dto.ArticleAmount) error {
 	if err := data.Validate(); err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func (s *Service) ChangeAmountInStock(ctx context.Context, data dto.ArticleWithA
 }
 
 // AmountInStock возвращает доступное для продажи количество товара.
-func (s *Service) AmountInStock(ctx context.Context, data dto.ArticleDTO) (uint, error) {
+func (s *Service) AmountInStock(ctx context.Context, data dto.Article) (uint, error) {
 	if err := data.Validate(); err != nil {
 		return 0, err
 	}
@@ -144,7 +144,7 @@ func (s *Service) MakeReservation(ctx context.Context, data dto.ReservationDTO) 
 	return s.Repository.WithinTransaction(ctx, func(txCtx context.Context) error {
 		for _, p := range data.Products {
 			if available, err = s.Repository.ReadStockAmount(txCtx,
-				&dto.ArticleDTO{Article: p.Article}); err != nil {
+				&dto.Article{Article: p.Article}); err != nil {
 				return err
 			}
 			if available < p.Amount {
@@ -155,7 +155,7 @@ func (s *Service) MakeReservation(ctx context.Context, data dto.ReservationDTO) 
 		for _, p := range data.Products {
 			err = s.Repository.UpdateStockAmount(
 				txCtx,
-				&dto.ArticleWithAmountDTO{
+				&dto.ArticleAmount{
 					Article: p.Article,
 					Amount:  newAmountInStock[p.Article],
 				},
@@ -183,7 +183,7 @@ func (s *Service) MakeReservation(ctx context.Context, data dto.ReservationDTO) 
 }
 
 // CancelReservation снимает бронь с товара/ов.
-func (s *Service) CancelReservation(ctx context.Context, data dto.OrderNumberDTO) error {
+func (s *Service) CancelReservation(ctx context.Context, data dto.Number) error {
 	if err := data.Validate(); err != nil {
 		return err
 	}
@@ -200,18 +200,18 @@ func (s *Service) CancelReservation(ctx context.Context, data dto.OrderNumberDTO
 
 		for _, p := range res.Products {
 			var inStock uint
-			if inStock, err = s.Repository.ReadStockAmount(txCtx, &dto.ArticleDTO{Article: p.Article}); err != nil {
+			if inStock, err = s.Repository.ReadStockAmount(txCtx, &dto.Article{Article: p.Article}); err != nil {
 				return err
 			}
 			if err = s.Repository.UpdateStockAmount(txCtx,
-				&dto.ArticleWithAmountDTO{Article: p.Article, Amount: p.Amount + inStock}); err != nil {
+				&dto.ArticleAmount{Article: p.Article, Amount: p.Amount + inStock}); err != nil {
 				return err
 			}
 
 		}
 
 		if data.OrderNumber <= reservation.MaxCashRegisterNumber {
-			return s.Repository.DeleteReservation(txCtx, &dto.OrderNumberDTO{OrderNumber: data.OrderNumber})
+			return s.Repository.DeleteReservation(txCtx, &dto.Number{OrderNumber: data.OrderNumber})
 		}
 
 		err = s.Repository.UpdateReservation(txCtx, &dto.ReservationDTO{
@@ -230,7 +230,7 @@ func (s *Service) CancelReservation(ctx context.Context, data dto.OrderNumberDTO
 }
 
 // MakeSale уменьшает количества доступного для продажи товара и производит запись в статистику продаж.
-func (s *Service) MakeSale(ctx context.Context, data []dto.ProductDTO) error {
+func (s *Service) MakeSale(ctx context.Context, data []dto.ArticlePriceAmount) error {
 	for _, p := range data {
 		if err := p.Validate(); err != nil {
 			return err
@@ -242,14 +242,14 @@ func (s *Service) MakeSale(ctx context.Context, data []dto.ProductDTO) error {
 
 	return s.Repository.WithinTransaction(ctx, func(txCtx context.Context) error {
 		for _, p := range data {
-			if available, err = s.Repository.ReadStockAmount(txCtx, &dto.ArticleDTO{Article: p.Article}); err != nil {
+			if available, err = s.Repository.ReadStockAmount(txCtx, &dto.Article{Article: p.Article}); err != nil {
 				return err
 			}
 			if available < p.Amount {
 				return service.ErrNoEnoughItemsInStock
 			}
 
-			if err = s.Repository.UpdateStockAmount(txCtx, &dto.ArticleWithAmountDTO{
+			if err = s.Repository.UpdateStockAmount(txCtx, &dto.ArticleAmount{
 				Article: p.Article,
 				Amount:  available - p.Amount,
 			},
@@ -259,7 +259,7 @@ func (s *Service) MakeSale(ctx context.Context, data []dto.ProductDTO) error {
 		}
 
 		for _, p := range data {
-			if err = s.Repository.CreateSoldRecord(txCtx, &dto.SoldDTO{
+			if err = s.Repository.CreateSoldRecord(txCtx, &dto.ArticlePriceAmountDate{
 				Article: p.Article, Price: p.Price, Amount: p.Amount, Date: time.Now(),
 			}); err != nil {
 				return err
@@ -274,7 +274,7 @@ func (s *Service) MakeSale(ctx context.Context, data []dto.ProductDTO) error {
 }
 
 // FinishOrder помечает заказ, как выполненный. Данные о содержащихся в заказе товарах переносятся в статистику продаж.
-func (s *Service) FinishOrder(ctx context.Context, data dto.OrderNumberDTO) error {
+func (s *Service) FinishOrder(ctx context.Context, data dto.Number) error {
 	if err := data.Validate(); err != nil {
 		return err
 	}
@@ -291,7 +291,7 @@ func (s *Service) FinishOrder(ctx context.Context, data dto.OrderNumberDTO) erro
 		}
 
 		for _, p := range res.Products {
-			if err = s.Repository.CreateSoldRecord(txCtx, &dto.SoldDTO{
+			if err = s.Repository.CreateSoldRecord(txCtx, &dto.ArticlePriceAmountDate{
 				Article: p.Article,
 				Price:   p.Price,
 				Amount:  p.Amount,
@@ -315,7 +315,7 @@ func (s *Service) FinishOrder(ctx context.Context, data dto.OrderNumberDTO) erro
 }
 
 // TotalSold возвращает количество проданного товара с переданным артикулом за весь период.
-func (s *Service) TotalSold(ctx context.Context, data dto.ArticleDTO) (uint, error) {
+func (s *Service) TotalSold(ctx context.Context, data dto.Article) (uint, error) {
 	var amount uint
 	var err error
 
@@ -334,7 +334,7 @@ func (s *Service) TotalSold(ctx context.Context, data dto.ArticleDTO) (uint, err
 }
 
 // TotalSoldInPeriod возвращает количество проданного товара с переданным артикулом за указанный период.
-func (s *Service) TotalSoldInPeriod(ctx context.Context, data dto.ArticleWithPeriodDTO) (uint, error) {
+func (s *Service) TotalSoldInPeriod(ctx context.Context, data dto.ArticlePeriod) (uint, error) {
 	var amount uint
 	var err error
 

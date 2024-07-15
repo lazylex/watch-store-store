@@ -25,24 +25,24 @@ type Interface interface {
 
 	WithinTransaction(context.Context, func(context.Context) error) error
 
-	CreateStock(context.Context, *dto.NamedProductDTO) error
-	ReadStock(context.Context, *dto.ArticleDTO) (dto.NamedProductDTO, error)
-	ReadStockAmount(context.Context, *dto.ArticleDTO) (uint, error)
-	ReadStockPrice(context.Context, *dto.ArticleDTO) (float64, error)
-	UpdateStock(context.Context, *dto.NamedProductDTO) error
-	UpdateStockAmount(context.Context, *dto.ArticleWithAmountDTO) error
+	CreateStock(context.Context, *dto.ArticlePriceNameAmount) error
+	ReadStock(context.Context, *dto.Article) (dto.ArticlePriceNameAmount, error)
+	ReadStockAmount(context.Context, *dto.Article) (uint, error)
+	ReadStockPrice(context.Context, *dto.Article) (float64, error)
+	UpdateStock(context.Context, *dto.ArticlePriceNameAmount) error
+	UpdateStockAmount(context.Context, *dto.ArticleAmount) error
 	UpdateStockPrice(context.Context, *dto.ArticleWithPriceDTO) error
 
 	CreateReservation(context.Context, *dto.ReservationDTO) error
-	ReadReservation(context.Context, *dto.OrderNumberDTO) (dto.ReservationDTO, error)
+	ReadReservation(context.Context, *dto.Number) (dto.ReservationDTO, error)
 	UpdateReservation(context.Context, *dto.ReservationDTO) error
-	DeleteReservation(context.Context, *dto.OrderNumberDTO) error
+	DeleteReservation(context.Context, *dto.Number) error
 
-	CreateSoldRecord(context.Context, *dto.SoldDTO) error
-	ReadSoldRecords(context.Context, *dto.ArticleDTO) ([]dto.SoldDTO, error)
-	ReadSoldAmount(context.Context, *dto.ArticleDTO) (uint, error)
-	ReadSoldRecordsInPeriod(context.Context, *dto.ArticleWithPeriodDTO) ([]dto.SoldDTO, error)
-	ReadSoldAmountInPeriod(context.Context, *dto.ArticleWithPeriodDTO) (uint, error)
+	CreateSoldRecord(context.Context, *dto.ArticlePriceAmountDate) error
+	ReadSoldRecords(context.Context, *dto.Article) ([]dto.ArticlePriceAmountDate, error)
+	ReadSoldAmount(context.Context, *dto.Article) (uint, error)
+	ReadSoldRecordsInPeriod(context.Context, *dto.ArticlePeriod) ([]dto.ArticlePriceAmountDate, error)
+	ReadSoldAmountInPeriod(context.Context, *dto.ArticlePeriod) (uint, error)
 }
 
 type SQLDBInterface interface {

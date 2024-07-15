@@ -219,7 +219,7 @@ func (r *Repository) ConvertToCommonErr(err error) error {
 ////////////////////////////
 
 // CreateStock сохраняет в БД запись о товаре.
-func (r *Repository) CreateStock(ctx context.Context, data *dto.NamedProductDTO) error {
+func (r *Repository) CreateStock(ctx context.Context, data *dto.ArticlePriceNameAmount) error {
 	var err error
 	stmt := `INSERT INTO stock (article, name, price, amount) VALUES (?,?,?,?)`
 
@@ -228,9 +228,9 @@ func (r *Repository) CreateStock(ctx context.Context, data *dto.NamedProductDTO)
 	return r.ConvertToCommonErr(err)
 }
 
-// ReadStock возвращает запись из БД о товаре, находящемся в продаже в виде dto.NamedProductDTO.
-func (r *Repository) ReadStock(ctx context.Context, data *dto.ArticleDTO) (dto.NamedProductDTO, error) {
-	var result dto.NamedProductDTO
+// ReadStock возвращает запись из БД о товаре, находящемся в продаже в виде dto.ArticlePriceNameAmount.
+func (r *Repository) ReadStock(ctx context.Context, data *dto.Article) (dto.ArticlePriceNameAmount, error) {
+	var result dto.ArticlePriceNameAmount
 	var err error
 	stmt := `SELECT article, name, price, amount FROM stock WHERE article = ?`
 
@@ -240,8 +240,8 @@ func (r *Repository) ReadStock(ctx context.Context, data *dto.ArticleDTO) (dto.N
 	return result, r.ConvertToCommonErr(err)
 }
 
-// ReadStockAmount возвращает количество товара с артикулом, переданным в dto.ArticleDTO из находящегося в продаже.
-func (r *Repository) ReadStockAmount(ctx context.Context, data *dto.ArticleDTO) (uint, error) {
+// ReadStockAmount возвращает количество товара с артикулом, переданным в dto.Article из находящегося в продаже.
+func (r *Repository) ReadStockAmount(ctx context.Context, data *dto.Article) (uint, error) {
 	var amount uint
 	stmt := `SELECT amount FROM stock WHERE article = ?`
 
@@ -253,8 +253,8 @@ func (r *Repository) ReadStockAmount(ctx context.Context, data *dto.ArticleDTO) 
 	return amount, nil
 }
 
-// ReadStockPrice возвращает цену товара с артикулом, переданным в dto.ArticleDTO, из находящегося в продаже.
-func (r *Repository) ReadStockPrice(ctx context.Context, data *dto.ArticleDTO) (float64, error) {
+// ReadStockPrice возвращает цену товара с артикулом, переданным в dto.Article, из находящегося в продаже.
+func (r *Repository) ReadStockPrice(ctx context.Context, data *dto.Article) (float64, error) {
 	var price float64
 	stmt := `SELECT amount FROM stock WHERE article = ?`
 
@@ -266,8 +266,8 @@ func (r *Repository) ReadStockPrice(ctx context.Context, data *dto.ArticleDTO) (
 	return price, nil
 }
 
-// UpdateStock обновляет запись о товаре в БД, в соответствии с переданными в dto.NamedProductDTO данными.
-func (r *Repository) UpdateStock(ctx context.Context, data *dto.NamedProductDTO) error {
+// UpdateStock обновляет запись о товаре в БД, в соответствии с переданными в dto.ArticlePriceNameAmount данными.
+func (r *Repository) UpdateStock(ctx context.Context, data *dto.ArticlePriceNameAmount) error {
 	var err error
 	stmt := `UPDATE stock SET name, price, amount = (?,?,?) WHERE article = ?`
 
@@ -277,8 +277,8 @@ func (r *Repository) UpdateStock(ctx context.Context, data *dto.NamedProductDTO)
 }
 
 // UpdateStockAmount обновляет количество доступного для продажи товара в соответствии с переданными в
-// dto.ArticleWithAmountDTO данными.
-func (r *Repository) UpdateStockAmount(ctx context.Context, data *dto.ArticleWithAmountDTO) error {
+// dto.ArticleAmount данными.
+func (r *Repository) UpdateStockAmount(ctx context.Context, data *dto.ArticleAmount) error {
 	var err error
 	stmt := `UPDATE stock SET amount = ? WHERE article = ?`
 
@@ -324,8 +324,8 @@ func (r *Repository) CreateReservation(ctx context.Context, data *dto.Reservatio
 }
 
 // ReadReservation возвращает в виде dto.ReservationDTO  данные о бронировании товаров с номером заказа, переданным в
-// dto.OrderNumberDTO.
-func (r *Repository) ReadReservation(ctx context.Context, data *dto.OrderNumberDTO) (dto.ReservationDTO, error) {
+// dto.Number.
+func (r *Repository) ReadReservation(ctx context.Context, data *dto.Number) (dto.ReservationDTO, error) {
 	stmt := `SELECT article, price, amount, date_of_reservation, order_number, status
     		 FROM on_processing 
     		 WHERE order_number = ?`
@@ -338,10 +338,10 @@ func (r *Repository) ReadReservation(ctx context.Context, data *dto.OrderNumberD
 	var state uint
 	var date time.Time
 	var orderNumber reservation.OrderNumber
-	var products []dto.ProductDTO
+	var products []dto.ArticlePriceAmount
 
 	for rows.Next() {
-		var product dto.ProductDTO
+		var product dto.ArticlePriceAmount
 		err = rows.Scan(&product.Article, &product.Price, &product.Amount, &date, &orderNumber, &state)
 		if err != nil {
 			return dto.ReservationDTO{}, r.ConvertToCommonErr(err)
@@ -375,8 +375,8 @@ func (r *Repository) UpdateReservation(ctx context.Context, data *dto.Reservatio
 	return nil
 }
 
-// DeleteReservation удаляет из БД записи с номером заказа, переданным в dto.OrderNumberDTO.
-func (r *Repository) DeleteReservation(ctx context.Context, data *dto.OrderNumberDTO) error {
+// DeleteReservation удаляет из БД записи с номером заказа, переданным в dto.Number.
+func (r *Repository) DeleteReservation(ctx context.Context, data *dto.Number) error {
 	stmt := `DELETE FROM on_processing WHERE order_number = ?`
 
 	_, err := r.executor(ctx).ExecContext(ctx, stmt, data.OrderNumber)
@@ -385,7 +385,7 @@ func (r *Repository) DeleteReservation(ctx context.Context, data *dto.OrderNumbe
 }
 
 // CreateSoldRecord сохраняет в БД запись об проданном товаре.
-func (r *Repository) CreateSoldRecord(ctx context.Context, data *dto.SoldDTO) error {
+func (r *Repository) CreateSoldRecord(ctx context.Context, data *dto.ArticlePriceAmountDate) error {
 	var err error
 	stmt := `INSERT INTO sold (article, price, amount, date_of_sale) VALUES (?,?,?,?)`
 
@@ -394,9 +394,9 @@ func (r *Repository) CreateSoldRecord(ctx context.Context, data *dto.SoldDTO) er
 	return r.ConvertToCommonErr(err)
 }
 
-// ReadSoldRecords возвращает все записи о продажах товара с переданным в dto.ArticleDTO артикулом.
-func (r *Repository) ReadSoldRecords(ctx context.Context, data *dto.ArticleDTO) ([]dto.SoldDTO, error) {
-	var result []dto.SoldDTO
+// ReadSoldRecords возвращает все записи о продажах товара с переданным в dto.Article артикулом.
+func (r *Repository) ReadSoldRecords(ctx context.Context, data *dto.Article) ([]dto.ArticlePriceAmountDate, error) {
+	var result []dto.ArticlePriceAmountDate
 	stmt := `SELECT article, price, amount, date_of_sale FROM stock WHERE article = ?`
 
 	rows, err := r.executor(ctx).QueryContext(ctx, stmt, data.Article)
@@ -405,7 +405,7 @@ func (r *Repository) ReadSoldRecords(ctx context.Context, data *dto.ArticleDTO) 
 	}
 
 	for rows.Next() {
-		var record dto.SoldDTO
+		var record dto.ArticlePriceAmountDate
 		if err = rows.Scan(&record.Article, &record.Price, &record.Amount, &record.Date); err != nil {
 			return result, r.ConvertToCommonErr(err)
 		}
@@ -417,8 +417,8 @@ func (r *Repository) ReadSoldRecords(ctx context.Context, data *dto.ArticleDTO) 
 	return result, r.ConvertToCommonErr(err)
 }
 
-// ReadSoldAmount возвращает количество проданного товара с переданным в *dto.ArticleDTO артикулом (за весь период).
-func (r *Repository) ReadSoldAmount(ctx context.Context, data *dto.ArticleDTO) (uint, error) {
+// ReadSoldAmount возвращает количество проданного товара с переданным в *dto.Article артикулом (за весь период).
+func (r *Repository) ReadSoldAmount(ctx context.Context, data *dto.Article) (uint, error) {
 	var result sql.NullInt64
 
 	stmt := `SELECT SUM(amount) FROM sold WHERE article = ?`
@@ -434,10 +434,10 @@ func (r *Repository) ReadSoldAmount(ctx context.Context, data *dto.ArticleDTO) (
 	return 0, nil
 }
 
-// ReadSoldRecordsInPeriod возвращает все записи о продажах товара с переданным в dto.ArticleWithPeriodDTO артикулом
+// ReadSoldRecordsInPeriod возвращает все записи о продажах товара с переданным в dto.ArticlePeriod артикулом
 // в период между датами From и To включительно.
-func (r *Repository) ReadSoldRecordsInPeriod(ctx context.Context, data *dto.ArticleWithPeriodDTO) ([]dto.SoldDTO, error) {
-	var result []dto.SoldDTO
+func (r *Repository) ReadSoldRecordsInPeriod(ctx context.Context, data *dto.ArticlePeriod) ([]dto.ArticlePriceAmountDate, error) {
+	var result []dto.ArticlePriceAmountDate
 	stmt := `SELECT article, price, amount, date_of_sale 
 			 FROM stock 
 			 WHERE article = ? AND date_of_sale >= ? AND date_of_sale <= ?`
@@ -448,7 +448,7 @@ func (r *Repository) ReadSoldRecordsInPeriod(ctx context.Context, data *dto.Arti
 	}
 
 	for rows.Next() {
-		var record dto.SoldDTO
+		var record dto.ArticlePriceAmountDate
 		if err = rows.Scan(&record.Article, &record.Price, &record.Amount, &record.Date); err != nil {
 			return result, r.ConvertToCommonErr(err)
 		}
@@ -461,7 +461,7 @@ func (r *Repository) ReadSoldRecordsInPeriod(ctx context.Context, data *dto.Arti
 }
 
 // ReadSoldAmountInPeriod возвращает количество проданного товара за определенный период.
-func (r *Repository) ReadSoldAmountInPeriod(ctx context.Context, data *dto.ArticleWithPeriodDTO) (uint, error) {
+func (r *Repository) ReadSoldAmountInPeriod(ctx context.Context, data *dto.ArticlePeriod) (uint, error) {
 	var result sql.NullInt64
 
 	stmt := `SELECT SUM(amount) FROM sold WHERE article = ? AND date_of_sale >= ? AND date_of_sale <= ?`

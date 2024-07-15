@@ -5,11 +5,11 @@ import (
 	"github.com/lazylex/watch-store-store/internal/dto/validators"
 )
 
-type ArticleDTO struct {
+type Article struct {
 	Article article.Article `json:"article"`
 }
 
 // Validate валидация корректности сохраненных в DTO данных.
-func (a *ArticleDTO) Validate() error {
+func (a *Article) Validate() error {
 	return validators.Article(a.Article)
 }

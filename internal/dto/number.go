@@ -5,11 +5,11 @@ import (
 	"github.com/lazylex/watch-store-store/internal/dto/validators"
 )
 
-type OrderNumberDTO struct {
+type Number struct {
 	OrderNumber reservation.OrderNumber `json:"order_number"`
 }
 
 // Validate валидация корректности сохраненных в DTO данных.
-func (on *OrderNumberDTO) Validate() error {
+func (on *Number) Validate() error {
 	return validators.OrderNumber(on.OrderNumber)
 }

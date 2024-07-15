@@ -45,7 +45,7 @@ func injectRequestIDToCtx(ctx context.Context, r *http.Request) context.Context 
 func (h *Handler) StockRecord(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var art article.Article
-	var stock dto.NamedProductDTO
+	var stock dto.ArticlePriceNameAmount
 	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.StockRecord", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
@@ -53,7 +53,7 @@ func (h *Handler) StockRecord(w http.ResponseWriter, r *http.Request) {
 
 	art = article.Article(r.FormValue(request.Article))
 
-	transferObject := dto.ArticleDTO{Article: art}
+	transferObject := dto.Article{Article: art}
 	err = transferObject.Validate()
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
 		return
@@ -85,7 +85,7 @@ func (h *Handler) AmountInStock(w http.ResponseWriter, r *http.Request) {
 
 	art = article.Article(r.FormValue(request.Article))
 
-	transferObject := dto.ArticleDTO{Article: art}
+	transferObject := dto.Article{Article: art}
 	err = transferObject.Validate()
 	if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
 		return
@@ -140,7 +140,7 @@ func (h *Handler) UpdatePriceInStock(w http.ResponseWriter, r *http.Request) {
 // {"article":"3", "amount":6759}
 func (h *Handler) UpdateAmountInStock(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var transferObject dto.ArticleWithAmountDTO
+	var transferObject dto.ArticleAmount
 	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.UpdateAmountInStock", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
@@ -172,7 +172,7 @@ func (h *Handler) UpdateAmountInStock(w http.ResponseWriter, r *http.Request) {
 // {"article":"3", "amount":6759, "price": 16000, "name": "plum-bus"}
 func (h *Handler) AddToStock(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var transferObject dto.NamedProductDTO
+	var transferObject dto.ArticlePriceNameAmount
 	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.CreateStock", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
@@ -220,7 +220,7 @@ func (h *Handler) SoldAmount(w http.ResponseWriter, r *http.Request) {
 	toParam := r.FormValue(request.To)
 
 	if len(fromParam) == 0 && len(toParam) == 0 {
-		transferObject := dto.ArticleDTO{Article: art}
+		transferObject := dto.Article{Article: art}
 		err = transferObject.Validate()
 		if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
 			return
@@ -248,7 +248,7 @@ func (h *Handler) SoldAmount(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		transferObject := dto.ArticleWithPeriodDTO{Article: art, From: from, To: to}
+		transferObject := dto.ArticlePeriod{Article: art, From: from, To: to}
 		err = transferObject.Validate()
 		if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
 			return
@@ -321,7 +321,7 @@ func (h *Handler) MakeReservation(w http.ResponseWriter, r *http.Request) {
 // {"order_number": 9}
 func (h *Handler) CancelReservation(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var transferObject dto.OrderNumberDTO
+	var transferObject dto.Number
 	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.CancelReservation", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
@@ -362,7 +362,7 @@ func (h *Handler) CancelReservation(w http.ResponseWriter, r *http.Request) {
 //	]
 func (h *Handler) MakeLocalSale(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var products []dto.ProductDTO
+	var products []dto.ArticlePriceAmount
 	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.MakeLocalSale", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)
@@ -392,7 +392,7 @@ func (h *Handler) MakeLocalSale(w http.ResponseWriter, r *http.Request) {
 // {"order_number": 9}
 func (h *Handler) FinishOrder(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var transferObject dto.OrderNumberDTO
+	var transferObject dto.Number
 	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.FinishOrder", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)

@@ -34,7 +34,7 @@ func MustRun(service service.Interface, cfg *config.Kafka, instance string) {
 	}
 
 	if len(cfg.RequestCountTopic) > 0 && len(cfg.ResponseCountTopic) > 0 {
-		countCh := make(chan dto.ArticleWithAmountDTO, countChannelBufferSize)
+		countCh := make(chan dto.ArticleAmount, countChannelBufferSize)
 		go request_count.ListenTopic(service, cfg.Brokers, cfg.RequestCountTopic, instance, countCh)
 		go response_count.Serve(cfg.Brokers, cfg.ResponseCountTopic, instance, countCh)
 
