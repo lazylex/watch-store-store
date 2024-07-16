@@ -31,18 +31,18 @@ type Interface interface {
 	ReadStockPrice(context.Context, *dto.Article) (float64, error)
 	UpdateStock(context.Context, *dto.ArticlePriceNameAmount) error
 	UpdateStockAmount(context.Context, *dto.ArticleAmount) error
-	UpdateStockPrice(context.Context, *dto.ArticleWithPriceDTO) error
+	UpdateStockPrice(context.Context, *dto.ArticlePrice) error
 
-	CreateReservation(context.Context, *dto.ReservationDTO) error
-	ReadReservation(context.Context, *dto.Number) (dto.ReservationDTO, error)
-	UpdateReservation(context.Context, *dto.ReservationDTO) error
+	CreateReservation(context.Context, *dto.NumberDateStateProducts) error
+	ReadReservation(context.Context, *dto.Number) (dto.NumberDateStateProducts, error)
+	UpdateReservation(context.Context, *dto.NumberDateStateProducts) error
 	DeleteReservation(context.Context, *dto.Number) error
 
 	CreateSoldRecord(context.Context, *dto.ArticlePriceAmountDate) error
 	ReadSoldRecords(context.Context, *dto.Article) ([]dto.ArticlePriceAmountDate, error)
 	ReadSoldAmount(context.Context, *dto.Article) (uint, error)
-	ReadSoldRecordsInPeriod(context.Context, *dto.ArticlePeriod) ([]dto.ArticlePriceAmountDate, error)
-	ReadSoldAmountInPeriod(context.Context, *dto.ArticlePeriod) (uint, error)
+	ReadSoldRecordsInPeriod(context.Context, *dto.ArticleFromTo) ([]dto.ArticlePriceAmountDate, error)
+	ReadSoldAmountInPeriod(context.Context, *dto.ArticleFromTo) (uint, error)
 }
 
 type SQLDBInterface interface {

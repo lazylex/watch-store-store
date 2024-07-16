@@ -45,7 +45,7 @@ func UpdatePrice(service service.Interface, brokers []string, topic, instance st
 		}
 		canFetchMessage = true
 
-		var data dto.ArticleWithPriceDTO
+		var data dto.ArticlePrice
 		err = json.Unmarshal(m.Value, &data)
 
 		if err != nil {

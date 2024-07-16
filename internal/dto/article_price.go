@@ -5,13 +5,13 @@ import (
 	"github.com/lazylex/watch-store-store/internal/dto/validators"
 )
 
-type ArticleWithPriceDTO struct {
+type ArticlePrice struct {
 	Article article.Article `json:"article"`
 	Price   float64         `json:"price"`
 }
 
 // Validate валидация корректности сохраненных в DTO данных.
-func (a *ArticleWithPriceDTO) Validate() error {
+func (a *ArticlePrice) Validate() error {
 	if err := validators.Price(a.Price); err != nil {
 		return err
 	}

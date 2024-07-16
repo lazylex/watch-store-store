@@ -81,7 +81,7 @@ func TestReservationDTO_Validate(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		r := &ReservationDTO{OrderNumber: tc.order, State: tc.state, Products: tc.products}
+		r := &NumberDateStateProducts{OrderNumber: tc.order, State: tc.state, Products: tc.products}
 		t.Run(tc.testName, func(t *testing.T) {
 			if !errors.Is(r.Validate(), tc.expectedErr) {
 				t.Fail()
@@ -90,7 +90,7 @@ func TestReservationDTO_Validate(t *testing.T) {
 	}
 
 	t.Run("duplicate product", func(t *testing.T) {
-		r := &ReservationDTO{OrderNumber: 466, State: reservation.NewForInternetCustomer,
+		r := &NumberDateStateProducts{OrderNumber: 466, State: reservation.NewForInternetCustomer,
 			Products: []ArticlePriceAmount{
 				{
 					Article: "ca-09.1000",
@@ -114,7 +114,7 @@ func TestReservationDTO_Validate(t *testing.T) {
 	})
 
 	t.Run("error product", func(t *testing.T) {
-		r := &ReservationDTO{OrderNumber: 466, State: reservation.NewForInternetCustomer,
+		r := &NumberDateStateProducts{OrderNumber: 466, State: reservation.NewForInternetCustomer,
 			Products: []ArticlePriceAmount{
 				{
 					Article: "ca-09.1900",

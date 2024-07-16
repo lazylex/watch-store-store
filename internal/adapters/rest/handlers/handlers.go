@@ -107,7 +107,7 @@ func (h *Handler) AmountInStock(w http.ResponseWriter, r *http.Request) {
 // {"article":"3", "price":6759}
 func (h *Handler) UpdatePriceInStock(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var transferObject dto.ArticleWithPriceDTO
+	var transferObject dto.ArticlePrice
 
 	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.UpdatePriceInStock", r)
 
@@ -248,7 +248,7 @@ func (h *Handler) SoldAmount(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		transferObject := dto.ArticlePeriod{Article: art, From: from, To: to}
+		transferObject := dto.ArticleFromTo{Article: art, From: from, To: to}
 		err = transferObject.Validate()
 		if response.WriteHeaderAndLogAboutErr(w, log, err); err != nil {
 			return
@@ -267,7 +267,7 @@ func (h *Handler) SoldAmount(w http.ResponseWriter, r *http.Request) {
 }
 
 // MakeReservation резервирует группу товаров под переданным номером заказа. В теле запроса передается номер заказа,
-// статус резервирования (описание в internal/domain/aggregates/reservation/reservation.go) и массив резервируемых
+// статус резервирования (описание в internal/domain/aggregates/reservation/number_date_state_products.go) и массив резервируемых
 // продуктов в формате JSON. В случае удачного резервирования возвращается http.StatusCreated и производится запись в
 // лог. Пример передаваемых данных:
 //
@@ -289,7 +289,7 @@ func (h *Handler) SoldAmount(w http.ResponseWriter, r *http.Request) {
 //	}
 func (h *Handler) MakeReservation(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var transferObject dto.ReservationDTO
+	var transferObject dto.NumberDateStateProducts
 	log := logger.AddPlaceAndRequestId(slog.Default(), "rest.handlers.MakeReservation", r)
 
 	ctx, cancel := context.WithTimeout(r.Context(), h.queryTimeout)

@@ -54,7 +54,7 @@ func (mr *MockInterfaceMockRecorder) ConvertToCommonErr(arg0 interface{}) *gomoc
 }
 
 // CreateReservation mocks base method.
-func (m *MockInterface) CreateReservation(arg0 context.Context, arg1 *dto.ReservationDTO) error {
+func (m *MockInterface) CreateReservation(arg0 context.Context, arg1 *dto.NumberDateStateProducts) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateReservation", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -110,10 +110,10 @@ func (mr *MockInterfaceMockRecorder) DeleteReservation(arg0, arg1 interface{}) *
 }
 
 // ReadReservation mocks base method.
-func (m *MockInterface) ReadReservation(arg0 context.Context, arg1 *dto.Number) (dto.ReservationDTO, error) {
+func (m *MockInterface) ReadReservation(arg0 context.Context, arg1 *dto.Number) (dto.NumberDateStateProducts, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReadReservation", arg0, arg1)
-	ret0, _ := ret[0].(dto.ReservationDTO)
+	ret0, _ := ret[0].(dto.NumberDateStateProducts)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -140,7 +140,7 @@ func (mr *MockInterfaceMockRecorder) ReadSoldAmount(arg0, arg1 interface{}) *gom
 }
 
 // ReadSoldAmountInPeriod mocks base method.
-func (m *MockInterface) ReadSoldAmountInPeriod(arg0 context.Context, arg1 *dto.ArticlePeriod) (uint, error) {
+func (m *MockInterface) ReadSoldAmountInPeriod(arg0 context.Context, arg1 *dto.ArticleFromTo) (uint, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReadSoldAmountInPeriod", arg0, arg1)
 	ret0, _ := ret[0].(uint)
@@ -170,7 +170,7 @@ func (mr *MockInterfaceMockRecorder) ReadSoldRecords(arg0, arg1 interface{}) *go
 }
 
 // ReadSoldRecordsInPeriod mocks base method.
-func (m *MockInterface) ReadSoldRecordsInPeriod(arg0 context.Context, arg1 *dto.ArticlePeriod) ([]dto.ArticlePriceAmountDate, error) {
+func (m *MockInterface) ReadSoldRecordsInPeriod(arg0 context.Context, arg1 *dto.ArticleFromTo) ([]dto.ArticlePriceAmountDate, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReadSoldRecordsInPeriod", arg0, arg1)
 	ret0, _ := ret[0].([]dto.ArticlePriceAmountDate)
@@ -230,7 +230,7 @@ func (mr *MockInterfaceMockRecorder) ReadStockPrice(arg0, arg1 interface{}) *gom
 }
 
 // UpdateReservation mocks base method.
-func (m *MockInterface) UpdateReservation(arg0 context.Context, arg1 *dto.ReservationDTO) error {
+func (m *MockInterface) UpdateReservation(arg0 context.Context, arg1 *dto.NumberDateStateProducts) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateReservation", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -272,7 +272,7 @@ func (mr *MockInterfaceMockRecorder) UpdateStockAmount(arg0, arg1 interface{}) *
 }
 
 // UpdateStockPrice mocks base method.
-func (m *MockInterface) UpdateStockPrice(arg0 context.Context, arg1 *dto.ArticleWithPriceDTO) error {
+func (m *MockInterface) UpdateStockPrice(arg0 context.Context, arg1 *dto.ArticlePrice) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateStockPrice", arg0, arg1)
 	ret0, _ := ret[0].(error)

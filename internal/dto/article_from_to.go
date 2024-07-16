@@ -6,14 +6,14 @@ import (
 	"time"
 )
 
-type ArticlePeriod struct {
+type ArticleFromTo struct {
 	Article article.Article `json:"article"`
 	From    time.Time       `json:"from"`
 	To      time.Time       `json:"to"`
 }
 
 // Validate валидация корректности сохраненных в DTO данных.
-func (ap *ArticlePeriod) Validate() error {
+func (ap *ArticleFromTo) Validate() error {
 	if err := validators.Article(ap.Article); err != nil {
 		return err
 	}

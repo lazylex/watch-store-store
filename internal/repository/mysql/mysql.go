@@ -288,8 +288,8 @@ func (r *Repository) UpdateStockAmount(ctx context.Context, data *dto.ArticleAmo
 }
 
 // UpdateStockPrice обновляет цену доступного для продажи товара в соответствии с переданными в
-// dto.ArticleWithPriceDTO данными.
-func (r *Repository) UpdateStockPrice(ctx context.Context, data *dto.ArticleWithPriceDTO) error {
+// dto.ArticlePrice данными.
+func (r *Repository) UpdateStockPrice(ctx context.Context, data *dto.ArticlePrice) error {
 	var err error
 	stmt := `UPDATE stock SET price = ? WHERE article = ?`
 
@@ -301,7 +301,7 @@ func (r *Repository) UpdateStockPrice(ctx context.Context, data *dto.ArticleWith
 // CreateReservation выполняет резервирование товаров в таблицу on_processing. Если в передаваемом контексте уже
 // содержится транзакция, то запросы к БД выполняются в этой внешней транзакции. В противном случае создается новая
 // транзакция и запросы выполняются в ней.
-func (r *Repository) CreateReservation(ctx context.Context, data *dto.ReservationDTO) error {
+func (r *Repository) CreateReservation(ctx context.Context, data *dto.NumberDateStateProducts) error {
 	stmt := `INSERT
 			 INTO on_processing 
 			 (article, price, amount, date_of_reservation, updated_at, order_number, status) 
@@ -323,16 +323,16 @@ func (r *Repository) CreateReservation(ctx context.Context, data *dto.Reservatio
 	return r.WithinTransaction(ctx, f)
 }
 
-// ReadReservation возвращает в виде dto.ReservationDTO  данные о бронировании товаров с номером заказа, переданным в
+// ReadReservation возвращает в виде dto.NumberDateStateProducts  данные о бронировании товаров с номером заказа, переданным в
 // dto.Number.
-func (r *Repository) ReadReservation(ctx context.Context, data *dto.Number) (dto.ReservationDTO, error) {
+func (r *Repository) ReadReservation(ctx context.Context, data *dto.Number) (dto.NumberDateStateProducts, error) {
 	stmt := `SELECT article, price, amount, date_of_reservation, order_number, status
     		 FROM on_processing 
     		 WHERE order_number = ?`
 
 	rows, err := r.executor(ctx).QueryContext(ctx, stmt, data.OrderNumber)
 	if err != nil {
-		return dto.ReservationDTO{}, err
+		return dto.NumberDateStateProducts{}, err
 	}
 
 	var state uint
@@ -344,21 +344,21 @@ func (r *Repository) ReadReservation(ctx context.Context, data *dto.Number) (dto
 		var product dto.ArticlePriceAmount
 		err = rows.Scan(&product.Article, &product.Price, &product.Amount, &date, &orderNumber, &state)
 		if err != nil {
-			return dto.ReservationDTO{}, r.ConvertToCommonErr(err)
+			return dto.NumberDateStateProducts{}, r.ConvertToCommonErr(err)
 		}
 		products = append(products, product)
 	}
 
 	if err = rows.Err(); err != nil {
-		return dto.ReservationDTO{}, r.ConvertToCommonErr(err)
+		return dto.NumberDateStateProducts{}, r.ConvertToCommonErr(err)
 	}
 
-	return dto.ReservationDTO{OrderNumber: orderNumber, Date: date, State: state, Products: products}, nil
+	return dto.NumberDateStateProducts{OrderNumber: orderNumber, Date: date, State: state, Products: products}, nil
 }
 
-// UpdateReservation обновляет в БД записи о бронировании, в соответствии с переданными в dto.ReservationDTO данными
+// UpdateReservation обновляет в БД записи о бронировании, в соответствии с переданными в dto.NumberDateStateProducts данными
 // (кроме идентификатора записи в таблицы и времени бронирования).
-func (r *Repository) UpdateReservation(ctx context.Context, data *dto.ReservationDTO) error {
+func (r *Repository) UpdateReservation(ctx context.Context, data *dto.NumberDateStateProducts) error {
 	var err error
 	stmt := `UPDATE on_processing 
 			 SET article = ?, price = ?, amount = ?, status= ? , updated_at= ? 
@@ -434,9 +434,9 @@ func (r *Repository) ReadSoldAmount(ctx context.Context, data *dto.Article) (uin
 	return 0, nil
 }
 
-// ReadSoldRecordsInPeriod возвращает все записи о продажах товара с переданным в dto.ArticlePeriod артикулом
+// ReadSoldRecordsInPeriod возвращает все записи о продажах товара с переданным в dto.ArticleFromTo артикулом
 // в период между датами From и To включительно.
-func (r *Repository) ReadSoldRecordsInPeriod(ctx context.Context, data *dto.ArticlePeriod) ([]dto.ArticlePriceAmountDate, error) {
+func (r *Repository) ReadSoldRecordsInPeriod(ctx context.Context, data *dto.ArticleFromTo) ([]dto.ArticlePriceAmountDate, error) {
 	var result []dto.ArticlePriceAmountDate
 	stmt := `SELECT article, price, amount, date_of_sale 
 			 FROM stock 
@@ -461,7 +461,7 @@ func (r *Repository) ReadSoldRecordsInPeriod(ctx context.Context, data *dto.Arti
 }
 
 // ReadSoldAmountInPeriod возвращает количество проданного товара за определенный период.
-func (r *Repository) ReadSoldAmountInPeriod(ctx context.Context, data *dto.ArticlePeriod) (uint, error) {
+func (r *Repository) ReadSoldAmountInPeriod(ctx context.Context, data *dto.ArticleFromTo) (uint, error) {
 	var result sql.NullInt64
 
 	stmt := `SELECT SUM(amount) FROM sold WHERE article = ? AND date_of_sale >= ? AND date_of_sale <= ?`

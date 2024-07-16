@@ -52,7 +52,7 @@ func New(options ...Option) *Service {
 }
 
 // ChangePriceInStock изменяет цену товара, находящегося в продаже.
-func (s *Service) ChangePriceInStock(ctx context.Context, data dto.ArticleWithPriceDTO) error {
+func (s *Service) ChangePriceInStock(ctx context.Context, data dto.ArticlePrice) error {
 	if err := data.Validate(); err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func (s *Service) AmountInStock(ctx context.Context, data dto.Article) (uint, er
 // MakeReservation производит резервирование товара для покупателя. Резервирование проводится как для бронирования
 // через интернет, так и во время нахождения товара на кассе (в ожидании оплаты локальным покупателем). В таком случае
 // в качестве номера заказа передаётся номер кассы.
-func (s *Service) MakeReservation(ctx context.Context, data dto.ReservationDTO) error {
+func (s *Service) MakeReservation(ctx context.Context, data dto.NumberDateStateProducts) error {
 	var err error
 	var available uint
 	newAmountInStock := make(map[article.Article]uint)
@@ -214,7 +214,7 @@ func (s *Service) CancelReservation(ctx context.Context, data dto.Number) error 
 			return s.Repository.DeleteReservation(txCtx, &dto.Number{OrderNumber: data.OrderNumber})
 		}
 
-		err = s.Repository.UpdateReservation(txCtx, &dto.ReservationDTO{
+		err = s.Repository.UpdateReservation(txCtx, &dto.NumberDateStateProducts{
 			Products:    res.Products,
 			OrderNumber: data.OrderNumber,
 			Date:        time.Now(),
@@ -305,7 +305,7 @@ func (s *Service) FinishOrder(ctx context.Context, data dto.Number) error {
 			return s.Repository.DeleteReservation(txCtx, &data)
 		}
 
-		return s.Repository.UpdateReservation(txCtx, &dto.ReservationDTO{
+		return s.Repository.UpdateReservation(txCtx, &dto.NumberDateStateProducts{
 			Products:    res.Products,
 			OrderNumber: data.OrderNumber,
 			Date:        time.Now(),
@@ -334,7 +334,7 @@ func (s *Service) TotalSold(ctx context.Context, data dto.Article) (uint, error)
 }
 
 // TotalSoldInPeriod возвращает количество проданного товара с переданным артикулом за указанный период.
-func (s *Service) TotalSoldInPeriod(ctx context.Context, data dto.ArticlePeriod) (uint, error) {
+func (s *Service) TotalSoldInPeriod(ctx context.Context, data dto.ArticleFromTo) (uint, error) {
 	var amount uint
 	var err error
 

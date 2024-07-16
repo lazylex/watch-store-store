@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type ReservationDTO struct {
+type NumberDateStateProducts struct {
 	Products    []ArticlePriceAmount `json:"products"`
 	OrderNumber rs.OrderNumber       `json:"order_number"`
 	Date        time.Time            `json:"date"`
@@ -15,12 +15,12 @@ type ReservationDTO struct {
 }
 
 // IsNew возвращает true, если бронь еще не была снята (по причине отмены или завершения заказа).
-func (r *ReservationDTO) IsNew() bool {
+func (r *NumberDateStateProducts) IsNew() bool {
 	return r.State == rs.NewForInternetCustomer || r.State == rs.NewForLocalCustomer || r.State == rs.NewForCashRegister
 }
 
 // Validate валидация корректности сохраненных в DTO данных.
-func (r *ReservationDTO) Validate() error {
+func (r *NumberDateStateProducts) Validate() error {
 	if err := validators.OrderNumber(r.OrderNumber); err != nil {
 		return err
 	}

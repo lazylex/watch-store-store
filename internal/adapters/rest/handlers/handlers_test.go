@@ -144,7 +144,7 @@ func TestHandler_UpdatePriceInStockSuccess(t *testing.T) {
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price", strings.NewReader("{\"Article\": \"9\", \"Price\": 1000}"))
 
-	service.EXPECT().ChangePriceInStock(gomock.Any(), dto.ArticleWithPriceDTO{Article: "9", Price: 1000})
+	service.EXPECT().ChangePriceInStock(gomock.Any(), dto.ArticlePrice{Article: "9", Price: 1000})
 
 	mux.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {
@@ -211,7 +211,7 @@ func TestHandler_UpdatePriceInStockTimeout(t *testing.T) {
 	request := httptest.NewRequest(http.MethodPut, "/api/api_v1/stock/price", strings.NewReader("{\"Article\": \"9\", \"Price\": 1000}"))
 
 	service.EXPECT().ChangePriceInStock(gomock.Any(),
-		dto.ArticleWithPriceDTO{Article: "9", Price: 1000}).Times(1).Return(repository.ErrTimeout)
+		dto.ArticlePrice{Article: "9", Price: 1000}).Times(1).Return(repository.ErrTimeout)
 
 	mux.ServeHTTP(response, request)
 
@@ -440,7 +440,7 @@ func TestHandler_GetSoldAmountInTimePeriodSuccess(t *testing.T) {
 
 	service.EXPECT().TotalSoldInPeriod(
 		gomock.Any(),
-		dto.ArticlePeriod{Article: "9",
+		dto.ArticleFromTo{Article: "9",
 			From: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
 			To:   time.Date(2023, 9, 28, 0, 0, 0, 0, time.UTC)}).Times(
 		1).Return(uint(13), nil)
@@ -487,7 +487,7 @@ func TestHandler_GetSoldAmountInTimePeriodTimeout(t *testing.T) {
 
 	service.EXPECT().TotalSoldInPeriod(
 		gomock.Any(),
-		dto.ArticlePeriod{Article: "9",
+		dto.ArticleFromTo{Article: "9",
 			From: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
 			To:   time.Date(2023, 9, 28, 0, 0, 0, 0, time.UTC)}).Times(
 		1).Return(uint(13), repository.ErrTimeout)

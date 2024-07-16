@@ -28,7 +28,7 @@ var (
 //go:generate mockgen -source=service.go -destination=mocks/service.go
 type Interface interface {
 	// ChangePriceInStock изменяет цену товара, находящегося в продаже
-	ChangePriceInStock(ctx context.Context, data dto.ArticleWithPriceDTO) error
+	ChangePriceInStock(ctx context.Context, data dto.ArticlePrice) error
 	// Stock возвращает полную информацию о товаре, доступном для продажи, в виде dto.ArticlePriceNameAmount
 	Stock(ctx context.Context, data dto.Article) (dto.ArticlePriceNameAmount, error)
 	// AddProductToStock добавляет новый товар в ассортимент магазина
@@ -40,7 +40,7 @@ type Interface interface {
 	// MakeReservation производит резервирование товара для покупателя. Резервирование проводится как для бронирования
 	// через интернет, так и во время нахождения товара на кассе (в ожидании оплаты локальным покупателем). В таком случае
 	// в качестве номера заказа передаётся номер кассы.
-	MakeReservation(ctx context.Context, data dto.ReservationDTO) error
+	MakeReservation(ctx context.Context, data dto.NumberDateStateProducts) error
 	// CancelReservation снимает бронь с товара/ов
 	CancelReservation(ctx context.Context, data dto.Number) error
 	// MakeSale уменьшает количества доступного для продажи товара и производит запись в статистику продаж
@@ -50,5 +50,5 @@ type Interface interface {
 	// TotalSold возвращает количество проданного товара с переданным артикулом за весь период
 	TotalSold(ctx context.Context, data dto.Article) (uint, error)
 	// TotalSoldInPeriod возвращает количество проданного товара с переданным артикулом за указанный период
-	TotalSoldInPeriod(ctx context.Context, data dto.ArticlePeriod) (uint, error)
+	TotalSoldInPeriod(ctx context.Context, data dto.ArticleFromTo) (uint, error)
 }

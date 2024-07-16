@@ -9,7 +9,7 @@ import (
 
 func TestArticleWithPeriodDTO(t *testing.T) {
 	t.Run("incorrect article", func(t *testing.T) {
-		a := ArticlePeriod{Article: "test-9.....", From: time.Now(), To: time.Now()}
+		a := ArticleFromTo{Article: "test-9.....", From: time.Now(), To: time.Now()}
 		err := a.Validate()
 		if !errors.Is(err, validators.ErrIncorrectArticle) {
 			t.Fail()
@@ -17,7 +17,7 @@ func TestArticleWithPeriodDTO(t *testing.T) {
 	})
 
 	t.Run("incorrect dates order", func(t *testing.T) {
-		a := ArticlePeriod{Article: "test-9",
+		a := ArticleFromTo{Article: "test-9",
 			From: time.Date(2021, 1, 1, 1, 1, 1, 0, time.Local),
 			To:   time.Date(2020, 1, 1, 1, 1, 1, 0, time.Local)}
 		err := a.Validate()
@@ -27,7 +27,7 @@ func TestArticleWithPeriodDTO(t *testing.T) {
 	})
 
 	t.Run("correct", func(t *testing.T) {
-		a := ArticlePeriod{Article: "test-9",
+		a := ArticleFromTo{Article: "test-9",
 			From: time.Date(2020, 1, 1, 1, 1, 1, 0, time.Local),
 			To:   time.Date(2021, 1, 1, 1, 1, 1, 0, time.Local)}
 
